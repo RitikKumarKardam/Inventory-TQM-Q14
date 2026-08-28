@@ -1,0 +1,23 @@
+# Submission Checklist - BBAT104 Q14
+
+- [x] Assignment identified: S.No. 136 / Ritik Kumar / Roll No. 2520301005
+- [x] Baseline: Inventory Management System
+- [x] Quality Goal: Q14 - Improve Navigation
+- [x] Five Q14 features implemented
+- [x] Base product CRUD
+- [x] SQLite persistence
+- [x] SRS + architecture flowchart
+- [x] CTQ tree
+- [x] SIPOC process map
+- [x] FMEA with RPN
+- [x] Defect log/checksheet
+- [x] Pareto chart
+- [x] Fishbone diagram
+- [x] PDCA log
+- [x] README
+- [x] User manual
+- [x] Viva questions
+- [ ] Create public GitHub repository `BBAT104_TQM_2520301005`
+- [ ] Push project and maintain >=30 meaningful commits
+- [ ] Add GitHub Issues
+- [ ] Add screenshots of live execution to README
