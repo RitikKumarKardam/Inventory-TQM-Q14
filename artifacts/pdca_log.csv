@@ -1,0 +1,5 @@
+Phase,Action,Evidence,Owner,Status
+Plan,Identify navigation friction and rank failure modes,CTQ and FMEA,Ritik Kumar,Complete
+Do,Implement five Q14 navigation features,Application code,Ritik Kumar,Complete
+Check,Review defect frequencies and high-RPN risks,Checksheet Pareto tests,Ritik Kumar,Complete
+Act,Standardize successful navigation patterns and document them,README user manual shortcut screen,Ritik Kumar,Complete
