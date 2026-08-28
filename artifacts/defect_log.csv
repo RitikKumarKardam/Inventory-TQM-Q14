@@ -1,0 +1,9 @@
+Defect Type,Frequency,Cumulative %
+No clear return path,14,28.000000000000004
+Module hidden from nav,10,48.0
+Too many clicks,8,64.0
+Shortcut unavailable,6,76.0
+Breadcrumb absent,5,86.0
+Inconsistent labels,3,92.0
+Dashboard tile unclear,2,96.0
+Other,2,100.0
