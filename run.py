@@ -1,3 +1,4 @@
-from app.app import seed_demo, InventoryApp
-seed_demo()
-InventoryApp().mainloop()
+from main import main
+
+if __name__ == "__main__":
+    main()
