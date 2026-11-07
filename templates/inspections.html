@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Incoming Quality Inspection (GRN QC){% endblock %}
+
+{% block breadcrumbs %}
+  <li><a href="{{ url_for('dashboard') }}">Quality Control</a></li>
+  <li class="active">Lot Inspections</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h2><i class="bi bi-shield-check" style="color: var(--color-primary);"></i> Goods Receipt Note (GRN) Quality Inspection</h2>
+    <p>Incoming lot verification, Acceptance Quality Limit (AQL) statistical sampling, and quarantine disposition management.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('export_csv', data_type='inspections') }}" class="btn btn-outline">
+      <i class="bi bi-file-earmark-arrow-down"></i> Export Log
+    </a>
+    <button type="button" class="btn btn-primary" data-open-modal="modal-record-inspection">
+      <i class="bi bi-plus-lg"></i> Record Lot Inspection
+    </button>
+  </div>
+</div>
+
+<!-- Inspections Summary Tiles -->
+<div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
+  <div class="kpi-card kpi-blue">
+    <div class="kpi-content">
+      <div class="kpi-title">Total Lots Inspected</div>
+      <div class="kpi-value">{{ inspections|length }}</div>
+      <div class="kpi-subtext">Statistical sample batches</div>
+    </div>
+    <div class="kpi-icon-box"><i class="bi bi-clipboard2-check"></i></div>
+  </div>
+
+  <div class="kpi-card kpi-green">
+    <div class="kpi-content">
+      <div class="kpi-title">Passed Lots</div>
+      <div class="kpi-value">{{ passed_count }}</div>
+      <div class="kpi-subtext">Released to active inventory</div>
+    </div>
+    <div class="kpi-icon-box"><i class="bi bi-check-circle"></i></div>
+  </div>
+
+  <div class="kpi-card kpi-amber">
+    <div class="kpi-content">
+      <div class="kpi-title">Quarantined Lots</div>
+      <div class="kpi-value">{{ quarantine_count }}</div>
+      <div class="kpi-subtext">Held for supplier rework / RMA</div>
+    </div>
+    <div class="kpi-icon-box"><i class="bi bi-exclamation-diamond"></i></div>
+  </div>
+
+  <div class="kpi-card kpi-cyan">
+    <div class="kpi-content">
+      <div class="kpi-title">Quality Acceptance Rate</div>
+      <div class="kpi-value">{{ pass_rate }}%</div>
+      <div class="kpi-subtext">AQL 0.65 Level II Standard</div>
+    </div>
+    <div class="kpi-icon-box"><i class="bi bi-patch-check"></i></div>
+  </div>
+</div>
+
+<!-- Inspections Ledger Table -->
+<div class="card">
+  <div class="card-header">
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1; max-width: 450px;">
+      <i class="bi bi-search" style="color: var(--color-text-muted);"></i>
+      <input type="text" class="form-control table-search-input" data-target-table="inspections-table" placeholder="Live filter by lot #, product, supplier, or defect...">
+    </div>
+    <div style="font-size: 13px; color: var(--color-text-muted);">
+      Showing: <strong>{{ inspections|length }} Inspection Dossiers</strong>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="table-amrapali" id="inspections-table">
+        <thead>
+          <tr>
+            <th>Lot Batch #</th>
+            <th>Product Item</th>
+            <th>Supplier</th>
+            <th>Sample Size</th>
+            <th>Defects Found</th>
+            <th>Defect Category</th>
+            <th>Inspection Result</th>
+            <th>Inspector</th>
+            <th>Remarks</th>
+            <th>Inspection Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in inspections %}
+          <tr>
+            <td><code style="font-weight: 700; color: var(--color-primary);">{{ i.lot_number }}</code></td>
+            <td>
+              <strong>{{ i.sku }}</strong><br>
+              <span style="font-size: 12px; color: var(--color-text-muted);">{{ i.product_name }}</span>
+            </td>
+            <td>{{ i.supplier_name }}</td>
+            <td>{{ i.sample_size }} pcs</td>
+            <td>
+              {% if i.defects_found > 0 %}
+                <strong style="color: var(--color-danger);">{{ i.defects_found }} ({{ i.defect_rate_pct }}%)</strong>
+              {% else %}
+                <span style="color: var(--color-success);">0 (Zero Defect)</span>
+              {% endif %}
+            </td>
+            <td>{{ i.defect_type }}</td>
+            <td>
+              <span class="badge badge-{{ i.badge }}">
+                <i class="bi {% if i.inspection_status == 'PASSED' %}bi-check-circle{% elif i.inspection_status == 'QUARANTINE' %}bi-exclamation-triangle{% else %}bi-x-circle{% endif %}"></i>
+                {{ i.inspection_status }}
+              </span>
+            </td>
+            <td>{{ i.inspector_name }}</td>
+            <td style="font-size: 12px; max-width: 200px;">{{ i.remarks }}</td>
+            <td style="font-size: 11.5px; color: var(--color-text-muted);">{{ i.created_at }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="10" style="text-align: center; color: var(--color-text-muted); padding: 30px;">
+              No quality inspection records found.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     MODAL: RECORD QUALITY INSPECTION
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-record-inspection">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="bi bi-shield-plus" style="color: var(--color-primary);"></i> New Incoming Lot Inspection (GRN)</h3>
+      <button type="button" class="modal-close">&times;</button>
+    </div>
+    <form action="{{ url_for('record_inspection') }}" method="POST">
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Lot / Batch Number *</label>
+            <input type="text" name="lot_number" class="form-control" placeholder="e.g. LOT-2026-D401" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product Item *</label>
+            <select name="product_id" class="form-control" required>
+              <option value="">-- Select Product --</option>
+              {% for p in products %}
+                <option value="{{ p.id }}">{{ p.sku }} - {{ p.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Supplier Vendor</label>
+          <select name="supplier_id" class="form-control">
+            <option value="">-- Select Vendor --</option>
+            {% for s in suppliers %}
+              <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Sample Inspection Size *</label>
+            <input type="number" name="sample_size" class="form-control" value="20" min="1" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Defects Found (Count) *</label>
+            <input type="number" name="defects_found" class="form-control" value="0" min="0" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Defect Classification</label>
+            <input type="text" name="defect_type" class="form-control" placeholder="e.g. Optical sensor jitter / None">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Disposition Status *</label>
+            <select name="inspection_status" class="form-control" required>
+              <option value="PASSED" selected>PASSED (Accept into Active Stock)</option>
+              <option value="QUARANTINE">QUARANTINE (Hold for Vendor RMA)</option>
+              <option value="REJECTED">REJECTED (Scrap / Return to Vendor)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Inspector Technical Notes</label>
+          <textarea name="remarks" class="form-control" rows="2" placeholder="e.g. Dimensions verified with digital caliper; passed AQL 0.65."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Submit Inspection Dossier</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

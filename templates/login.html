@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Amrapali University TQM Portal</title>
+  
+  <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='img/amrapali_circle.jpg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/amrapali-theme.css') }}">
+
+  <style>
+    :root {
+      --font-google: 'Google Sans', 'Google Sans Text', 'Roboto', 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      font-family: var(--font-google) !important;
+    }
+
+    body {
+      font-family: var(--font-google) !important;
+      background: linear-gradient(135deg, #f0f6ff 0%, #e2ecfd 100%);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    input, button, select, textarea, label {
+      font-family: var(--font-google) !important;
+    }
+
+    .login-container {
+      max-width: 470px;
+      width: 100%;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    .login-card {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 12px 30px -6px rgba(11, 61, 145, 0.15);
+      overflow: hidden;
+    }
+
+    .login-header {
+      background: linear-gradient(135deg, #0b3d91 0%, #061f4a 100%);
+      color: #ffffff;
+      padding: 28px 24px 22px;
+      text-align: center;
+      border-bottom: 3px solid var(--color-secondary);
+      position: relative;
+    }
+
+    .login-header-logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .login-crest {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #ffffff;
+      padding: 3px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+    }
+
+    .login-body {
+      padding: 28px 24px;
+    }
+
+    .role-toggle-group {
+      display: flex;
+      gap: 8px;
+      background: var(--color-surface-alt);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 22px;
+    }
+
+    .role-toggle-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.18s ease;
+    }
+
+    .role-toggle-btn.active.role-admin {
+      background: #ffffff;
+      color: var(--color-primary);
+      box-shadow: 0 2px 6px rgba(11, 61, 145, 0.12);
+      font-weight: 700;
+      border-bottom: 2px solid var(--color-primary);
+    }
+
+    .role-toggle-btn.active.role-member {
+      background: #ffffff;
+      color: #15803d;
+      box-shadow: 0 2px 6px rgba(22, 163, 74, 0.12);
+      font-weight: 700;
+      border-bottom: 2px solid #16a34a;
+    }
+
+    .login-separator {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 22px 0 16px;
+    }
+
+    .login-separator::before,
+    .login-separator::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .login-separator span {
+      padding: 0 12px;
+      font-size: 12px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    .btn-google-signin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 10px 16px;
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: var(--radius-sm);
+      color: #3c4043;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--font-google);
+      text-decoration: none;
+      transition: background-color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.08);
+      cursor: pointer;
+    }
+
+    .btn-google-signin:hover {
+      background-color: #f8fafd;
+      border-color: #c2c7d0;
+      box-shadow: 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+      color: #202124;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Card Box -->
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-header-logos">
+          <img src="{{ url_for('static', filename='img/amrapali_circle.jpg') }}" alt="Amrapali University Crest" class="login-crest">
+        </div>
+        <h2 style="margin: 0; font-size: 19px; font-weight: 700; color: #ffffff;">Inventory Management Portal</h2>
+      </div>
+
+      <div class="login-body">
+        <!-- Flash messages (Errors / Warnings / Info) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="badge badge-{{ category }}" style="display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 12px 14px; font-size: 13px; border-radius: var(--radius-sm); margin-bottom: 18px; text-align: left; line-height: 1.4;">
+                <i class="bi bi-exclamation-triangle-fill" style="font-size: 15px; margin-top: 1px;"></i>
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Role Selector Tabs -->
+        <div class="role-toggle-group">
+          <button type="button" class="role-toggle-btn role-admin {% if active_role == 'Admin' %}active{% endif %}" id="tab-admin" onclick="switchRole('Admin')">
+            <i class="bi bi-shield-lock-fill"></i> Admin Login
+          </button>
+          <button type="button" class="role-toggle-btn role-member {% if active_role == 'Member' %}active{% endif %}" id="tab-member" onclick="switchRole('Member')">
+            <i class="bi bi-person-badge-fill"></i> Member Login
+          </button>
+        </div>
+
+        <!-- Login Form -->
+        <form action="{{ url_for('login') }}" method="POST">
+          <input type="hidden" name="role_hint" id="role_hint" value="{{ active_role }}">
+
+          <div class="form-group">
+            <label class="form-label" id="username-label">
+              <i class="bi {% if active_role == 'Admin' %}bi-shield-person{% else %}bi-person-badge{% endif %}" id="label-icon"></i>
+              <span id="label-role-text">{% if active_role == 'Admin' %}Admin User ID *{% else %}Member User ID *{% endif %}</span>
+            </label>
+            <input type="text" name="username" id="input-username" class="form-control" placeholder="{% if active_role == 'Admin' %}Enter Admin User ID{% else %}Enter Member User ID{% endif %}" required autofocus>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label"><i class="bi bi-key"></i> Password *</label>
+            <input type="password" name="password" id="input-password" class="form-control" placeholder="Enter Password" required>
+          </div>
+
+          <!-- Security CAPTCHA Verification -->
+          <div class="form-group">
+            <label class="form-label"><i class="bi bi-shield-check"></i> Security Code (CAPTCHA) *</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <div class="captcha-badge-wrapper" style="display: flex; align-items: center; background: #e0f2fe; border: 1px solid #7dd3fc; border-radius: var(--radius-sm); padding: 3px 6px; flex-shrink: 0; user-select: none;">
+                <img id="captcha-img" src="{{ url_for('get_captcha') }}" alt="CAPTCHA Code" style="height: 36px; width: 110px; cursor: pointer; border-radius: 4px; display: block;" onclick="refreshCaptcha()" title="Click image to refresh security code">
+                <button type="button" onclick="refreshCaptcha()" title="Refresh Security Code" style="background: none; border: none; color: #0284c7; cursor: pointer; padding: 4px 6px; font-size: 16px;">
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+              </div>
+              <input type="text" name="captcha" id="input-captcha" class="form-control" placeholder="Enter Code" maxlength="6" autocomplete="off" style="text-transform: uppercase; font-family: var(--font-google) !important; font-size: 15px; font-weight: 700; letter-spacing: 2px;" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn {% if active_role == 'Admin' %}btn-primary{% else %}btn-success{% endif %}" id="btn-submit" style="width: 100%; padding: 11px; font-size: 14.5px; font-weight: 600; margin-top: 8px;">
+            <i class="bi {% if active_role == 'Admin' %}bi-shield-lock-fill{% else %}bi-person-check-fill{% endif %}" id="btn-icon"></i>
+            <span id="btn-text">{% if active_role == 'Admin' %}Sign In to Admin Portal{% else %}Sign In to Member Portal{% endif %}</span>
+          </button>
+        </form>
+
+        <!-- Google / Gmail Sign-In Option -->
+        <div class="login-separator">
+          <span>or sign in with</span>
+        </div>
+
+        <a href="{{ url_for('login_google') }}" class="btn-google-signin">
+          <svg width="18" height="18" viewBox="0 0 18 18">
+            <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/>
+            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+            <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
+          </svg>
+          <span>Continue with Google (Gmail)</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchRole(role) {
+      document.getElementById('role_hint').value = role;
+      const btnSubmit = document.getElementById('btn-submit');
+      const btnIcon = document.getElementById('btn-icon');
+      const btnText = document.getElementById('btn-text');
+      const labelText = document.getElementById('label-role-text');
+      const labelIcon = document.getElementById('label-icon');
+      const inputUser = document.getElementById('input-username');
+      const tabAdmin = document.getElementById('tab-admin');
+      const tabMember = document.getElementById('tab-member');
+
+      if (role === 'Admin') {
+        tabAdmin.classList.add('active');
+        tabMember.classList.remove('active');
+        labelIcon.className = 'bi bi-shield-person';
+        labelText.textContent = 'Admin User ID *';
+        inputUser.placeholder = 'Enter Admin User ID';
+        btnSubmit.className = 'btn btn-primary';
+        btnIcon.className = 'bi bi-shield-lock-fill';
+        btnText.textContent = 'Sign In to Admin Portal';
+      } else {
+        tabMember.classList.add('active');
+        tabAdmin.classList.remove('active');
+        labelIcon.className = 'bi bi-person-badge';
+        labelText.textContent = 'Member User ID *';
+        inputUser.placeholder = 'Enter Member User ID';
+        btnSubmit.className = 'btn btn-success';
+        btnIcon.className = 'bi bi-person-check-fill';
+        btnText.textContent = 'Sign In to Member Portal';
+      }
+    }
+
+    function refreshCaptcha() {
+      const img = document.getElementById('captcha-img');
+      if (img) {
+        img.src = "{{ url_for('get_captcha') }}?t=" + new Date().getTime();
+        const inp = document.getElementById('input-captcha');
+        if (inp) {
+          inp.value = '';
+          inp.focus();
+        }
+      }
+    }
+  </script>
+</body>
+</html>

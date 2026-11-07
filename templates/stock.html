@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Stock IN / OUT Movement Ledger{% endblock %}
+
+{% block breadcrumbs %}
+  <li><a href="{{ url_for('dashboard') }}">Inventory</a></li>
+  <li class="active">Stock Movement</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h2><i class="bi bi-arrow-left-right" style="color: var(--color-primary);"></i> Stock Inward &amp; Outward Ledger</h2>
+    <p>Track all receipt and dispatch transactions with full ISO 9001 inventory balance traceability.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('export_csv', data_type='movements') }}" class="btn btn-outline">
+      <i class="bi bi-file-earmark-arrow-down"></i> Export CSV
+    </a>
+    <button type="button" class="btn btn-primary" data-open-modal="modal-record-movement">
+      <i class="bi bi-plus-lg"></i> Record Stock Movement
+    </button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1; max-width: 450px;">
+      <i class="bi bi-search" style="color: var(--color-text-muted);"></i>
+      <input type="text" class="form-control table-search-input" data-target-table="movements-table" placeholder="Live filter movements by SKU, product, type, or note...">
+    </div>
+    <div style="font-size: 13px; color: var(--color-text-muted);">
+      Total Transactions: <strong>{{ movements|length }} Records</strong>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="table-amrapali" id="movements-table">
+        <thead>
+          <tr>
+            <th>Tx ID</th>
+            <th>Type</th>
+            <th>Product SKU</th>
+            <th>Product Name</th>
+            <th>Quantity Moved</th>
+            <th>Reference / Note</th>
+            <th>Date &amp; Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in movements %}
+          <tr>
+            <td><code style="color: var(--color-text-muted);">#TX-{{ m.id }}</code></td>
+            <td>
+              <span class="badge {% if m.movement_type == 'IN' %}badge-in{% else %}badge-out{% endif %}">
+                <i class="bi {% if m.movement_type == 'IN' %}bi-arrow-down-left{% else %}bi-arrow-up-right{% endif %}"></i>
+                STOCK {{ m.movement_type }}
+              </span>
+            </td>
+            <td><code style="font-weight: 600; color: var(--color-primary);">{{ m.sku }}</code></td>
+            <td><strong>{{ m.name }}</strong></td>
+            <td>
+              <strong style="font-size: 14px; {% if m.movement_type == 'IN' %}color: var(--color-success);{% else %}color: var(--color-danger);{% endif %}">
+                {% if m.movement_type == 'IN' %}+{% else %}-{% endif %}{{ m.quantity }} units
+              </strong>
+            </td>
+            <td>{{ m.note or '<em style="color: #94a3b8;">Standard stock transaction</em>'|safe }}</td>
+            <td style="font-size: 12px; color: var(--color-text-muted);">{{ m.created_at }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 30px;">
+              No movement records yet. Click "Record Stock Movement" to log receipt or issuance.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     MODAL: RECORD STOCK MOVEMENT
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-record-movement">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="bi bi-box-arrow-in-down-right" style="color: var(--color-primary);"></i> Record Stock Movement</h3>
+      <button type="button" class="modal-close">&times;</button>
+    </div>
+    <form action="{{ url_for('record_stock_movement') }}" method="POST">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Select Product Item *</label>
+          <select id="movement-product" name="product_id" class="form-control" required>
+            <option value="">-- Choose Product Item --</option>
+            {% for p in products_for_movement %}
+              <option value="{{ p.id }}" data-qty="{{ p.quantity }}">
+                {{ p.sku }} - {{ p.name }} (Current Warehouse Stock: {{ p.quantity }} units)
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Movement Type *</label>
+            <select id="movement-type" name="movement_type" class="form-control" required>
+              <option value="IN">Stock IN (Inward Receipt / Purchase / Return)</option>
+              <option value="OUT">Stock OUT (Issue / Department Consumption / Sale)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantity to Move *</label>
+            <input type="number" id="movement-qty" name="quantity" class="form-control" min="1" placeholder="e.g. 10" required>
+          </div>
+        </div>
+
+        <div id="stock-warning" style="display: none; background: #fee2e2; color: #b91c1c; padding: 10px; border-radius: var(--radius-sm); font-size: 12.5px; margin-bottom: 14px;">
+          <i class="bi bi-exclamation-triangle-fill"></i> Warning: Movement quantity exceeds available warehouse stock!
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Transaction Note / Reference Slip</label>
+          <input type="text" name="note" class="form-control" placeholder="e.g. PO-8921 / Department Lab 3 Indent">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Commit Movement</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const prodSelect = document.getElementById("movement-product");
+  const typeSelect = document.getElementById("movement-type");
+  const qtyInput = document.getElementById("movement-qty");
+  const warningBox = document.getElementById("stock-warning");
+
+  function validateQty() {
+    if (!prodSelect || !typeSelect || !qtyInput) return;
+    const selectedOption = prodSelect.options[prodSelect.selectedIndex];
+    if (!selectedOption || !selectedOption.value) return;
+
+    const currentQty = parseInt(selectedOption.getAttribute("data-qty")) || 0;
+    const moveType = typeSelect.value;
+    const enteredQty = parseInt(qtyInput.value) || 0;
+
+    if (moveType === "OUT" && enteredQty > currentQty) {
+      warningBox.style.display = "block";
+    } else {
+      warningBox.style.display = "none";
+    }
+  }
+
+  if (prodSelect && typeSelect && qtyInput) {
+    prodSelect.addEventListener("change", validateQty);
+    typeSelect.addEventListener("change", validateQty);
+    qtyInput.addEventListener("input", validateQty);
+  }
+</script>
+{% endblock %}

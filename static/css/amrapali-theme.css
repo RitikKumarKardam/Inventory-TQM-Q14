@@ -1,0 +1,1032 @@
+/**
+ * Amrapali University / Student Portal Design System Theme
+ * Aligned with https://student.amrapali.ac.in
+ *
+ * Subject: BBAT104 Fundamental of Total Quality Management (TQM)
+ * Project: Q14 - Inventory Management System & Quality Control Suite
+ * Student: Ritik Kumar (Roll No: 2520301005, B.Tech CSE 5th Sem, Sec C)
+ */
+
+:root {
+  /* Exact Amrapali brand color tokens */
+  --color-primary: #0b3d91;
+  --color-primary-hover: #061f4a;
+  --color-primary-light: #e8f0fe;
+  --color-primary-text: #ffffff;
+  
+  --color-secondary: #00a6d6;
+  --color-secondary-hover: #0288d1;
+  --color-secondary-light: #e0f7fa;
+  --color-secondary-text: #ffffff;
+  
+  --color-success: #16a34a;
+  --color-success-bg: #dcfce7;
+  --color-success-border: #86efac;
+  
+  --color-warning: #d97706;
+  --color-warning-bg: #fef3c7;
+  --color-warning-border: #fcd34d;
+  
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee2e2;
+  --color-danger-border: #fca5a5;
+  
+  --color-info: #0891b2;
+  --color-info-bg: #cffafe;
+  --color-info-border: #a5f3fc;
+  
+  --color-bg: #f5f9ff;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f1f5f9;
+  
+  --color-text: #172033;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-border: #dbe7f3;
+  --color-border-strong: #cbd5e1;
+  
+  --shadow-sm: 0 1px 3px rgba(11, 61, 145, 0.06);
+  --shadow-md: 0 4px 10px -2px rgba(11, 61, 145, 0.08), 0 2px 4px -1px rgba(11, 61, 145, 0.04);
+  --shadow-lg: 0 12px 24px -4px rgba(11, 61, 145, 0.12), 0 4px 8px -2px rgba(11, 61, 145, 0.06);
+  
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
+  
+  --font-family-base: "Google Sans", "Google Sans Text", "Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-family-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Base resets & typography */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+button, input, select, textarea, optgroup {
+  font-family: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--color-secondary);
+}
+
+/* =========================================================================
+   TOP UTILITY & INSTITUTIONAL BRAND HEADER (Amrapali Portal Style)
+   ========================================================================= */
+
+.amrapali-utility-bar {
+  background: #061f4a;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  padding: 4px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.amrapali-utility-bar a {
+  color: #7dd3fc;
+}
+
+.amrapali-utility-bar .badge-course {
+  background: rgba(0, 166, 214, 0.25);
+  color: #38bdf8;
+  border: 1px solid rgba(0, 166, 214, 0.4);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.amrapali-header {
+  background: linear-gradient(135deg, #0b3d91 0%, #082d6b 100%);
+  color: #ffffff;
+  padding: 12px 24px;
+  box-shadow: 0 4px 12px rgba(11, 61, 145, 0.18);
+  position: relative;
+  border-bottom: 3px solid var(--color-secondary);
+}
+
+.header-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-logos {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.amrapali-crest {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.amrapali-wordmark {
+  height: 44px;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.brand-titles h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.brand-titles .dept-tag {
+  font-size: 12px;
+  color: #b9d5ff;
+  font-weight: 400;
+}
+
+.student-portal-pill {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.student-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00a6d6, #0288d1);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  border: 1.5px solid #ffffff;
+}
+
+.student-meta {
+  line-height: 1.2;
+}
+
+.student-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.student-sub {
+  font-size: 11px;
+  color: #dbeafe;
+}
+
+/* =========================================================================
+   TOP NAVIGATION BAR (Q14 Navigation Target 3: Sticky & Universal)
+   ========================================================================= */
+
+.amrapali-nav {
+  background: #ffffff;
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav-links::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 16px;
+  font-weight: 500;
+  font-size: 13.5px;
+  color: #475569;
+  border-bottom: 3px solid transparent;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.nav-link i {
+  font-size: 16px;
+}
+
+.nav-link:hover {
+  color: var(--color-primary);
+  background-color: var(--color-surface-alt);
+}
+
+.nav-link.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+  background-color: #f0f6ff;
+}
+
+.nav-hotkey {
+  font-size: 10px;
+  padding: 1px 4px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+  color: #94a3b8;
+  margin-left: 4px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-nav-shortcut {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-nav-shortcut:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+/* =========================================================================
+   BREADCRUMBS BAR (Q14 Navigation Target 2: Visible on Every Page)
+   ========================================================================= */
+
+.breadcrumb-section {
+  background: #f8fafc;
+  border-bottom: 1px solid var(--color-border);
+  padding: 8px 24px;
+}
+
+.breadcrumb-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.breadcrumb-trail {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.breadcrumb-trail li + li::before {
+  content: "/";
+  padding: 0 8px;
+  color: #cbd5e1;
+}
+
+.breadcrumb-trail li a {
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumb-trail li.active {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.quick-stats-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 3px 10px;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+}
+
+.quick-stats-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success);
+}
+
+.quick-stats-badge .dot.warning {
+  background: var(--color-warning);
+}
+
+/* =========================================================================
+   MAIN APP CONTENT & GRID LAYOUT
+   ========================================================================= */
+
+.main-content {
+  flex: 1;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Page titles and action headers */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title-group h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-title-group p {
+  margin: 4px 0 0 0;
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+}
+
+.page-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* =========================================================================
+   DASHBOARD KPI METRIC TILES (Amrapali Portal Card Look)
+   ========================================================================= */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: #b9d5ff;
+}
+
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--color-primary);
+}
+
+.kpi-card.kpi-blue::before { background: var(--color-primary); }
+.kpi-card.kpi-cyan::before { background: var(--color-secondary); }
+.kpi-card.kpi-amber::before { background: var(--color-warning); }
+.kpi-card.kpi-green::before { background: var(--color-success); }
+.kpi-card.kpi-red::before { background: var(--color-danger); }
+.kpi-card.kpi-purple::before { background: #8b5cf6; }
+
+.kpi-content {
+  flex: 1;
+}
+
+.kpi-title {
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.kpi-subtext {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+}
+
+.kpi-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.kpi-blue .kpi-icon-box { background: #eff6ff; color: #1d4ed8; }
+.kpi-cyan .kpi-icon-box { background: #ecfeff; color: #0891b2; }
+.kpi-amber .kpi-icon-box { background: #fffbeb; color: #d97706; }
+.kpi-green .kpi-icon-box { background: #f0fdf4; color: #16a34a; }
+.kpi-red .kpi-icon-box { background: #fef2f2; color: #dc2626; }
+.kpi-purple .kpi-icon-box { background: #f5f3ff; color: #7c3aed; }
+
+/* =========================================================================
+   STANDARD CARDS & PANELS
+   ========================================================================= */
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 16px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* =========================================================================
+   TABLES & LISTS
+   ========================================================================= */
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-amrapali {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  text-align: left;
+}
+
+.table-amrapali th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.table-amrapali td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.table-amrapali tbody tr:hover {
+  background-color: #f8faff;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.badge-success { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success-border); }
+.badge-warning { background: var(--color-warning-bg); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
+.badge-danger { background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger-border); }
+.badge-info { background: var(--color-info-bg); color: var(--color-info); border: 1px solid var(--color-info-border); }
+.badge-primary { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+
+/* ABC Badges */
+.badge-abc-a { background: #fee2e2; color: #b91c1c; font-weight: 700; border: 1px solid #f87171; }
+.badge-abc-b { background: #fef3c7; color: #b45309; font-weight: 700; border: 1px solid #fbbf24; }
+.badge-abc-c { background: #dcfce7; color: #15803d; font-weight: 700; border: 1px solid #86efac; }
+
+/* Movement Type Badges */
+.badge-in { background: #dcfce7; color: #15803d; font-weight: 700; }
+.badge-out { background: #fee2e2; color: #b91c1c; font-weight: 700; }
+
+/* =========================================================================
+   BUTTONS & FORM CONTROLS
+   ========================================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background: var(--color-secondary);
+  color: #ffffff;
+}
+
+.btn-secondary:hover {
+  background: var(--color-secondary-hover);
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  background: #15803d;
+  color: #ffffff;
+}
+
+.btn-outline {
+  background: transparent;
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.btn-outline:hover {
+  background: var(--color-surface-alt);
+  border-color: #94a3b8;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  color: var(--color-text);
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus {
+  border-color: var(--color-primary);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(11, 61, 145, 0.15);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* =========================================================================
+   TQM QUALITY TOOLS TABS & VISUALS
+   ========================================================================= */
+
+.tqm-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.tqm-tab-btn {
+  background: transparent;
+  border: none;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.tqm-tab-btn:hover {
+  color: var(--color-primary);
+}
+
+.tqm-tab-btn.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tqm-tab-pane {
+  display: none;
+}
+
+.tqm-tab-pane.active {
+  display: block;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fishbone Diagram Visual Grid */
+.fishbone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.fishbone-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--color-secondary);
+}
+
+.fishbone-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.fishbone-causes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.fishbone-causes-list li {
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--color-border);
+  font-size: 13px;
+}
+
+.fishbone-causes-list li:last-child {
+  border-bottom: none;
+}
+
+.fishbone-causes-list .cause-title {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.fishbone-causes-list .cause-desc {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* =========================================================================
+   DEMING PDCA CARDS
+   ========================================================================= */
+
+.pdca-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.pdca-card {
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.pdca-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid;
+}
+
+.pdca-plan .pdca-header { border-color: #3b82f6; }
+.pdca-do .pdca-header { border-color: #10b981; }
+.pdca-check .pdca-header { border-color: #f59e0b; }
+.pdca-act .pdca-header { border-color: #8b5cf6; }
+
+.pdca-phase-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.pdca-plan .pdca-phase-name { color: #1d4ed8; }
+.pdca-do .pdca-phase-name { color: #047857; }
+.pdca-check .pdca-phase-name { color: #b45309; }
+.pdca-act .pdca-phase-name { color: #6d28d9; }
+
+/* =========================================================================
+   MODAL WINDOWS & BACKDROP
+   ========================================================================= */
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-backdrop.active {
+  display: flex;
+}
+
+.modal-dialog {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--color-border);
+  background: #f8fafc;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* =========================================================================
+   FOOTER (Institutional credits)
+   ========================================================================= */
+
+.amrapali-footer {
+  background: #0f172a;
+  color: #94a3b8;
+  padding: 24px;
+  margin-top: auto;
+  border-top: 1px solid #1e293b;
+  font-size: 12.5px;
+}
+
+.footer-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-credits strong {
+  color: #f1f5f9;
+}
+
+/* Keyboard Shortcut List in Modal */
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.kbd-badge {
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  border-bottom: 2px solid #94a3b8;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Print Optimization */
+@media print {
+  .amrapali-nav,
+  .btn,
+  .breadcrumb-section,
+  .nav-actions,
+  .modal-backdrop {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .card {
+    border: 1px solid #000000 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+}

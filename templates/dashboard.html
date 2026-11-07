@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard & TQM Command Center{% endblock %}
+
+{% block breadcrumbs %}
+  <li class="active">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h2><i class="bi bi-speedometer2" style="color: var(--color-primary);"></i> TQM Inventory Dashboard &amp; Quality Control</h2>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('products') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add Product</a>
+    <a href="{{ url_for('stock') }}" class="btn btn-secondary"><i class="bi bi-arrow-down-up"></i> Stock IN / OUT</a>
+    <a href="{{ url_for('inspections') }}" class="btn btn-outline"><i class="bi bi-check2-circle"></i> Log Inspection</a>
+  </div>
+</div>
+
+<!-- ====================================================================
+     LOW STOCK ALERT BANNER (IF ANY)
+     ==================================================================== -->
+{% if low_stock_items and low_stock_items|length > 0 %}
+<div class="card" style="border-left: 5px solid var(--color-danger); background: #fff5f5; margin-bottom: 20px;">
+  <div class="card-body" style="padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="width: 36px; height: 36px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <div>
+        <strong style="color: #991b1b; font-size: 14px;">Quality Exception: {{ low_stock_items|length }} Item(s) At or Below Reorder Threshold!</strong>
+        <div style="font-size: 12.5px; color: #7f1d1d;">
+          Stockout risk detected. Immediate procurement or replenishment action recommended to maintain Six Sigma continuity.
+        </div>
+      </div>
+    </div>
+    <a href="{{ url_for('reports') }}#low-stock-section" class="btn btn-danger btn-sm">
+      <i class="bi bi-eye"></i> View Low Stock Items
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ====================================================================
+     DASHBOARD KPI METRIC TILES
+     ==================================================================== -->
+<div class="kpi-grid">
+  <!-- 1. Total Products -->
+  <div class="kpi-card kpi-blue">
+    <div class="kpi-content">
+      <div class="kpi-title">Active Products</div>
+      <div class="kpi-value">{{ metrics.total_products }}</div>
+      <div class="kpi-subtext">Across {{ categories|length }} active categories</div>
+    </div>
+    <div class="kpi-icon-box">
+      <i class="bi bi-box-seam"></i>
+    </div>
+  </div>
+
+  <!-- 2. Total Units -->
+  <div class="kpi-card kpi-cyan">
+    <div class="kpi-content">
+      <div class="kpi-title">Stock Units</div>
+      <div class="kpi-value">{{ metrics.stock_units }}</div>
+      <div class="kpi-subtext">Physical units currently in warehouse</div>
+    </div>
+    <div class="kpi-icon-box">
+      <i class="bi bi-layers"></i>
+    </div>
+  </div>
+
+  <!-- 3. Low Stock Alerts -->
+  <div class="kpi-card {% if metrics.low_stock > 0 %}kpi-red{% else %}kpi-green{% endif %}">
+    <div class="kpi-content">
+      <div class="kpi-title">Low Stock Alerts</div>
+      <div class="kpi-value">{{ metrics.low_stock }}</div>
+      <div class="kpi-subtext">
+        {% if metrics.low_stock > 0 %}Needs purchase order{% else %}All items healthy{% endif %}
+      </div>
+    </div>
+    <div class="kpi-icon-box">
+      <i class="bi bi-bell"></i>
+    </div>
+  </div>
+
+  <!-- 4. Verified Suppliers -->
+  <div class="kpi-card kpi-amber">
+    <div class="kpi-content">
+      <div class="kpi-title">Verified Suppliers</div>
+      <div class="kpi-value">{{ metrics.total_suppliers }}</div>
+      <div class="kpi-subtext">ISO rated vendors on file</div>
+    </div>
+    <div class="kpi-icon-box">
+      <i class="bi bi-building"></i>
+    </div>
+  </div>
+
+  <!-- 5. Inventory Valuation -->
+  <div class="kpi-card kpi-green">
+    <div class="kpi-content">
+      <div class="kpi-title">Total Valuation</div>
+      <div class="kpi-value">₹{{ "{:,.2f}".format(quality_summary.inventory_value) }}</div>
+      <div class="kpi-subtext">Asset capital invested in inventory</div>
+    </div>
+    <div class="kpi-icon-box">
+      <i class="bi bi-currency-rupee"></i>
+    </div>
+  </div>
+
+  <!-- 6. Quality Pass Rate -->
+  <div class="kpi-card kpi-purple">
+    <div class="kpi-content">
+      <div class="kpi-title">Inspection Pass Rate</div>
+      <div class="kpi-value">{{ quality_pass_rate }}%</div>
+      <div class="kpi-subtext">Incoming Goods Receipt Note (GRN) QC</div>
+    </div>
+    <div class="kpi-icon-box">
+      <i class="bi bi-patch-check"></i>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     VISUAL CHARTS ROW (Pareto Curve Preview & Category Share)
+     ==================================================================== -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 24px;">
+  <!-- Pareto Defect Analysis Preview -->
+  <div class="card" style="margin-bottom: 0;">
+    <div class="card-header">
+      <h3 class="card-title"><i class="bi bi-bar-chart-fill" style="color: var(--color-primary);"></i> Pareto 80/20 Defect Analysis</h3>
+      <a href="{{ url_for('tqm_suite') }}" class="btn btn-outline btn-sm">Full 7 QC Tools <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="card-body">
+      <div style="position: relative; height: 260px; width: 100%;">
+        <canvas id="paretoChartCanvas"></canvas>
+      </div>
+      <div style="font-size: 12px; color: var(--color-text-muted); margin-top: 10px; text-align: center;">
+        <span style="display: inline-block; width: 12px; height: 12px; background: #0b3d91; border-radius: 2px; vertical-align: middle;"></span> Vital Few Defect Frequency
+        &nbsp;&bull;&nbsp;
+        <span style="display: inline-block; width: 12px; height: 3px; background: #dc2626; vertical-align: middle;"></span> Cumulative 80% Cutoff Line
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory Category Distribution -->
+  <div class="card" style="margin-bottom: 0;">
+    <div class="card-header">
+      <h3 class="card-title"><i class="bi bi-pie-chart-fill" style="color: var(--color-secondary);"></i> Category Units Breakdown</h3>
+      <a href="{{ url_for('calculators') }}" class="btn btn-outline btn-sm">ABC Analysis <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="card-body">
+      <div style="position: relative; height: 260px; width: 100%;">
+        <canvas id="categoryChartCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     RECENT ACTIVITIES & AUDIT LOG ROW
+     ==================================================================== -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px;">
+  <!-- Recent Stock Movements -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title"><i class="bi bi-arrow-left-right" style="color: var(--color-primary);"></i> Recent Stock Movements</h3>
+      <a href="{{ url_for('stock') }}" class="btn btn-outline btn-sm">View All Movements</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      <div class="table-responsive">
+        <table class="table-amrapali">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>SKU / Product</th>
+              <th>Quantity</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in recent_movements %}
+            <tr>
+              <td>
+                <span class="badge {% if m.movement_type == 'IN' %}badge-in{% else %}badge-out{% endif %}">
+                  {{ m.movement_type }}
+                </span>
+              </td>
+              <td>
+                <strong>{{ m.sku }}</strong><br>
+                <span style="font-size: 11.5px; color: var(--color-text-muted);">{{ m.product_name }}</span>
+              </td>
+              <td><strong>{{ m.quantity }} units</strong></td>
+              <td style="font-size: 11.5px; color: var(--color-text-muted);">{{ m.created_at }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">
+                No stock movement recorded yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ISO 9001 Audit Trail -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title"><i class="bi bi-shield-check" style="color: var(--color-success);"></i> ISO 9001 Quality Audit Trail</h3>
+      <a href="{{ url_for('reports') }}" class="btn btn-outline btn-sm">Full Audit Trail</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      <div class="table-responsive">
+        <table class="table-amrapali">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Action</th>
+              <th>Entity / Details</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in recent_audits %}
+            <tr>
+              <td><strong>{{ a.username }}</strong></td>
+              <td><span class="badge badge-info">{{ a.action }}</span></td>
+              <td style="font-size: 12px;">{{ a.entity }}: {{ a.details }}</td>
+              <td style="font-size: 11.5px; color: var(--color-text-muted);">{{ a.created_at }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">
+                No audit events recorded yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.PARETO_DATA = {{ pareto_data.defect_items | tojson }};
+  window.CATEGORY_DATA = {{ category_distribution | tojson }};
+</script>
+{% endblock %}

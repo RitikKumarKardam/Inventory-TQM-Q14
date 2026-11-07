@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Products Catalog &amp; Inventory Master{% endblock %}
+
+{% block breadcrumbs %}
+  <li><a href="{{ url_for('dashboard') }}">Inventory</a></li>
+  <li class="active">Products Catalog</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h2><i class="bi bi-box-seam-fill" style="color: var(--color-primary);"></i> Products Master Catalog</h2>
+    <p>Manage product items, category associations, reorder thresholds, and active warehouse inventory balances.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('export_csv', data_type='products') }}" class="btn btn-outline">
+      <i class="bi bi-file-earmark-arrow-down"></i> Export CSV
+    </a>
+    <button type="button" class="btn btn-primary" data-open-modal="modal-add-product">
+      <i class="bi bi-plus-lg"></i> Add New Product
+    </button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1; max-width: 450px;">
+      <i class="bi bi-search" style="color: var(--color-text-muted);"></i>
+      <input type="text" class="form-control table-search-input" data-target-table="products-table" placeholder="Live filter by SKU, product name, category, or supplier...">
+    </div>
+    <div style="font-size: 13px; color: var(--color-text-muted);">
+      Total Catalog: <strong>{{ products|length }} Products</strong>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="table-amrapali" id="products-table">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Supplier</th>
+            <th>Stock Units</th>
+            <th>Reorder Level</th>
+            <th>Unit Price (₹)</th>
+            <th>Total Value (₹)</th>
+            <th>Status</th>
+            <th style="text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr>
+            <td><code style="font-weight: 600; color: var(--color-primary);">{{ p.sku }}</code></td>
+            <td><strong>{{ p.name }}</strong></td>
+            <td><span class="badge badge-info">{{ p.category }}</span></td>
+            <td>{{ p.supplier }}</td>
+            <td>
+              {% if p.quantity == 0 %}
+                <span class="badge badge-danger"><i class="bi bi-x-circle"></i> Out of Stock (0)</span>
+              {% elif p.quantity <= p.reorder_level %}
+                <span class="badge badge-warning"><i class="bi bi-exclamation-circle"></i> Low ({{ p.quantity }})</span>
+              {% else %}
+                <span class="badge badge-success"><i class="bi bi-check-circle"></i> {{ p.quantity }} units</span>
+              {% endif %}
+            </td>
+            <td>{{ p.reorder_level }} units</td>
+            <td>₹{{ "{:,.2f}".format(p.price) }}</td>
+            <td><strong>₹{{ "{:,.2f}".format(p.quantity * p.price) }}</strong></td>
+            <td>
+              <span class="badge {% if p.status == 'Active' %}badge-success{% else %}badge-warning{% endif %}">
+                {{ p.status }}
+              </span>
+            </td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button type="button" class="btn btn-outline btn-sm edit-prod-btn"
+                      data-id="{{ p.id }}"
+                      data-sku="{{ p.sku }}"
+                      data-name="{{ p.name }}"
+                      data-cat="{{ p.category }}"
+                      data-supp="{{ p.supplier }}"
+                      data-qty="{{ p.quantity }}"
+                      data-reorder="{{ p.reorder_level }}"
+                      data-price="{{ p.price }}"
+                      data-status="{{ p.status }}"
+                      title="Edit Product">
+                <i class="bi bi-pencil"></i>
+              </button>
+              
+              {% if user.is_admin %}
+              <form action="{{ url_for('delete_product', product_id=p.id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete SKU {{ p.sku }}? This action is logged in the ISO 9001 audit trail.');">
+                <button type="submit" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: #fca5a5;" title="Delete Product (Admin Only)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+              {% else %}
+              <button type="button" class="btn btn-outline btn-sm" style="color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed;" title="Product deletion restricted to Admin role" disabled>
+                <i class="bi bi-lock-fill"></i>
+              </button>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="10" style="text-align: center; color: var(--color-text-muted); padding: 30px;">
+              No products found in the database. Click "Add New Product" to get started.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     MODAL: ADD NEW PRODUCT
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-add-product">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="bi bi-plus-circle" style="color: var(--color-primary);"></i> Add New Product Item</h3>
+      <button type="button" class="modal-close">&times;</button>
+    </div>
+    <form action="{{ url_for('create_product') }}" method="POST">
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">SKU Code *</label>
+            <input type="text" name="sku" class="form-control" placeholder="e.g. ITM-1006" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product Name *</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Ergonomic Mousepad" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select name="category_id" class="form-control">
+              <option value="">-- Select Category --</option>
+              {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Primary Supplier</label>
+            <select name="supplier_id" class="form-control">
+              <option value="">-- Select Supplier --</option>
+              {% for s in suppliers %}
+                <option value="{{ s.id }}">{{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Initial Quantity *</label>
+            <input type="number" name="quantity" class="form-control" value="0" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reorder Level *</label>
+            <input type="number" name="reorder_level" class="form-control" value="10" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit Price (₹) *</label>
+            <input type="number" step="0.01" name="price" class="form-control" value="0.00" min="0" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Item Status</label>
+          <select name="status" class="form-control">
+            <option value="Active" selected>Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ====================================================================
+     MODAL: EDIT PRODUCT
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-edit-product">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="bi bi-pencil-square" style="color: var(--color-primary);"></i> Edit Product</h3>
+      <button type="button" class="modal-close">&times;</button>
+    </div>
+    <form id="edit-product-form" action="" method="POST">
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">SKU Code *</label>
+            <input type="text" id="edit-sku" name="sku" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product Name *</label>
+            <input type="text" id="edit-name" name="name" class="form-control" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="edit-category" name="category_id" class="form-control">
+              <option value="">-- Select Category --</option>
+              {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Primary Supplier</label>
+            <select id="edit-supplier" name="supplier_id" class="form-control">
+              <option value="">-- Select Supplier --</option>
+              {% for s in suppliers %}
+                <option value="{{ s.id }}">{{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Quantity in Stock *</label>
+            <input type="number" id="edit-quantity" name="quantity" class="form-control" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reorder Level *</label>
+            <input type="number" id="edit-reorder" name="reorder_level" class="form-control" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit Price (₹) *</label>
+            <input type="number" step="0.01" id="edit-price" name="price" class="form-control" min="0" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="edit-status" name="status" class="form-control">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Update Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll(".edit-prod-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const pId = btn.getAttribute("data-id");
+      const form = document.getElementById("edit-product-form");
+      form.action = `/products/${pId}/edit`;
+
+      document.getElementById("edit-sku").value = btn.getAttribute("data-sku");
+      document.getElementById("edit-name").value = btn.getAttribute("data-name");
+      document.getElementById("edit-quantity").value = btn.getAttribute("data-qty");
+      document.getElementById("edit-reorder").value = btn.getAttribute("data-reorder");
+      document.getElementById("edit-price").value = btn.getAttribute("data-price");
+      document.getElementById("edit-status").value = btn.getAttribute("data-status");
+
+      openModal("modal-edit-product");
+    });
+  });
+</script>
+{% endblock %}

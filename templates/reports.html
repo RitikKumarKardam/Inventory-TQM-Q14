@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Quality Reports &amp; ISO 9001 Audit Trail{% endblock %}
+
+{% block breadcrumbs %}
+  <li><a href="{{ url_for('dashboard') }}">Compliance</a></li>
+  <li class="active">Reports &amp; Audit</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h2><i class="bi bi-file-earmark-text-fill" style="color: var(--color-primary);"></i> Quality Reports &amp; ISO 9001 Traceability Dossier</h2>
+    <p>Low-stock exception alerts, transaction audit records, and system integrity logs for store compliance.</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-outline" onclick="window.print()">
+      <i class="bi bi-printer"></i> Print Quality Report
+    </button>
+    <a href="{{ url_for('export_csv', data_type='audit') }}" class="btn btn-primary">
+      <i class="bi bi-file-earmark-arrow-down"></i> Export Audit Log (CSV)
+    </a>
+  </div>
+</div>
+
+<!-- ====================================================================
+     LOW STOCK ALERT REPORT (Quality Exception)
+     ==================================================================== -->
+<div class="card" id="low-stock-section">
+  <div class="card-header" style="background: {% if low_stock_rows|length > 0 %}#fff7ed{% else %}#f8fafc{% endif %};">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="bi bi-exclamation-triangle-fill" style="color: var(--color-warning); font-size: 18px;"></i>
+      <h3 class="card-title" style="color: #9a3412;">Low Stock &amp; Reorder Exception Report</h3>
+    </div>
+    <span class="badge {% if low_stock_rows|length > 0 %}badge-warning{% else %}badge-success{% endif %}">
+      {{ low_stock_rows|length }} Exception(s) Active
+    </span>
+  </div>
+  <div class="card-body" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="table-amrapali">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Product Name</th>
+            <th>Current Units</th>
+            <th>Reorder Threshold</th>
+            <th>Deficit Units</th>
+            <th>Quality Risk</th>
+            <th>Recommended Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in low_stock_rows %}
+          <tr>
+            <td><code>{{ r.sku }}</code></td>
+            <td><strong>{{ r.name }}</strong></td>
+            <td>
+              <strong style="color: var(--color-danger); font-size: 14px;">{{ r.quantity }} units</strong>
+            </td>
+            <td>{{ r.reorder_level }} units</td>
+            <td>
+              <span style="color: var(--color-danger);">
+                -{{ r.reorder_level - r.quantity }} units
+              </span>
+            </td>
+            <td>
+              <span class="badge badge-danger"><i class="bi bi-shield-x"></i> Stockout Risk</span>
+            </td>
+            <td>
+              <a href="{{ url_for('stock') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus"></i> Issue Stock IN PO
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--color-success); padding: 24px;">
+              <i class="bi bi-check-circle-fill" style="font-size: 20px;"></i><br>
+              <strong>All inventory items are currently above their minimum safety reorder thresholds.</strong>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     ISO 9001 AUDIT TRAIL (Traceability: WHO, WHAT, WHEN)
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="bi bi-shield-lock-fill" style="color: var(--color-success); font-size: 18px;"></i>
+      <h3 class="card-title">ISO 9001 Audit Trail (User Actions Traceability)</h3>
+    </div>
+    <div style="font-size: 12.5px; color: var(--color-text-muted);">
+      Total Logged Events: <strong>{{ audit_rows|length }}</strong>
+    </div>
+  </div>
+  <div class="card-body" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="table-amrapali">
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Operator</th>
+            <th>Quality Action</th>
+            <th>Entity Subsystem</th>
+            <th>Operation Details</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in audit_rows %}
+          <tr>
+            <td><code>#LOG-{{ a.id if a.id else loop.index }}</code></td>
+            <td><strong>{{ a.username }}</strong></td>
+            <td>
+              <span class="badge badge-info">{{ a.action }}</span>
+            </td>
+            <td>{{ a.entity }}</td>
+            <td style="font-size: 12px; font-family: var(--font-family-mono); max-width: 320px;">
+              {{ a.details }}
+            </td>
+            <td style="font-size: 12px; color: var(--color-text-muted);">{{ a.created_at }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--color-text-muted); padding: 24px;">
+              No audit log entries recorded yet.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     ERROR & EXCEPTION LOG
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="bi bi-bug-fill" style="color: var(--color-danger); font-size: 18px;"></i>
+      <h3 class="card-title">Application Exception &amp; Error Diagnostic Log</h3>
+    </div>
+    <span class="badge {% if error_rows|length > 0 %}badge-danger{% else %}badge-success{% endif %}">
+      {{ error_rows|length }} Exceptions Logged
+    </span>
+  </div>
+  <div class="card-body" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="table-amrapali">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Error Code</th>
+            <th>Module</th>
+            <th>Error Diagnostic Message</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in error_rows %}
+          <tr>
+            <td>{{ e.username }}</td>
+            <td><code style="color: var(--color-danger); font-weight: 700;">{{ e.error_code }}</code></td>
+            <td>{{ e.module }}</td>
+            <td style="font-size: 12px; color: #7f1d1d;">{{ e.message }}</td>
+            <td style="font-size: 12px; color: var(--color-text-muted);">{{ e.created_at }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--color-success); padding: 24px;">
+              <i class="bi bi-check-all" style="font-size: 20px;"></i><br>
+              <strong>Zero exceptions logged. System operating within nominal parameters.</strong>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

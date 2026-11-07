@@ -80,3 +80,37 @@ class ReportService:
         ).fetchall()
         conn.close()
         return rows
+
+    def category_distribution(self):
+        conn = get_conn()
+        rows = conn.execute(
+            """
+            SELECT COALESCE(c.name, 'Uncategorized') AS category,
+                   COUNT(p.id) AS product_count,
+                   COALESCE(SUM(p.quantity), 0) AS total_units,
+                   COALESCE(SUM(p.quantity * p.price), 0.0) AS total_value
+            FROM products p
+            LEFT JOIN categories c ON c.id = p.category_id
+            GROUP BY c.id
+            ORDER BY total_value DESC
+            """
+        ).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def movement_summary(self, limit: int = 10):
+        conn = get_conn()
+        rows = conn.execute(
+            """
+            SELECT m.id, m.movement_type, m.quantity, COALESCE(m.note, '') AS note,
+                   m.created_at, p.sku, p.name AS product_name
+            FROM stock_movements m
+            JOIN products p ON p.id = m.product_id
+            ORDER BY m.id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+

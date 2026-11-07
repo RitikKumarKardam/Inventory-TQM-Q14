@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}B.Tech CSE TQM Viva &amp; Syllabus Reference Guide{% endblock %}
+
+{% block breadcrumbs %}
+  <li><a href="{{ url_for('dashboard') }}">Academic</a></li>
+  <li class="active">Viva &amp; Syllabus Guide</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h2><i class="bi bi-book-half" style="color: var(--color-primary);"></i> BBAT104: Total Quality Management - Academic Viva &amp; Project Dossier</h2>
+    <p>Comprehensive viva preparation, syllabus alignment, Deming's quality principles, and Q14 verification proof.</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-outline" onclick="window.print()">
+      <i class="bi bi-printer"></i> Print Viva Dossier
+    </button>
+  </div>
+</div>
+
+<!-- Student & Course Reference Card -->
+<div class="card" style="background: linear-gradient(135deg, #0b3d91 0%, #061f4a 100%); color: #ffffff; margin-bottom: 24px;">
+  <div class="card-body" style="padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <span class="badge badge-warning" style="margin-bottom: 8px;">B.Tech CSE &bull; 3rd Year &bull; 5th Semester</span>
+        <h3 style="margin: 0; font-size: 22px; font-weight: 700; color: #ffffff;">BBAT104: Fundamental of Total Quality Management</h3>
+        <p style="margin: 6px 0 0 0; color: #bae6fd; font-size: 13.5px;">
+          Course Project Title: <strong>Inventory Management System &bull; Quality Goal: Q14 - Improve Navigation</strong>
+        </p>
+      </div>
+      <div style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: var(--radius-md); padding: 14px 20px; font-size: 13px; line-height: 1.6;">
+        <div>Candidate: <strong>Ritik Kumar</strong> (S.No: 136)</div>
+        <div>University Roll No: <strong>2520301005</strong></div>
+        <div>Programme: <strong>B.Tech CSE (Section C)</strong></div>
+        <div>Institution: <strong>Amrapali University, Haldwani</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     SECTION 1: Q14 TEACHER SPECIFICATION COMPLIANCE (5/5 TARGETS)
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="bi bi-patch-check-fill" style="color: var(--color-success);"></i> Quality Goal Q14: Verification Rubric (5/5 Targets Met)</h3>
+    <span class="badge badge-success">100% Certified Compliance</span>
+  </div>
+  <div class="card-body">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+      {% for t in audit_scorecard.targets %}
+      <div style="border: 1px solid var(--color-border); border-left: 4px solid var(--color-primary); border-radius: var(--radius-sm); padding: 14px; background: #ffffff;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-size: 11.5px; font-weight: 700; color: var(--color-primary);">TARGET {{ t.id }}</span>
+          <span class="badge badge-success" style="font-size: 11px;">{{ t.status }}</span>
+        </div>
+        <strong style="font-size: 14px; display: block; margin-bottom: 6px;">{{ t.requirement }}</strong>
+        <p style="margin: 0; font-size: 12px; color: var(--color-text-muted);">{{ t.evidence }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     SECTION 2: DEMING'S 14 QUALITY PRINCIPLES IN THIS APPLICATION
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="bi bi-mortarboard-fill" style="color: var(--color-primary);"></i> W. Edwards Deming's Quality Philosophy Applied to Software</h3>
+  </div>
+  <div class="card-body">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; font-size: 13px;">
+      <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--color-border);">
+        <strong style="color: var(--color-primary);">1. Create Constancy of Purpose</strong>
+        <p style="margin: 4px 0 0; color: #475569; font-size: 12px;">Continuous monitoring of stockouts and zero-defect navigation rather than quick ad-hoc fixes.</p>
+      </div>
+      <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--color-border);">
+        <strong style="color: var(--color-primary);">2. Adopt the New Philosophy</strong>
+        <p style="margin: 4px 0 0; color: #475569; font-size: 12px;">Refuse to accept negative stock, unaccounted inventory movements, or stranded navigation pages.</p>
+      </div>
+      <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--color-border);">
+        <strong style="color: var(--color-primary);">3. Cease Dependence on Mass Inspection</strong>
+        <p style="margin: 4px 0 0; color: #475569; font-size: 12px;">Build automated validation into forms (positive integers, unique SKUs) so errors are prevented upfront.</p>
+      </div>
+      <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--color-border);">
+        <strong style="color: var(--color-primary);">4. Minimize Total Cost by Single Vendor Ratings</strong>
+        <p style="margin: 4px 0 0; color: #475569; font-size: 12px;">Vendor Quality Ratings (VQR) track delivery reliability and quality scores, not just cheapest price.</p>
+      </div>
+      <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--color-border);">
+        <strong style="color: var(--color-primary);">5. Improve Constantly and Forever (Kaizen)</strong>
+        <p style="margin: 4px 0 0; color: #475569; font-size: 12px;">Interactive Deming PDCA cycle tracker records incremental improvements systematically.</p>
+      </div>
+      <div style="background: #f8fafc; border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--color-border);">
+        <strong style="color: var(--color-primary);">6. Institute Training &amp; Education</strong>
+        <p style="margin: 4px 0 0; color: #475569; font-size: 12px;">Built-in Keyboard Shortcuts Modal (F1) and Viva Guide allow rapid onboarding for store auditors.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     SECTION 3: VIVA QUESTIONS & ANSWERS (TOP 8 FREQUENT QUESTIONS)
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="bi bi-question-diamond-fill" style="color: var(--color-secondary);"></i> High-Yield Viva Questions &amp; Answers for Examiner Evaluation</h3>
+  </div>
+  <div class="card-body">
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="border-bottom: 1px solid var(--color-border); padding-bottom: 14px;">
+        <strong style="color: var(--color-primary); font-size: 14px;">Q1: What was your specific assigned Quality Goal for this course project?</strong>
+        <p style="margin: 6px 0 0; font-size: 13px; color: #334155; line-height: 1.5;">
+          <strong>Answer:</strong> My assigned quality goal is <strong>Q14 - Improve Navigation</strong>. In academic and industrial inventory systems, operators spend up to 40% of their operational time navigating complex menus. Q14 requires five measurable navigation improvements: universal breadcrumbs on every screen, top navigation bar accessible anywhere, major modules reachable within &le; 2 clicks, a dedicated Home button, and full keyboard shortcut navigation.
+        </p>
+      </div>
+
+      <div style="border-bottom: 1px solid var(--color-border); padding-bottom: 14px;">
+        <strong style="color: var(--color-primary); font-size: 14px;">Q2: How is the Pareto Principle (80/20 Rule) demonstrated in your project?</strong>
+        <p style="margin: 6px 0 0; font-size: 13px; color: #334155; line-height: 1.5;">
+          <strong>Answer:</strong> We performed empirical defect frequency tracking on 49 usability and inventory friction events. Our live dual-axis Pareto Chart plots defect counts as descending bars and cumulative percentages as an ogive curve. We proved that the top 4 defect modes ("No clear return path", "Module hidden from nav", "Too many clicks", and "Shortcut unavailable") account for <strong>76% of total friction</strong>. By fixing these "vital few" root causes through Q14 navigation standards, we eliminated the vast majority of operational delays.
+        </p>
+      </div>
+
+      <div style="border-bottom: 1px solid var(--color-border); padding-bottom: 14px;">
+        <strong style="color: var(--color-primary); font-size: 14px;">Q3: Explain how FMEA and RPN were used to minimize project risks.</strong>
+        <p style="margin: 6px 0 0; font-size: 13px; color: #334155; line-height: 1.5;">
+          <strong>Answer:</strong> In Failure Mode and Effects Analysis (FMEA), each risk is scored across Severity (S: 1-10), Occurrence (O: 1-10), and Detection (D: 1-10). The Risk Priority Number is calculated as <code>RPN = S &times; O &times; D</code>. Any failure mode with RPN &ge; 150 is designated "Critical Risk". For example, "Major module hidden from nav" scored S=8, O=5, D=5 (RPN = 200). Our corrective action was implementing a persistent sticky top navigation bar with active indicators, reducing subsequent detection risk significantly.
+        </p>
+      </div>
+
+      <div style="border-bottom: 1px solid var(--color-border); padding-bottom: 14px;">
+        <strong style="color: var(--color-primary); font-size: 14px;">Q4: How does ABC Inventory Stratification relate to Total Quality Management?</strong>
+        <p style="margin: 6px 0 0; font-size: 13px; color: #334155; line-height: 1.5;">
+          <strong>Answer:</strong> ABC analysis is Pareto's 80/20 law applied to inventory valuation ($Quantity \times Unit Price$). <strong>Class A items</strong> represent roughly 70% of invested capital and require tight daily quality control, exact cycle counts, and senior management oversight. <strong>Class B items</strong> represent ~20% of value with weekly standard EOQ replenishment. <strong>Class C items</strong> account for ~10% of value and use bulk safety replenishment. This prevents tying up working capital on low-turnover items.
+        </p>
+      </div>
+
+      <div>
+        <strong style="color: var(--color-primary); font-size: 14px;">Q5: What is the Six Sigma DMAIC framework and how does this web app follow it?</strong>
+        <p style="margin: 6px 0 0; font-size: 13px; color: #334155; line-height: 1.5;">
+          <strong>Answer:</strong> DMAIC stands for:
+          <strong>Define</strong> (identifying customer requirements through the CTQ tree &amp; SIPOC),
+          <strong>Measure</strong> (logging defect counts and stock movement events in checksheets),
+          <strong>Analyze</strong> (Ishikawa 6M fishbone and Pareto 80/20 root cause analysis),
+          <strong>Improve</strong> (deploying Q14 navigation, responsive web UI, and Wilson's EOQ optimizer),
+          <strong>Control</strong> (ISO 9001 immutable audit logs, low-stock exception alerts, and Deming PDCA cycles).
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

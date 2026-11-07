@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Industry Calculators: EOQ &amp; ABC Stratification{% endblock %}
+
+{% block breadcrumbs %}
+  <li><a href="{{ url_for('dashboard') }}">Operations Research</a></li>
+  <li class="active">EOQ &amp; ABC Calculators</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h2><i class="bi bi-calculator-fill" style="color: var(--color-primary);"></i> Operations Research &amp; Inventory Optimization Engine</h2>
+    <p>Calculate Wilson's Economic Order Quantity (EOQ), Safety Stock buffers, Reorder Points (ROP), and Pareto ABC Value Stratification.</p>
+  </div>
+</div>
+
+<!-- ====================================================================
+     SECTION 1: ECONOMIC ORDER QUANTITY (EOQ) CALCULATOR
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="bi bi-gear-wide-connected" style="color: var(--color-primary);"></i> Wilson's Economic Order Quantity (EOQ) &amp; Safety Stock Optimizer</h3>
+    <span class="badge badge-primary">Mathematical Optimization</span>
+  </div>
+  <div class="card-body">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <!-- Inputs Column -->
+      <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 18px;">
+        <h4 style="margin: 0 0 14px 0; font-size: 15px; color: var(--color-primary);">
+          <i class="bi bi-sliders"></i> Simulation Parameters
+        </h4>
+
+        <div class="form-group">
+          <label class="form-label">Annual Demand (D in units/year) *</label>
+          <input type="number" id="eoq-demand" class="form-control eoq-calc-input" value="1200" min="1">
+          <span style="font-size: 11.5px; color: var(--color-text-muted);">Expected annual store consumption / issue volume</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Ordering Cost (S in ₹/order) *</label>
+            <input type="number" id="eoq-order-cost" class="form-control eoq-calc-input" value="250" min="1">
+            <span style="font-size: 11px; color: var(--color-text-muted);">PO, shipping, and receipt cost</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Holding Cost (H in ₹/unit/yr) *</label>
+            <input type="number" step="0.1" id="eoq-hold-cost" class="form-control eoq-calc-input" value="15" min="0.1">
+            <span style="font-size: 11px; color: var(--color-text-muted);">Storage, insurance, &amp; capital cost</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Supplier Lead Time (Days)</label>
+            <input type="number" id="eoq-lead-time" class="form-control eoq-calc-input" value="7" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Target Service Level (%)</label>
+            <select id="eoq-service-level" class="form-control eoq-calc-input">
+              <option value="90">90% (Z = 1.28)</option>
+              <option value="95" selected>95% (Z = 1.645)</option>
+              <option value="98">98% (Z = 2.05)</option>
+              <option value="99">99% (Z = 2.33)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Calculation Results -->
+      <div style="background: linear-gradient(135deg, #0b3d91 0%, #061f4a 100%); color: #ffffff; border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #7dd3fc; margin-bottom: 4px;">Optimal Batch Size</div>
+          <div style="font-size: 38px; font-weight: 700; color: #ffffff; line-height: 1.1;">
+            <span id="out-eoq">200</span> <span style="font-size: 18px; font-weight: 400; color: #bae6fd;">units / order</span>
+          </div>
+          <div style="font-size: 12px; color: #cbd5e1; margin-top: 4px;">
+            Formula: <code>EOQ = &radic;( (2 &times; D &times; S) / H )</code>
+          </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.1); border-radius: var(--radius-sm); padding: 14px; margin: 16px 0; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <span style="color: #cbd5e1;">Reorder Point (ROP):</span>
+            <strong id="out-rop" style="color: #fde047; font-size: 15px;">29 units</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <span style="color: #cbd5e1;">Safety Stock Buffer (SS):</span>
+            <strong id="out-safety-stock" style="color: #86efac;">10 units</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <span style="color: #cbd5e1;">Orders Per Year:</span>
+            <strong id="out-orders-year">6.0 orders</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #cbd5e1;">Order Cycle Frequency:</span>
+            <strong id="out-cycle-days">61 days</strong>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 12px;">
+          <div>Annual Order Cost: <strong id="out-order-cost">₹1,500</strong></div>
+          <div>Annual Hold Cost: <strong id="out-hold-cost">₹1,500</strong></div>
+          <div>Total: <strong id="out-total-cost" style="color: #7dd3fc;">₹3,000</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     SECTION 2: ABC INVENTORY STRATIFICATION (PARETO VALUE)
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="bi bi-pie-chart-fill" style="color: var(--color-primary);"></i> ABC Inventory Stratification (Pareto Capital Distribution)</h3>
+    <span style="font-size: 12.5px; color: var(--color-text-muted);">
+      Total Portfolio Capital: <strong>₹{{ "{:,.2f}".format(abc_data.total_value) }}</strong>
+    </span>
+  </div>
+  <div class="card-body">
+    <!-- ABC Summary Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px;">
+      <!-- Class A -->
+      <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #dc2626; border-radius: var(--radius-sm); padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #b91c1c; font-size: 15px;">Class A (Vital High Value)</strong>
+          <span class="badge badge-abc-a">Top 70%</span>
+        </div>
+        <div style="font-size: 22px; font-weight: 700; color: #991b1b;">
+          ₹{{ "{:,.2f}".format(abc_data.summary.A.value) }}
+        </div>
+        <div style="font-size: 12px; color: #7f1d1d; margin-top: 4px;">
+          {{ abc_data.summary.A.count }} item(s) &bull; <strong>{{ abc_data.summary.A.val_pct }}% of inventory value</strong>
+        </div>
+        <div style="font-size: 11.5px; color: #64748b; margin-top: 6px; border-top: 1px dashed #fca5a5; padding-top: 6px;">
+          Policy: Daily physical review, strict security, accurate counts.
+        </div>
+      </div>
+
+      <!-- Class B -->
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #d97706; border-radius: var(--radius-sm); padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #b45309; font-size: 15px;">Class B (Moderate Value)</strong>
+          <span class="badge badge-abc-b">Next 20%</span>
+        </div>
+        <div style="font-size: 22px; font-weight: 700; color: #92400e;">
+          ₹{{ "{:,.2f}".format(abc_data.summary.B.value) }}
+        </div>
+        <div style="font-size: 12px; color: #78350f; margin-top: 4px;">
+          {{ abc_data.summary.B.count }} item(s) &bull; <strong>{{ abc_data.summary.B.val_pct }}% of inventory value</strong>
+        </div>
+        <div style="font-size: 11.5px; color: #64748b; margin-top: 6px; border-top: 1px dashed #fcd34d; padding-top: 6px;">
+          Policy: Weekly review, regular EOQ replenishment.
+        </div>
+      </div>
+
+      <!-- Class C -->
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; border-radius: var(--radius-sm); padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <strong style="color: #15803d; font-size: 15px;">Class C (Bulk / Low Value)</strong>
+          <span class="badge badge-abc-c">Bottom 10%</span>
+        </div>
+        <div style="font-size: 22px; font-weight: 700; color: #166534;">
+          ₹{{ "{:,.2f}".format(abc_data.summary.C.value) }}
+        </div>
+        <div style="font-size: 12px; color: #14532d; margin-top: 4px;">
+          {{ abc_data.summary.C.count }} item(s) &bull; <strong>{{ abc_data.summary.C.val_pct }}% of inventory value</strong>
+        </div>
+        <div style="font-size: 11.5px; color: #64748b; margin-top: 6px; border-top: 1px dashed #86efac; padding-top: 6px;">
+          Policy: Simple two-bin replenishment, bulk purchase orders.
+        </div>
+      </div>
+    </div>
+
+    <!-- ABC Products Breakdown Table -->
+    <div class="table-responsive">
+      <table class="table-amrapali">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>ABC Class</th>
+            <th>SKU</th>
+            <th>Product Name</th>
+            <th>Units</th>
+            <th>Unit Price</th>
+            <th>Total Value (₹)</th>
+            <th>Value Share %</th>
+            <th>Cumulative Value %</th>
+            <th>Inventory Control Strategy</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in abc_data.products %}
+          <tr>
+            <td><strong>#{{ loop.index }}</strong></td>
+            <td>
+              <span class="badge badge-abc-{{ p.abc_class.lower() }}">
+                Class {{ p.abc_class }}
+              </span>
+            </td>
+            <td><code>{{ p.sku }}</code></td>
+            <td><strong>{{ p.name }}</strong></td>
+            <td>{{ p.quantity }} units</td>
+            <td>₹{{ "{:,.2f}".format(p.price) }}</td>
+            <td><strong>₹{{ "{:,.2f}".format(p.total_value) }}</strong></td>
+            <td>{{ p.value_share_pct }}%</td>
+            <td>
+              <strong style="color: var(--color-primary);">{{ p.cumulative_share_pct }}%</strong>
+            </td>
+            <td style="font-size: 12px; color: var(--color-text-muted);">{{ p.strategy }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.ABC_SUMMARY = {{ abc_data.summary | tojson }};
+</script>
+{% endblock %}
