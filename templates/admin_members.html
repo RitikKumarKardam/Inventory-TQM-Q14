@@ -125,17 +125,18 @@
     </h3>
     <span class="badge badge-info" id="visibleCountBadge">Showing {{ users|length }} of {{ users|length }}</span>
   </div>
-  <div class="card-body" style="padding: 0; overflow-x: auto;">
-    <table class="table" id="membersTable" style="margin: 0; min-width: 900px;">
-      <thead>
-        <tr style="background: #f1f5f9;">
-          <th style="padding: 14px 18px;">User Identity</th>
-          <th style="padding: 14px 14px;">Role</th>
-          <th style="padding: 14px 14px;">Email &amp; Mobile</th>
-          <th style="padding: 14px 14px;">Status</th>
-          <th style="padding: 14px 18px; text-align: right;">Admin Actions</th>
-        </tr>
-      </thead>
+  <div class="card-body" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="table-amrapali" id="membersTable" style="width: 100%; border-collapse: collapse; margin: 0;">
+        <thead>
+          <tr style="background: #f8fafc;">
+            <th style="padding: 14px 18px; width: 28%;">User Identity</th>
+            <th style="padding: 14px 14px; width: 12%;">Role</th>
+            <th style="padding: 14px 14px; width: 25%;">Email &amp; Mobile</th>
+            <th style="padding: 14px 14px; width: 13%;">Status</th>
+            <th style="padding: 14px 18px; text-align: right; width: 22%;">Admin Actions</th>
+          </tr>
+        </thead>
       <tbody>
         {% for u in users %}
         <tr class="member-row" id="user-row-{{ u.id }}" 
@@ -293,6 +294,7 @@
         {% endfor %}
       </tbody>
     </table>
+    </div>
   </div>
 </div>
 
