@@ -892,8 +892,8 @@ def profile_send_otp():
 @app.route("/profile/smtp-config", methods=["POST"])
 def profile_smtp_config():
     user = session.get("user")
-    if not user or not (user.get("is_admin") or user.get("role") == "Admin"):
-        return jsonify({"success": False, "error": "Only Administrators can configure SMTP mailer settings."}), 403
+    if not user:
+        return jsonify({"success": False, "error": "Not authenticated"}), 401
 
     data = request.get_json(silent=True) or request.form
     smtp_host = (data.get("smtp_host") or "smtp.gmail.com").strip()
