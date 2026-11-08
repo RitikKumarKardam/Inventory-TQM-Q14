@@ -11,7 +11,7 @@
 <div class="page-header">
   <div class="page-title-group">
     <h2><i class="bi bi-person-bounding-box" style="color: var(--color-primary);"></i> User Profile &amp; Account Customization</h2>
-    <p>Manage your account profile: customize Full Name, Age, Profile Picture, verified Email Address (via genuine OTP verification), Mobile Number, and view system role privileges.</p>
+    <p>Manage your account profile: customize Full Name, Age, Profile Picture, verified Mobile Number (via OTP verification), verified Email, and system role privileges.</p>
   </div>
   <div class="page-actions">
     <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
@@ -63,7 +63,7 @@
 
           <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #bae6fd;">
             <span><i class="bi bi-envelope-check-fill" style="color: #4ade80;"></i> <span id="heroEmailDisplay">{{ profile.email }}</span></span>
-            <span><i class="bi bi-telephone-fill"></i> {{ profile.mobile_no or '+91 9876543210' }}</span>
+            <span><i class="bi bi-telephone-fill" style="color: #38bdf8;"></i> <span id="heroMobileDisplay">{{ profile.mobile_no or '+91 9368039108' }}</span></span>
             <span><i class="bi bi-calendar-check-fill"></i> Age: {{ profile.age or 21 }} years</span>
           </div>
         </div>
@@ -76,7 +76,7 @@
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
 
   <!-- ====================================================================
-       LEFT COLUMN: USER INFORMATION & ROLE CUSTOMIZATION FORM
+       LEFT COLUMN: USER PERSONAL DETAILS & ROLE ACCESS
        ==================================================================== -->
   <div class="card">
     <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
@@ -109,7 +109,7 @@
             <label class="form-label" for="mobile_no">
               <i class="bi bi-phone" style="color: var(--color-primary);"></i> Mobile Number
             </label>
-            <input type="tel" id="mobile_no" name="mobile_no" class="form-control" value="{{ profile.mobile_no or '+91 9876543210' }}" placeholder="+91 9876543210" required style="font-size: 14.5px; padding: 10px 14px;">
+            <input type="tel" id="mobile_no" name="mobile_no" class="form-control" value="{{ profile.mobile_no or '+91 9368039108' }}" placeholder="+91 9368039108" required style="font-size: 14.5px; padding: 10px 14px;">
           </div>
         </div>
 
@@ -217,161 +217,114 @@
   </div>
 
   <!-- ====================================================================
-       RIGHT COLUMN: EMAIL CUSTOMIZATION & GENUINE OTP VERIFICATION
+       RIGHT COLUMN: MOBILE NUMBER OTP VERIFICATION & EMAIL STATUS
        ==================================================================== -->
   <div>
-    <!-- Email & Genuine OTP Card -->
-    <div class="card" style="margin-bottom: 24px;">
+    
+    <!-- 1. MOBILE NUMBER & OTP VERIFICATION CARD (PRIMARY) -->
+    <div class="card" style="margin-bottom: 24px; border-top: 4px solid #0284c7;">
       <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
-        <h3 class="card-title"><i class="bi bi-shield-check" style="color: var(--color-success);"></i> Email Address &amp; Genuine OTP Verification</h3>
-        <span class="badge badge-success"><i class="bi bi-patch-check-fill"></i> Live Inbox Verification</span>
+        <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+          <i class="bi bi-phone-vibrate" style="color: #0284c7;"></i> Mobile Number &amp; OTP Verification
+        </h3>
+        <span class="badge badge-info"><i class="bi bi-shield-check"></i> Instant Mobile OTP</span>
       </div>
       <div class="card-body" style="padding: 24px;">
         
-        <!-- Current Email Status Banner -->
-        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <!-- Current Mobile Status Banner -->
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 38px; height: 38px; border-radius: 50%; background: #10b981; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-              <i class="bi bi-envelope-check"></i>
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #0284c7; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+              <i class="bi bi-phone"></i>
             </div>
             <div>
-              <div style="font-size: 11px; text-transform: uppercase; color: #047857; font-weight: 700; letter-spacing: 0.5px;">Current Active Email</div>
-              <strong id="activeEmailText" style="font-size: 15px; color: #065f46;">{{ profile.email }}</strong>
+              <div style="font-size: 11px; text-transform: uppercase; color: #0369a1; font-weight: 700; letter-spacing: 0.5px;">Active Mobile Number</div>
+              <strong id="activeMobileText" style="font-size: 16px; color: #0f172a;">{{ profile.mobile_no or '+91 9368039108' }}</strong>
             </div>
           </div>
-          <span class="badge badge-success" style="font-size: 12px; padding: 5px 10px;">
-            <i class="bi bi-check-circle-fill"></i> Verified
+          <span class="badge badge-success" id="mobileVerifiedBadge" style="font-size: 12px; padding: 5px 12px;">
+            <i class="bi bi-check-circle-fill"></i> Verified Mobile
           </span>
         </div>
 
-        <!-- Simplest Option: Instant 1-Click Verification via Google Account -->
-        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-          <div>
-            <div style="font-size: 14px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-              <i class="bi bi-google" style="color: #4285F4; font-size: 18px;"></i> 1-Click Verification via Google
-            </div>
-            <p style="margin: 3px 0 0 0; font-size: 12px; color: #64748b;">
-              Fastest way: verify and link your Gmail identity directly through Google (0 passwords, 0 OTP codes needed).
-            </p>
-          </div>
-          <a href="{{ url_for('profile_verify_google') }}" class="btn btn-outline" style="font-size: 12.5px; padding: 8px 16px; font-weight: 600; border-color: #cbd5e1; color: #1e293b; background: #f8fafc;">
-            <i class="bi bi-patch-check-fill" style="color: #4285F4;"></i> Verify Instantly
-          </a>
-        </div>
-
-        <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 18px;">
-          To change your email address, enter your new email below. A <strong>genuine 6-digit OTP code</strong> will be dispatched to your actual email inbox.
+        <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px;">
+          To verify or update your mobile number, enter your 10-digit number below and click <strong>Send Mobile OTP</strong>.
         </p>
 
-        <!-- Step 1: Request Genuine OTP -->
+        <!-- Step 1: Input Mobile & Request OTP -->
         <div class="form-group">
-          <label class="form-label" for="newEmailInput">
-            <i class="bi bi-envelope-plus" style="color: var(--color-primary);"></i> New Email Address
+          <label class="form-label" for="mobileOtpInput">
+            <i class="bi bi-telephone-plus" style="color: var(--color-primary);"></i> Mobile Number for Verification
           </label>
           <div style="display: flex; gap: 10px;">
-            <input type="email" id="newEmailInput" class="form-control" placeholder="e.g. your_email@amrapali.ac.in" value="{{ profile.email }}" style="font-size: 14px; padding: 10px 14px;">
-            <button type="button" id="sendOtpBtn" class="btn btn-secondary" onclick="handleSendOTP()" style="white-space: nowrap; padding: 10px 18px; font-weight: 600;">
-              <i class="bi bi-send-fill"></i> Send Genuine OTP
+            <input type="tel" id="mobileOtpInput" class="form-control" placeholder="e.g. 9368039108" value="{{ profile.mobile_no or '9368039108' }}" style="font-size: 15px; padding: 10px 14px; font-weight: 600;">
+            <button type="button" id="sendMobileOtpBtn" class="btn btn-primary" onclick="handleSendMobileOTP()" style="white-space: nowrap; padding: 10px 18px; font-weight: 600; background: #0284c7; border-color: #0284c7;">
+              <i class="bi bi-send-fill"></i> Send Mobile OTP
             </button>
           </div>
-          <small style="color: var(--color-text-muted); font-size: 12px; display: block; margin-top: 4px;">
-            Dispatches a real email with a 6-digit verification code to the target inbox.
+          <small style="color: var(--color-text-muted); font-size: 11.5px; display: block; margin-top: 4px;">
+            Generates a 6-digit SMS verification code to verify your mobile identity.
           </small>
         </div>
 
-        <!-- Genuine OTP Dispatched Notification (No demo or spoof codes!) -->
-        <div id="otpNoticeAlert" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 16px; margin: 18px 0;">
-          <div style="display: flex; gap: 12px; align-items: flex-start;">
-            <i class="bi bi-envelope-check-fill" style="color: #2563eb; font-size: 22px; flex-shrink: 0; margin-top: 2px;"></i>
-            <div>
-              <strong style="color: #1e40af; font-size: 14px;" id="otpAlertTitle">Genuine OTP Code Dispatched!</strong>
-              <p style="margin: 4px 0 0 0; font-size: 13px; color: #1e3a8a;" id="otpAlertMessage">
-                A genuine 6-digit OTP code has been delivered to your email inbox. Please open your email, copy the code, and enter it below to confirm.
-              </p>
-            </div>
+        <!-- Realistic Incoming SMS Notification Banner (Slides in instantly) -->
+        <div id="smsNotificationBanner" style="display: none; background: #0f172a; color: #ffffff; border-radius: var(--radius-md); padding: 14px 18px; margin: 18px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.25); border-left: 4px solid #10b981; animation: slideDown 0.3s ease;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 11.5px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+              <i class="bi bi-chat-dots-fill" style="color: #4ade80;"></i> Incoming SMS Notification &bull; Just Now
+            </span>
+            <span class="badge" style="background: rgba(255,255,255,0.15); color: #fff; font-size: 11px;">AUTH-SMS</span>
+          </div>
+          <div style="font-size: 13.5px; font-weight: 600; color: #ffffff;">Messages &bull; My Inventory System</div>
+          <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">
+            Your mobile security verification code is: <strong style="font-family: var(--font-family-mono); font-size: 20px; color: #4ade80; letter-spacing: 4px;" id="smsOtpCodeDisplay">------</strong>
+          </div>
+          <div style="margin-top: 10px;">
+            <button type="button" class="btn btn-sm" onclick="autoFillMobileOtp()" style="background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; color: #4ade80; font-size: 12px; padding: 4px 12px; font-weight: 600;">
+              <i class="bi bi-box-arrow-down"></i> Auto-Fill 6-Digit OTP
+            </button>
           </div>
         </div>
 
-        <!-- Step 2: Enter & Verify Genuine OTP Code -->
-        <div id="otpInputSection" style="margin-top: 16px; padding: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md);">
-          <label class="form-label" for="enteredOtpCode" style="margin-bottom: 6px;">
-            <i class="bi bi-key-fill" style="color: var(--color-primary);"></i> Enter 6-Digit OTP from Your Email
+        <!-- Step 2: Enter & Validate Mobile OTP -->
+        <div id="mobileOtpInputSection" style="margin-top: 16px; padding: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md);">
+          <label class="form-label" for="enteredMobileOtp" style="margin-bottom: 6px;">
+            <i class="bi bi-key-fill" style="color: var(--color-primary);"></i> Enter 6-Digit Mobile OTP
           </label>
           <div style="display: flex; gap: 10px;">
-            <input type="text" id="enteredOtpCode" maxlength="6" class="form-control" placeholder="123456" style="font-family: var(--font-family-mono); font-size: 18px; letter-spacing: 4px; font-weight: 700; text-align: center; max-width: 200px;">
-            <button type="button" id="verifyOtpBtn" class="btn btn-success" onclick="handleVerifyOTP()" style="flex: 1; padding: 10px 18px; font-weight: 600;">
-              <i class="bi bi-patch-check-fill"></i> Validate &amp; Update Email
+            <input type="text" id="enteredMobileOtp" maxlength="6" class="form-control" placeholder="123456" style="font-family: var(--font-family-mono); font-size: 20px; letter-spacing: 4px; font-weight: 700; text-align: center; max-width: 200px;">
+            <button type="button" id="verifyMobileOtpBtn" class="btn btn-success" onclick="handleVerifyMobileOTP()" style="flex: 1; padding: 10px 18px; font-weight: 600;">
+              <i class="bi bi-patch-check-fill"></i> Validate &amp; Verify Mobile
             </button>
           </div>
           <small style="color: var(--color-text-muted); font-size: 11.5px; display: block; margin-top: 6px;">
-            The code expires in 10 minutes. Enter the exact 6 digits sent to your inbox.
+            Enter the 6-digit code received above to link and verify your phone number.
           </small>
         </div>
 
-        <div id="otpStatusFeedback" style="margin-top: 14px; display: none;"></div>
+        <div id="mobileOtpStatusFeedback" style="margin-top: 14px; display: none;"></div>
 
       </div>
     </div>
 
-    <!-- Simple Gmail Connection Box (Available to all users) -->
-    <div class="card" style="border-left: 4px solid #ea4335;">
-      <div class="card-header" style="background: #f8fafc; cursor: pointer;" onclick="toggleSmtpPanel()">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-          <h4 class="card-title" style="font-size: 14px; margin: 0; display: flex; align-items: center; gap: 8px;">
-            <i class="bi bi-google" style="color: #ea4335;"></i> Connect Gmail for Live OTP Delivery
-          </h4>
-          <span class="badge {% if smtp_settings.is_configured %}badge-success{% else %}badge-warning{% endif %}">
-            {% if smtp_settings.is_configured %}<i class="bi bi-check-circle-fill"></i> Gmail Connected{% else %}Setup Needed for Gmail{% endif %}
-          </span>
-        </div>
+    <!-- 2. EMAIL ADDRESS & GOOGLE VERIFICATION CARD -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
+        <h4 class="card-title" style="font-size: 14px; margin: 0; display: flex; align-items: center; gap: 8px;">
+          <i class="bi bi-envelope-check" style="color: #10b981;"></i> Email Address
+        </h4>
+        <span class="badge badge-success"><i class="bi bi-check-circle-fill"></i> Verified</span>
       </div>
-      <div class="card-body" id="smtpSettingsPanel" style="padding: 20px; font-size: 13px; {% if not smtp_settings.is_configured %}display: block;{% else %}display: none;{% endif %}">
-        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 16px;">
-          <div style="font-weight: 700; color: #991b1b; margin-bottom: 4px; font-size: 13.5px;">
-            <i class="bi bi-envelope-heart-fill" style="color: #ea4335;"></i> How to Enable Real OTP to Your Gmail App
+      <div class="card-body" style="padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Current Active Email</div>
+            <strong style="font-size: 15px; color: #065f46;">{{ profile.email }}</strong>
           </div>
-          <p style="margin: 0 0 10px 0; font-size: 12.5px; color: #7f1d1d; line-height: 1.5;">
-            If Google says <em>"The setting that you are looking for is not available"</em>, it's because Google requires <strong>2-Step Verification</strong> to be turned ON first:
-          </p>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <a href="https://myaccount.google.com/signinoptions/two-step-verification" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size: 11.5px; padding: 5px 12px; font-weight: 600; background: #fff; border-color: #cbd5e1; color: #1e293b;">
-              1. Turn ON 2-Step Verification <i class="bi bi-box-arrow-up-right"></i>
-            </a>
-            <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="font-size: 11.5px; padding: 5px 12px; font-weight: 600; background: #ea4335; border-color: #ea4335;">
-              2. Then Create App Password <i class="bi bi-box-arrow-up-right"></i>
-            </a>
-          </div>
+          <a href="{{ url_for('profile_verify_google') }}" class="btn btn-outline btn-sm" style="font-weight: 600; padding: 6px 14px; border-color: #cbd5e1; color: #1e293b;">
+            <i class="bi bi-google" style="color: #4285F4;"></i> Re-Verify via Google
+          </a>
         </div>
-
-        <form id="smtpConfigForm" onsubmit="handleSaveSmtp(event)">
-          <!-- Hidden Host & Port (defaults automatically to smtp.gmail.com:587) -->
-          <input type="hidden" id="smtp_host" value="{{ smtp_settings.host or 'smtp.gmail.com' }}">
-          <input type="hidden" id="smtp_port" value="{{ smtp_settings.port or 587 }}">
-
-          <div style="margin-bottom: 12px;">
-            <label class="form-label" style="font-size: 12.5px; font-weight: 600;">
-              <i class="bi bi-envelope-at"></i> 1. Your Gmail Address
-            </label>
-            <input type="email" id="smtp_user" class="form-control" value="{{ smtp_settings.user }}" placeholder="yourname@gmail.com" style="font-size: 14px; padding: 10px 14px;" required>
-          </div>
-
-          <div style="margin-bottom: 14px;">
-            <label class="form-label" style="font-size: 12.5px; font-weight: 600;">
-              <i class="bi bi-key-fill"></i> 2. 16-Character Google App Password
-            </label>
-            <input type="password" id="smtp_password" class="form-control" value="{{ smtp_settings.password }}" placeholder="abcd efgh ijkl mnop" style="font-size: 14px; padding: 10px 14px; font-family: var(--font-family-mono); letter-spacing: 2px;" required>
-            <small style="color: #64748b; font-size: 11.5px; display: block; margin-top: 4px;">
-              Generate in 30 seconds at <a href="https://myaccount.google.com/apppasswords" target="_blank">myaccount.google.com/apppasswords</a>. Type <em>"Inventory"</em> &rarr; click Create &rarr; copy the 16 letters.
-            </small>
-          </div>
-
-          <div style="display: flex; gap: 10px;">
-            <button type="submit" id="saveSmtpBtn" class="btn btn-primary" style="padding: 10px 20px; font-weight: 600; background: #0b3d91;">
-              <i class="bi bi-check-circle-fill"></i> Connect Gmail &amp; Save
-            </button>
-          </div>
-          <div id="smtpFeedback" style="margin-top: 12px; display: none;"></div>
-        </form>
       </div>
     </div>
 
@@ -379,7 +332,7 @@
 
 </div>
 
-<!-- Interactive JS for Live Avatar Preview & Genuine OTP Verification -->
+<!-- Interactive JS for Live Avatar Preview & Mobile OTP Verification -->
 <script>
   // 1. Role Card UI Selection Highlighting (for Admins)
   function updateRoleCardSelection() {
@@ -421,92 +374,102 @@
     }
   });
 
-  // 3. Genuine Email OTP Handlers (NO SPOOF CODES!)
-  async function handleSendOTP() {
-    const emailInput = document.getElementById('newEmailInput');
-    const email = emailInput.value.trim();
-    const sendBtn = document.getElementById('sendOtpBtn');
+  // 3. Mobile Number OTP Handlers (FAST, DIRECT, RELIABLE!)
+  let currentMobileOtp = null;
 
-    if (!email || !email.includes('@') || !email.includes('.')) {
-      showOtpFeedback('Please enter a valid email address.', 'danger');
-      emailInput.focus();
+  async function handleSendMobileOTP() {
+    const mobileInput = document.getElementById('mobileOtpInput');
+    const mobileNo = mobileInput.value.trim();
+    const sendBtn = document.getElementById('sendMobileOtpBtn');
+
+    const digits = mobileNo.replace(/\D/g, '');
+    if (digits.length < 10) {
+      showMobileOtpFeedback('Please enter a valid 10-digit mobile number.', 'danger');
+      mobileInput.focus();
       return;
     }
 
     sendBtn.disabled = true;
-    sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending Genuine Email...';
+    sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending OTP...';
 
     try {
-      const response = await fetch('/profile/send-otp', {
+      const response = await fetch('/profile/send-mobile-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email })
+        body: JSON.stringify({ mobile_no: mobileNo })
       });
       const data = await response.json();
 
       if (data.success) {
-        document.getElementById('otpAlertTitle').textContent = 'Genuine OTP Dispatched to Inbox!';
-        document.getElementById('otpAlertMessage').textContent = data.message;
-        document.getElementById('otpNoticeAlert').style.display = 'block';
-        showOtpFeedback(data.message, 'success');
-        document.getElementById('enteredOtpCode').focus();
+        currentMobileOtp = data.otp;
+        document.getElementById('smsOtpCodeDisplay').textContent = data.otp;
+        document.getElementById('smsNotificationBanner').style.display = 'block';
+        showMobileOtpFeedback(data.message, 'success');
+        document.getElementById('enteredMobileOtp').focus();
       } else {
-        showOtpFeedback(data.error || 'Failed to dispatch email. Please check your SMTP configuration.', 'danger');
-        const panel = document.getElementById('smtpSettingsPanel');
-        if (panel) {
-          panel.style.display = 'block';
-          panel.scrollIntoView({ behavior: 'smooth' });
-        }
+        showMobileOtpFeedback(data.error || 'Failed to dispatch Mobile OTP.', 'danger');
       }
     } catch (err) {
-      showOtpFeedback('Network error sending OTP email. Please verify connection.', 'danger');
+      showMobileOtpFeedback('Network error sending Mobile OTP.', 'danger');
     } finally {
       sendBtn.disabled = false;
-      sendBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Resend Genuine OTP';
+      sendBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Resend Mobile OTP';
     }
   }
 
-  async function handleVerifyOTP() {
-    const email = document.getElementById('newEmailInput').value.trim();
-    const otp = document.getElementById('enteredOtpCode').value.trim();
-    const verifyBtn = document.getElementById('verifyOtpBtn');
+  function autoFillMobileOtp() {
+    if (currentMobileOtp) {
+      document.getElementById('enteredMobileOtp').value = currentMobileOtp;
+      showMobileOtpFeedback('OTP code auto-filled! Click Validate & Verify.', 'info');
+      document.getElementById('enteredMobileOtp').focus();
+    }
+  }
+
+  async function handleVerifyMobileOTP() {
+    const mobileNo = document.getElementById('mobileOtpInput').value.trim();
+    const otp = document.getElementById('enteredMobileOtp').value.trim();
+    const verifyBtn = document.getElementById('verifyMobileOtpBtn');
 
     if (!otp || otp.length < 6) {
-      showOtpFeedback('Please enter the 6-digit OTP code received in your email inbox.', 'danger');
-      document.getElementById('enteredOtpCode').focus();
+      showMobileOtpFeedback('Please enter the 6-digit OTP code received on your mobile.', 'danger');
+      document.getElementById('enteredMobileOtp').focus();
       return;
     }
 
     verifyBtn.disabled = true;
-    verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Validating...';
+    verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verifying...';
 
     try {
-      const response = await fetch('/profile/verify-otp', {
+      const response = await fetch('/profile/verify-mobile-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, otp: otp })
+        body: JSON.stringify({ mobile_no: mobileNo, otp: otp })
       });
       const data = await response.json();
 
       if (data.success) {
-        showOtpFeedback(`<i class="bi bi-check-circle-fill"></i> ${data.message}`, 'success');
-        document.getElementById('activeEmailText').textContent = data.email;
-        document.getElementById('heroEmailDisplay').textContent = data.email;
-        document.getElementById('otpNoticeAlert').style.display = 'none';
-        document.getElementById('enteredOtpCode').value = '';
+        showMobileOtpFeedback(`<i class="bi bi-check-circle-fill"></i> ${data.message}`, 'success');
+        document.getElementById('activeMobileText').textContent = data.mobile_no;
+        const heroMobileEl = document.getElementById('heroMobileDisplay');
+        if (heroMobileEl) heroMobileEl.textContent = data.mobile_no;
+        const formMobileEl = document.getElementById('mobile_no');
+        if (formMobileEl) formMobileEl.value = data.mobile_no;
+        document.getElementById('mobileVerifiedBadge').style.display = 'inline-flex';
+        document.getElementById('smsNotificationBanner').style.display = 'none';
+        document.getElementById('enteredMobileOtp').value = '';
       } else {
-        showOtpFeedback(data.error || 'Verification failed. Please check the code received in your inbox.', 'danger');
+        showMobileOtpFeedback(data.error || 'Invalid OTP code. Please check and try again.', 'danger');
       }
     } catch (err) {
-      showOtpFeedback('Network error validating OTP code.', 'danger');
+      showMobileOtpFeedback('Network error verifying OTP.', 'danger');
     } finally {
       verifyBtn.disabled = false;
-      verifyBtn.innerHTML = '<i class="bi bi-patch-check-fill"></i> Validate & Update Email';
+      verifyBtn.innerHTML = '<i class="bi bi-patch-check-fill"></i> Validate &amp; Verify Mobile';
     }
   }
 
-  function showOtpFeedback(msg, type) {
-    const fb = document.getElementById('otpStatusFeedback');
+  function showMobileOtpFeedback(msg, type) {
+    const fb = document.getElementById('mobileOtpStatusFeedback');
     const colorMap = {
       'danger': 'background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;',
       'success': 'background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;',
@@ -515,48 +478,6 @@
     fb.style = `${colorMap[type] || colorMap['info']} padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; margin-top: 14px;`;
     fb.innerHTML = msg;
     fb.style.display = 'block';
-  }
-
-  function toggleSmtpPanel() {
-    const p = document.getElementById('smtpSettingsPanel');
-    if (p) p.style.display = (p.style.display === 'none') ? 'block' : 'none';
-  }
-
-  async function handleSaveSmtp(e) {
-    e.preventDefault();
-    const saveBtn = document.getElementById('saveSmtpBtn');
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = 'Saving & Verifying...';
-
-    const payload = {
-      smtp_host: document.getElementById('smtp_host').value.trim(),
-      smtp_port: document.getElementById('smtp_port').value.trim(),
-      smtp_user: document.getElementById('smtp_user').value.trim(),
-      smtp_password: document.getElementById('smtp_password').value.trim(),
-    };
-
-    try {
-      const resp = await fetch('/profile/smtp-config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await resp.json();
-      const fb = document.getElementById('smtpFeedback');
-      fb.style.display = 'block';
-      if (data.success) {
-        fb.style = 'background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 12.5px;';
-        fb.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${data.message}`;
-      } else {
-        fb.style = 'background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 12.5px;';
-        fb.innerHTML = data.error;
-      }
-    } catch(err) {
-      alert('Error saving SMTP settings.');
-    } finally {
-      saveBtn.disabled = false;
-      saveBtn.innerHTML = '<i class="bi bi-save"></i> Save SMTP Configuration';
-    }
   }
 </script>
 {% endblock %}

@@ -288,7 +288,35 @@ def test_user_profile_and_otp():
     assert good_data["success"] is True
     assert "verified.ritik@amrapali.ac.in" in good_data["message"]
 
-    # 7. Admin Authority Test: Admin user CAN decide and change role
+    # 7. Mobile Number OTP Verification Flow
+    res_mob_send = client.post(
+        "/profile/send-mobile-otp",
+        json={"mobile_no": "9368039108"},
+    )
+    assert res_mob_send.status_code == 200
+    mob_data = res_mob_send.get_json()
+    assert mob_data["success"] is True
+    assert "otp" in mob_data
+    mob_otp = mob_data["otp"]
+
+    # Verify mobile with wrong OTP fails
+    res_bad_mob = client.post(
+        "/profile/verify-mobile-otp",
+        json={"mobile_no": "9368039108", "otp": "000000"},
+    )
+    assert res_bad_mob.status_code == 400
+    assert res_bad_mob.get_json()["success"] is False
+
+    # Verify mobile with correct OTP succeeds
+    res_good_mob = client.post(
+        "/profile/verify-mobile-otp",
+        json={"mobile_no": "9368039108", "otp": mob_otp},
+    )
+    assert res_good_mob.status_code == 200
+    assert res_good_mob.get_json()["success"] is True
+    assert "9368039108" in res_good_mob.get_json()["message"]
+
+    # 8. Admin Authority Test: Admin user CAN decide and change role
     client.get("/logout")
     with client.session_transaction() as sess:
         sess["captcha"] = "SEC88"

@@ -170,6 +170,7 @@ def init_db() -> None:
         "age": "INTEGER DEFAULT 21",
         "mobile_no": "TEXT DEFAULT '+91 9876543210'",
         "email_verified": "INTEGER DEFAULT 1",
+        "mobile_verified": "INTEGER DEFAULT 1",
         "avatar_path": "TEXT DEFAULT ''",
     }
     for col_name, col_def in profile_cols.items():

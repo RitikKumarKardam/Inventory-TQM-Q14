@@ -988,6 +988,67 @@ def profile_verify_google():
     return redirect(url_for("profile"))
 
 
+@app.route("/profile/send-mobile-otp", methods=["POST"])
+def profile_send_mobile_otp():
+    user = session.get("user")
+    if not user:
+        return jsonify({"success": False, "error": "Not authenticated"}), 401
+
+    data = request.get_json(silent=True) or request.form
+    mobile_no = (data.get("mobile_no") or "").strip()
+    digits = "".join([c for c in mobile_no if c.isdigit()])
+    if len(digits) < 10:
+        return jsonify({"success": False, "error": "Please enter a valid 10-digit mobile number."}), 400
+
+    otp = f"{random.randint(100000, 999999)}"
+    session["mobile_otp"] = {
+        "code": otp,
+        "mobile_no": mobile_no,
+        "created_at": time.time(),
+    }
+    session.modified = True
+
+    return jsonify({
+        "success": True,
+        "message": f"Verification OTP code dispatched for {mobile_no}!",
+        "otp": otp,
+        "mobile_no": mobile_no,
+    })
+
+
+@app.route("/profile/verify-mobile-otp", methods=["POST"])
+def profile_verify_mobile_otp():
+    user = session.get("user")
+    if not user:
+        return jsonify({"success": False, "error": "Not authenticated"}), 401
+
+    data = request.get_json(silent=True) or request.form
+    entered_otp = (data.get("otp") or "").strip()
+    mobile_no = (data.get("mobile_no") or "").strip()
+
+    otp_data = session.get("mobile_otp")
+    if not otp_data:
+        return jsonify({"success": False, "error": "No OTP requested. Please request an OTP first."}), 400
+
+    if str(otp_data.get("code")) != str(entered_otp):
+        return jsonify({"success": False, "error": "Invalid verification code. Please check and try again."}), 400
+
+    # Mobile OTP verified! Update mobile_no & mobile_verified in database & session
+    username = user.get("username", "")
+    auth_service.update_user_mobile(username, mobile_no, mobile_verified=1)
+
+    session["user"]["mobile_no"] = mobile_no
+    session["user"]["mobile_verified"] = 1
+    session.pop("mobile_otp", None)
+    session.modified = True
+
+    return jsonify({
+        "success": True,
+        "message": f"Mobile number {mobile_no} verified and linked successfully!",
+        "mobile_no": mobile_no,
+    })
+
+
 # =============================================================================
 # 11. CSV EXPORT UTILITY
 # =============================================================================

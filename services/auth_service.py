@@ -80,6 +80,7 @@ class AuthService:
         age = row["age"] if "age" in row.keys() and row["age"] else 21
         mobile_no = row["mobile_no"] if "mobile_no" in row.keys() and row["mobile_no"] else "+91 9876543210"
         email_verified = row["email_verified"] if "email_verified" in row.keys() else 1
+        mobile_verified = row["mobile_verified"] if "mobile_verified" in row.keys() else 1
         avatar_path = row["avatar_path"] if "avatar_path" in row.keys() and row["avatar_path"] else ""
 
         log_audit(row["username"], "LOGIN_SUCCESS", "Auth", f"Role: {role} (Portal: {required_role or 'Generic'})")
@@ -95,6 +96,7 @@ class AuthService:
             "age": age,
             "mobile_no": mobile_no,
             "email_verified": email_verified,
+            "mobile_verified": mobile_verified,
             "avatar_path": avatar_path,
         }, None
 
@@ -186,6 +188,7 @@ class AuthService:
                    COALESCE(age, 21) as age,
                    COALESCE(mobile_no, '+91 9876543210') as mobile_no,
                    COALESCE(email_verified, 1) as email_verified,
+                   COALESCE(mobile_verified, 1) as mobile_verified,
                    COALESCE(avatar_path, '') as avatar_path
             FROM users 
             WHERE LOWER(username) = LOWER(?)
@@ -239,4 +242,16 @@ class AuthService:
         conn.commit()
         conn.close()
         log_audit(username, "EMAIL_VERIFIED_UPDATED", "Auth", f"New Email: {email}")
+        return True
+
+    def update_user_mobile(self, username: str, mobile_no: str, mobile_verified: int = 1) -> bool:
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE users SET mobile_no = ?, mobile_verified = ? WHERE LOWER(username) = LOWER(?)",
+            (mobile_no.strip(), mobile_verified, username.strip()),
+        )
+        conn.commit()
+        conn.close()
+        log_audit(username, "MOBILE_VERIFIED_UPDATED", "Auth", f"New Mobile: {mobile_no}")
         return True
