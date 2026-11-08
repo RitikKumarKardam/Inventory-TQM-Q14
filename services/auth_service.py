@@ -30,7 +30,7 @@ class AuthService:
 
         conn = get_conn()
         row = conn.execute(
-            "SELECT id, username, password, role, email, provider FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)",
+            "SELECT * FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)",
             (username, username),
         ).fetchone()
         conn.close()
@@ -42,6 +42,25 @@ class AuthService:
         if row["password"] != password:
             log_audit(username, "LOGIN_FAILED", "Auth", "Incorrect password attempt")
             return None, "Incorrect password. Please verify your credentials and try again."
+
+        status = row["status"] if "status" in row.keys() and row["status"] else "Active"
+        status_reason = row["status_reason"] if "status_reason" in row.keys() and row["status_reason"] else ""
+
+        if status == "Suspended":
+            reason_str = f" Reason: {status_reason}" if status_reason else ""
+            log_audit(username, "LOGIN_BLOCKED_SUSPENDED", "Auth", f"Suspended account attempted login.{reason_str}")
+            return (
+                None,
+                f"Access Denied: Your account '{username}' has been temporarily suspended by the Administrator.{reason_str} Please contact support.",
+            )
+
+        if status == "Banned":
+            reason_str = f" Reason: {status_reason}" if status_reason else ""
+            log_audit(username, "LOGIN_BLOCKED_BANNED", "Auth", f"Banned account attempted login.{reason_str}")
+            return (
+                None,
+                f"Access Denied: Your account '{username}' has been permanently banned by the Administrator.{reason_str}",
+            )
 
         role = row["role"]
 
@@ -118,7 +137,7 @@ class AuthService:
         # Check if a genuine registered account exists with this email or username
         row = cur.execute(
             """
-            SELECT id, username, role, email, provider, password 
+            SELECT * 
             FROM users 
             WHERE LOWER(email) = LOWER(?) OR LOWER(username) = LOWER(?)
             """,
@@ -138,6 +157,21 @@ class AuthService:
                 "Only genuine registered accounts can sign in. "
                 "Please verify your email or sign in directly using your User ID and Password."
             )
+
+        status = row["status"] if "status" in row.keys() and row["status"] else "Active"
+        status_reason = row["status_reason"] if "status_reason" in row.keys() and row["status_reason"] else ""
+
+        if status == "Suspended":
+            conn.close()
+            reason_str = f" Reason: {status_reason}" if status_reason else ""
+            log_audit(row["username"], "LOGIN_GOOGLE_SUSPENDED", "Auth", f"Suspended account attempted Google login.{reason_str}")
+            raise ValueError(f"Access Denied: Your account has been temporarily suspended by the Administrator.{reason_str}")
+
+        if status == "Banned":
+            conn.close()
+            reason_str = f" Reason: {status_reason}" if status_reason else ""
+            log_audit(row["username"], "LOGIN_GOOGLE_BANNED", "Auth", f"Banned account attempted Google login.{reason_str}")
+            raise ValueError(f"Access Denied: Your account has been permanently banned by the Administrator.{reason_str}")
 
         user_id = row["id"]
         username = row["username"]
@@ -255,3 +289,176 @@ class AuthService:
         conn.close()
         log_audit(username, "MOBILE_VERIFIED_UPDATED", "Auth", f"New Mobile: {mobile_no}")
         return True
+
+    # =========================================================================
+    # MEMBER & USER ACCOUNT MANAGEMENT (ADMIN ONLY)
+    # =========================================================================
+
+    def get_all_users(self) -> list:
+        """Fetch all registered users with complete profile and status details."""
+        conn = get_conn()
+        cur = conn.cursor()
+        rows = cur.execute("""
+            SELECT id, username, role, email, provider,
+                   COALESCE(full_name, 'Ritik Kumar') as full_name,
+                   COALESCE(age, 21) as age,
+                   COALESCE(mobile_no, '+91 9368039108') as mobile_no,
+                   COALESCE(email_verified, 1) as email_verified,
+                   COALESCE(mobile_verified, 1) as mobile_verified,
+                   COALESCE(avatar_path, '') as avatar_path,
+                   COALESCE(status, 'Active') as status,
+                   COALESCE(status_reason, '') as status_reason,
+                   COALESCE(created_at, '2026-11-09') as created_at
+            FROM users
+            ORDER BY 
+                CASE WHEN role = 'Admin' THEN 1 ELSE 2 END,
+                id ASC
+        """).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def update_user_status(
+        self, user_id: int, new_status: str, reason: str = "", current_admin_id: Optional[int] = None
+    ) -> Tuple[bool, str]:
+        """Suspend, Ban, or Reactivate a user account."""
+        valid_statuses = ["Active", "Suspended", "Banned"]
+        if new_status not in valid_statuses:
+            return False, f"Invalid status '{new_status}'. Allowed: {', '.join(valid_statuses)}."
+
+        if current_admin_id and int(user_id) == int(current_admin_id):
+            return False, "Security Policy: You cannot suspend or ban your own active administrator account."
+
+        conn = get_conn()
+        cur = conn.cursor()
+        user_row = cur.execute("SELECT id, username, role FROM users WHERE id = ?", (user_id,)).fetchone()
+        if not user_row:
+            conn.close()
+            return False, f"User with ID {user_id} not found."
+
+        cur.execute(
+            "UPDATE users SET status = ?, status_reason = ? WHERE id = ?",
+            (new_status, reason.strip(), user_id),
+        )
+        conn.commit()
+        conn.close()
+
+        action_name = "REACTIVATED" if new_status == "Active" else new_status.upper()
+        log_audit(
+            "Admin",
+            f"USER_{action_name}",
+            "UserManagement",
+            f"User @{user_row['username']} (ID: {user_id}) marked as '{new_status}'. Reason: {reason}",
+        )
+        return True, f"Account for @{user_row['username']} has been set to '{new_status}' successfully."
+
+    def update_user_role(
+        self, user_id: int, new_role: str, current_admin_id: Optional[int] = None
+    ) -> Tuple[bool, str]:
+        """Promote to Admin or Demote to Member."""
+        valid_roles = ["Admin", "Member"]
+        new_role = new_role.strip().capitalize()
+        if new_role not in valid_roles:
+            return False, f"Invalid role '{new_role}'. Must be Admin or Member."
+
+        conn = get_conn()
+        cur = conn.cursor()
+        user_row = cur.execute("SELECT id, username, role FROM users WHERE id = ?", (user_id,)).fetchone()
+        if not user_row:
+            conn.close()
+            return False, f"User with ID {user_id} not found."
+
+        # Prevent demoting the last active administrator
+        if new_role == "Member" and user_row["role"] == "Admin":
+            admin_count_row = cur.execute("SELECT count(*) as c FROM users WHERE role = 'Admin' AND id != ?", (user_id,)).fetchone()
+            if admin_count_row and admin_count_row["c"] == 0:
+                conn.close()
+                return False, "Security Policy: Cannot demote the only remaining Administrator account in the system."
+
+        cur.execute("UPDATE users SET role = ? WHERE id = ?", (new_role, user_id))
+        conn.commit()
+        conn.close()
+
+        log_audit(
+            "Admin",
+            "USER_ROLE_CHANGED",
+            "UserManagement",
+            f"User @{user_row['username']} (ID: {user_id}) role changed to '{new_role}'",
+        )
+        return True, f"Role for @{user_row['username']} changed to '{new_role}' successfully."
+
+    def delete_user(self, user_id: int, current_admin_id: Optional[int] = None) -> Tuple[bool, str]:
+        """Permanently delete a member account."""
+        if current_admin_id and int(user_id) == int(current_admin_id):
+            return False, "Security Policy: You cannot delete your own currently active administrator account."
+
+        conn = get_conn()
+        cur = conn.cursor()
+        user_row = cur.execute("SELECT id, username, role FROM users WHERE id = ?", (user_id,)).fetchone()
+        if not user_row:
+            conn.close()
+            return False, f"User with ID {user_id} not found."
+
+        if user_row["role"] == "Admin":
+            admin_count_row = cur.execute("SELECT count(*) as c FROM users WHERE role = 'Admin' AND id != ?", (user_id,)).fetchone()
+            if admin_count_row and admin_count_row["c"] == 0:
+                conn.close()
+                return False, "Security Policy: Cannot delete the only remaining Administrator in the system."
+
+        cur.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+        conn.close()
+
+        log_audit(
+            "Admin",
+            "USER_DELETED",
+            "UserManagement",
+            f"Permanently deleted user @{user_row['username']} (ID: {user_id})",
+        )
+        return True, f"User @{user_row['username']} has been permanently deleted from the system."
+
+    def create_member(
+        self,
+        username: str,
+        password: str,
+        full_name: str,
+        email: str,
+        role: str = "Member",
+        mobile_no: str = "+91 9368039108",
+        age: int = 21,
+    ) -> Tuple[bool, str]:
+        """Register a new member or administrator account."""
+        username = (username or "").strip()
+        password = (password or "").strip()
+        full_name = (full_name or "").strip()
+        email = (email or "").strip().lower()
+        role = role.strip().capitalize() if role else "Member"
+
+        if not username:
+            return False, "Username is required."
+        if not password:
+            return False, "Password is required."
+        if role not in ["Admin", "Member"]:
+            role = "Member"
+
+        conn = get_conn()
+        cur = conn.cursor()
+        existing = cur.execute(
+            "SELECT id FROM users WHERE LOWER(username) = LOWER(?) OR (email != '' AND LOWER(email) = LOWER(?))",
+            (username, email),
+        ).fetchone()
+        if existing:
+            conn.close()
+            return False, f"An account with username '{username}' or email '{email}' already exists."
+
+        cur.execute(
+            """
+            INSERT INTO users (username, password, role, email, provider, full_name, age, mobile_no, status, email_verified, mobile_verified)
+            VALUES (?, ?, ?, ?, 'local', ?, ?, ?, 'Active', 1, 1)
+            """,
+            (username, password, role, email, full_name or username.title(), age, mobile_no),
+        )
+        conn.commit()
+        conn.close()
+
+        log_audit("Admin", "USER_CREATED", "UserManagement", f"Created @{username} with role '{role}'")
+        return True, f"Account for @{username} successfully created with role '{role}'."

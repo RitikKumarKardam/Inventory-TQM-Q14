@@ -85,6 +85,10 @@ function initKeyboardNavigation() {
           e.preventDefault();
           window.location.href = "/profile";
           break;
+        case "x":
+          e.preventDefault();
+          window.location.href = "/admin/members";
+          break;
       }
     }
   });

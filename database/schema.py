@@ -172,6 +172,9 @@ def init_db() -> None:
         "email_verified": "INTEGER DEFAULT 1",
         "mobile_verified": "INTEGER DEFAULT 1",
         "avatar_path": "TEXT DEFAULT ''",
+        "status": "TEXT DEFAULT 'Active'",
+        "status_reason": "TEXT DEFAULT ''",
+        "created_at": "TEXT DEFAULT ''",
     }
     for col_name, col_def in profile_cols.items():
         if col_name not in existing_cols:

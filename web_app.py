@@ -1126,6 +1126,162 @@ def profile_verify_mobile_otp():
 
 
 # =============================================================================
+# 10.5. MEMBER & USER MANAGEMENT (ADMIN ONLY - Q14 SEPARATE TAB)
+# =============================================================================
+
+@app.route("/admin/members")
+@app.route("/members")
+def admin_members():
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+    if not user.get("is_admin") and user.get("role") != "Admin":
+        flash("Access Denied: Only Administrators have authority to manage member accounts and roles.", "danger")
+        return redirect(url_for("dashboard"))
+
+    all_users = auth_service.get_all_users()
+    stats = {
+        "total": len(all_users),
+        "active": sum(1 for u in all_users if u.get("status") == "Active"),
+        "admins": sum(1 for u in all_users if u.get("role") == "Admin"),
+        "members": sum(1 for u in all_users if u.get("role") == "Member"),
+        "suspended": sum(1 for u in all_users if u.get("status") == "Suspended"),
+        "banned": sum(1 for u in all_users if u.get("status") == "Banned"),
+    }
+
+    return render_template(
+        "admin_members.html",
+        active_page="members",
+        users=all_users,
+        stats=stats,
+        is_admin=True,
+    )
+
+
+@app.route("/admin/members/status", methods=["POST"])
+def admin_member_status():
+    user = session.get("user")
+    if not user or not user.get("is_admin"):
+        return jsonify({"success": False, "error": "Administrator privileges required."}), 403
+
+    data = request.get_json(silent=True) or request.form
+    try:
+        user_id = int(data.get("user_id"))
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "error": "Invalid user ID."}), 400
+
+    new_status = (data.get("status") or "").strip()
+    reason = (data.get("reason") or "").strip()
+    current_admin_id = user.get("id")
+
+    success, message = auth_service.update_user_status(user_id, new_status, reason, current_admin_id=current_admin_id)
+    if not success:
+        if request.is_json:
+            return jsonify({"success": False, "error": message}), 400
+        flash(message, "danger")
+        return redirect(url_for("admin_members"))
+
+    if request.is_json:
+        return jsonify({"success": True, "message": message})
+    flash(message, "success")
+    return redirect(url_for("admin_members"))
+
+
+@app.route("/admin/members/role", methods=["POST"])
+def admin_member_role():
+    user = session.get("user")
+    if not user or not user.get("is_admin"):
+        return jsonify({"success": False, "error": "Administrator privileges required."}), 403
+
+    data = request.get_json(silent=True) or request.form
+    try:
+        user_id = int(data.get("user_id"))
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "error": "Invalid user ID."}), 400
+
+    new_role = (data.get("role") or "").strip()
+    current_admin_id = user.get("id")
+
+    success, message = auth_service.update_user_role(user_id, new_role, current_admin_id=current_admin_id)
+    if not success:
+        if request.is_json:
+            return jsonify({"success": False, "error": message}), 400
+        flash(message, "danger")
+        return redirect(url_for("admin_members"))
+
+    if request.is_json:
+        return jsonify({"success": True, "message": message})
+    flash(message, "success")
+    return redirect(url_for("admin_members"))
+
+
+@app.route("/admin/members/delete", methods=["POST"])
+def admin_member_delete():
+    user = session.get("user")
+    if not user or not user.get("is_admin"):
+        return jsonify({"success": False, "error": "Administrator privileges required."}), 403
+
+    data = request.get_json(silent=True) or request.form
+    try:
+        user_id = int(data.get("user_id"))
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "error": "Invalid user ID."}), 400
+
+    current_admin_id = user.get("id")
+
+    success, message = auth_service.delete_user(user_id, current_admin_id=current_admin_id)
+    if not success:
+        if request.is_json:
+            return jsonify({"success": False, "error": message}), 400
+        flash(message, "danger")
+        return redirect(url_for("admin_members"))
+
+    if request.is_json:
+        return jsonify({"success": True, "message": message})
+    flash(message, "success")
+    return redirect(url_for("admin_members"))
+
+
+@app.route("/admin/members/create", methods=["POST"])
+def admin_member_create():
+    user = session.get("user")
+    if not user or not user.get("is_admin"):
+        return jsonify({"success": False, "error": "Administrator privileges required."}), 403
+
+    data = request.get_json(silent=True) or request.form
+    username = (data.get("username") or "").strip()
+    password = (data.get("password") or "").strip()
+    full_name = (data.get("full_name") or "").strip()
+    email = (data.get("email") or "").strip()
+    role = (data.get("role") or "Member").strip()
+    mobile_no = (data.get("mobile_no") or "+91 9368039108").strip()
+    try:
+        age = int(data.get("age") or 21)
+    except ValueError:
+        age = 21
+
+    success, message = auth_service.create_member(
+        username=username,
+        password=password,
+        full_name=full_name,
+        email=email,
+        role=role,
+        mobile_no=mobile_no,
+        age=age,
+    )
+    if not success:
+        if request.is_json:
+            return jsonify({"success": False, "error": message}), 400
+        flash(message, "danger")
+        return redirect(url_for("admin_members"))
+
+    if request.is_json:
+        return jsonify({"success": True, "message": message})
+    flash(message, "success")
+    return redirect(url_for("admin_members"))
+
+
+# =============================================================================
 # 11. CSV EXPORT UTILITY
 # =============================================================================
 

@@ -2,6 +2,9 @@
 
 from web_app import app
 from services.tqm_service import TQMService
+from services.auth_service import AuthService
+
+auth_service = AuthService()
 
 
 def test_login_and_roles():
@@ -336,6 +339,159 @@ def test_user_profile_and_otp():
     res_admin_profile = client.get("/profile")
     assert res_admin_profile.status_code == 200
     assert "Admin Authority Active" in res_admin_profile.data.decode("utf-8")
+
+
+def test_admin_member_management():
+    from database.db import get_conn
+    conn = get_conn()
+    conn.execute("DELETE FROM users WHERE username = 'testdummy'")
+    conn.commit()
+    conn.close()
+
+    app.config["TESTING"] = True
+    client = app.test_client()
+
+    # 1. Non-admin (Member) cannot access /admin/members
+    with client.session_transaction() as sess:
+        sess["captcha"] = "SEC01"
+    client.post(
+        "/login",
+        data={"username": "member", "password": "member123", "captcha": "SEC01", "role_hint": "Member"},
+        follow_redirects=True,
+    )
+    res_member = client.get("/admin/members", follow_redirects=True)
+    assert "Access Denied" in res_member.data.decode("utf-8")
+
+    # 2. Admin can access /admin/members
+    client.get("/logout")
+    with client.session_transaction() as sess:
+        sess["captcha"] = "SEC02"
+    client.post(
+        "/login",
+        data={"username": "admin", "password": "admin123", "captcha": "SEC02", "role_hint": "Admin"},
+        follow_redirects=True,
+    )
+    res_admin = client.get("/admin/members")
+    assert res_admin.status_code == 200
+    html = res_admin.data.decode("utf-8")
+    assert "Member &amp; User Account Management" in html
+    assert "Registered System Users &amp; Members" in html
+    assert "Total Accounts" in html
+
+    # 3. Create a test member account
+    res_create = client.post(
+        "/admin/members/create",
+        json={
+            "username": "testdummy",
+            "password": "dummy123",
+            "full_name": "Test Dummy User",
+            "email": "dummy@amrapali.ac.in",
+            "role": "Member",
+            "mobile_no": "+91 9368039108",
+            "age": 20,
+        },
+    )
+    assert res_create.status_code == 200
+    assert res_create.get_json()["success"] is True
+
+    # Fetch user ID of testdummy
+    users = auth_service.get_all_users()
+    dummy_user = next((u for u in users if u["username"] == "testdummy"), None)
+    assert dummy_user is not None
+    dummy_id = dummy_user["id"]
+
+    # 4. Role Management: Promote testdummy to Admin
+    res_role_admin = client.post(
+        "/admin/members/role",
+        json={"user_id": dummy_id, "role": "Admin"},
+    )
+    assert res_role_admin.status_code == 200
+    assert res_role_admin.get_json()["success"] is True
+    u_after_role = next((u for u in auth_service.get_all_users() if u["id"] == dummy_id), None)
+    assert u_after_role["role"] == "Admin"
+
+    # Demote back to Member
+    res_role_mem = client.post(
+        "/admin/members/role",
+        json={"user_id": dummy_id, "role": "Member"},
+    )
+    assert res_role_mem.status_code == 200
+    assert res_role_mem.get_json()["success"] is True
+
+    # 5. Suspend Account: Admin suspends testdummy
+    res_susp = client.post(
+        "/admin/members/status",
+        json={"user_id": dummy_id, "status": "Suspended", "reason": "Academic audit review"},
+    )
+    assert res_susp.status_code == 200
+    assert res_susp.get_json()["success"] is True
+
+    # Verify suspended user cannot log in
+    client.get("/logout")
+    with client.session_transaction() as sess:
+        sess["captcha"] = "SEC03"
+    res_login_susp = client.post(
+        "/login",
+        data={"username": "testdummy", "password": "dummy123", "captcha": "SEC03", "role_hint": "Member"},
+        follow_redirects=True,
+    )
+    assert "temporarily suspended" in res_login_susp.data.decode("utf-8")
+
+    # 6. Reactivate Account: Admin reactivates testdummy
+    with client.session_transaction() as sess:
+        sess["captcha"] = "SEC04"
+    client.post(
+        "/login",
+        data={"username": "admin", "password": "admin123", "captcha": "SEC04", "role_hint": "Admin"},
+        follow_redirects=True,
+    )
+    res_reactivate = client.post(
+        "/admin/members/status",
+        json={"user_id": dummy_id, "status": "Active"},
+    )
+    assert res_reactivate.status_code == 200
+
+    # 7. Ban Account: Admin bans testdummy
+    res_ban = client.post(
+        "/admin/members/status",
+        json={"user_id": dummy_id, "status": "Banned", "reason": "Violation policy"},
+    )
+    assert res_ban.status_code == 200
+
+    # Verify banned user cannot log in
+    client.get("/logout")
+    with client.session_transaction() as sess:
+        sess["captcha"] = "SEC05"
+    res_login_ban = client.post(
+        "/login",
+        data={"username": "testdummy", "password": "dummy123", "captcha": "SEC05", "role_hint": "Member"},
+        follow_redirects=True,
+    )
+    assert "permanently banned" in res_login_ban.data.decode("utf-8")
+
+    # 8. Delete Account: Admin deletes testdummy
+    with client.session_transaction() as sess:
+        sess["captcha"] = "SEC06"
+    client.post(
+        "/login",
+        data={"username": "admin", "password": "admin123", "captcha": "SEC06", "role_hint": "Admin"},
+        follow_redirects=True,
+    )
+    res_del = client.post(
+        "/admin/members/delete",
+        json={"user_id": dummy_id},
+    )
+    assert res_del.status_code == 200
+    assert res_del.get_json()["success"] is True
+
+    # Verify testdummy is completely gone
+    assert not any(u["username"] == "testdummy" for u in auth_service.get_all_users())
+
+    # 9. Security Policy: Admin cannot delete self
+    admin_id = next(u["id"] for u in auth_service.get_all_users() if u["username"] == "admin")
+    res_del_self = client.post("/admin/members/delete", json={"user_id": admin_id})
+    assert res_del_self.status_code == 400
+    assert "cannot delete your own" in res_del_self.get_json()["error"]
 
 
 

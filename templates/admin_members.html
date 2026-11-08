@@ -1,0 +1,599 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Members - My Inventory System{% endblock %}
+
+{% block breadcrumbs %}
+  <li><a href="{{ url_for('dashboard') }}">Academic</a></li>
+  <li><a href="{{ url_for('profile') }}">Administrator</a></li>
+  <li class="active">Manage Members</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title-group">
+    <h2><i class="bi bi-people-fill" style="color: var(--color-primary);"></i> Member &amp; User Account Management</h2>
+    <p>Administrator Command Center: manage all member accounts, assign system roles, suspend or ban restricted accounts, and delete inactive users.</p>
+  </div>
+  <div class="page-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button type="button" class="btn btn-primary" onclick="openAddMemberModal()">
+      <i class="bi bi-person-plus-fill"></i> Add New Member
+    </button>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+      <i class="bi bi-arrow-left"></i> Return to Dashboard (Alt+D)
+    </a>
+  </div>
+</div>
+
+<!-- ====================================================================
+     1. METRICS / SUMMARY KPI CARDS
+     ==================================================================== -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 24px;">
+  
+  <div class="card" style="border-left: 4px solid var(--color-primary); padding: 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 11.5px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700; letter-spacing: 0.5px;">Total Accounts</div>
+        <div style="font-size: 28px; font-weight: 800; color: var(--color-primary); margin-top: 4px;" id="statTotal">{{ stats.total }}</div>
+      </div>
+      <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+        <i class="bi bi-people"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 4px solid #10b981; padding: 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 11.5px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700; letter-spacing: 0.5px;">Active Accounts</div>
+        <div style="font-size: 28px; font-weight: 800; color: #059669; margin-top: 4px;" id="statActive">{{ stats.active }}</div>
+      </div>
+      <div style="width: 44px; height: 44px; border-radius: 50%; background: #d1fae5; color: #059669; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 4px solid #f59e0b; padding: 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 11.5px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700; letter-spacing: 0.5px;">Administrators</div>
+        <div style="font-size: 28px; font-weight: 800; color: #d97706; margin-top: 4px;" id="statAdmins">{{ stats.admins }}</div>
+      </div>
+      <div style="width: 44px; height: 44px; border-radius: 50%; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 4px solid #ef4444; padding: 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 11.5px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700; letter-spacing: 0.5px;">Suspended / Banned</div>
+        <div style="font-size: 28px; font-weight: 800; color: #dc2626; margin-top: 4px;" id="statRestricted">{{ stats.suspended + stats.banned }}</div>
+      </div>
+      <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+        <i class="bi bi-slash-circle-fill"></i>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================================================================
+     2. SEARCH & FILTER CONTROLS (0-Click Instant Filtering)
+     ==================================================================== -->
+<div class="card" style="margin-bottom: 20px;">
+  <div class="card-body" style="padding: 16px 20px;">
+    <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+      
+      <!-- Live Search Input -->
+      <div style="flex: 1; min-width: 260px; position: relative;">
+        <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></i>
+        <input type="text" id="memberSearchInput" class="form-control" placeholder="Search members by full name, @username, email, or mobile..." onkeyup="filterMembersTable()" style="padding-left: 38px; font-size: 14px;">
+      </div>
+
+      <!-- Role Filter Dropdown -->
+      <div style="min-width: 160px;">
+        <select id="roleFilterSelect" class="form-control" onchange="filterMembersTable()" style="font-size: 13.5px;">
+          <option value="ALL">All Roles ({{ stats.total }})</option>
+          <option value="Admin">Admins Only ({{ stats.admins }})</option>
+          <option value="Member">Members Only ({{ stats.members }})</option>
+        </select>
+      </div>
+
+      <!-- Status Filter Dropdown -->
+      <div style="min-width: 170px;">
+        <select id="statusFilterSelect" class="form-control" onchange="filterMembersTable()" style="font-size: 13.5px;">
+          <option value="ALL">All Statuses ({{ stats.total }})</option>
+          <option value="Active">Active Only ({{ stats.active }})</option>
+          <option value="Suspended">Suspended Only ({{ stats.suspended }})</option>
+          <option value="Banned">Banned Only ({{ stats.banned }})</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     3. MEMBERS DIRECTORY TABLE
+     ==================================================================== -->
+<div class="card">
+  <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+    <h3 class="card-title" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+      <i class="bi bi-person-lines-fill" style="color: var(--color-primary);"></i> Registered System Users &amp; Members
+    </h3>
+    <span class="badge badge-info" id="visibleCountBadge">Showing {{ users|length }} of {{ users|length }}</span>
+  </div>
+  <div class="card-body" style="padding: 0; overflow-x: auto;">
+    <table class="table" id="membersTable" style="margin: 0; min-width: 900px;">
+      <thead>
+        <tr style="background: #f1f5f9;">
+          <th style="padding: 14px 18px;">User Identity</th>
+          <th style="padding: 14px 14px;">Role</th>
+          <th style="padding: 14px 14px;">Email &amp; Mobile</th>
+          <th style="padding: 14px 14px;">Status</th>
+          <th style="padding: 14px 18px; text-align: right;">Admin Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr class="member-row" id="user-row-{{ u.id }}" 
+            data-search="{{ u.full_name|lower }} {{ u.username|lower }} {{ u.email|lower }} {{ u.mobile_no|lower }}"
+            data-role="{{ u.role }}"
+            data-status="{{ u.status }}">
+          
+          <!-- Column 1: Identity & Avatar -->
+          <td style="padding: 14px 18px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: {% if u.role == 'Admin' %}linear-gradient(135deg, #d97706, #b45309){% else %}linear-gradient(135deg, #10b981, #059669){% endif %}; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
+                {% if u.avatar_path %}
+                  <img src="{{ u.avatar_path }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                {% elif u.provider == 'google' %}
+                  <i class="bi bi-google"></i>
+                {% else %}
+                  {{ (u.full_name or u.username)[:2]|upper }}
+                {% endif %}
+              </div>
+              <div>
+                <div style="font-weight: 700; color: #0f172a; font-size: 14.5px;">
+                  {{ u.full_name or 'Ritik Kumar' }}
+                  {% if u.id == session.user.id %}
+                    <span class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 10.5px; padding: 2px 6px; margin-left: 4px;">You (Active Admin)</span>
+                  {% endif %}
+                </div>
+                <div style="font-size: 12.5px; color: var(--color-text-muted); display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+                  <span>@{{ u.username }}</span>
+                  <span>&bull;</span>
+                  <span>Age: {{ u.age or 21 }}</span>
+                  {% if u.provider == 'google' %}
+                    <span class="badge" style="background: #eff6ff; color: #2563eb; font-size: 10.5px; padding: 2px 6px;">
+                      <i class="bi bi-google"></i> Google
+                    </span>
+                  {% else %}
+                    <span class="badge" style="background: #f1f5f9; color: #64748b; font-size: 10.5px; padding: 2px 6px;">
+                      <i class="bi bi-key-fill"></i> Local
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- Column 2: Role Management -->
+          <td style="padding: 14px 14px;">
+            <div id="role-badge-container-{{ u.id }}">
+              {% if u.role == 'Admin' %}
+                <span class="badge" style="background: #fef3c7; color: #92400e; font-weight: 700; font-size: 12px; padding: 5px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 5px;">
+                  <i class="bi bi-shield-lock-fill"></i> ADMIN
+                </span>
+              {% else %}
+                <span class="badge" style="background: #d1fae5; color: #065f46; font-weight: 700; font-size: 12px; padding: 5px 10px; border-radius: 12px; display: inline-flex; align-items: center; gap: 5px;">
+                  <i class="bi bi-person-fill"></i> MEMBER
+                </span>
+              {% endif %}
+            </div>
+          </td>
+
+          <!-- Column 3: Email & Mobile Contact -->
+          <td style="padding: 14px 14px; font-size: 13px;">
+            <div style="color: #334155; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <i class="bi bi-envelope-fill" style="color: #0284c7;"></i>
+              <span>{{ u.email or 'No email set' }}</span>
+              {% if u.email_verified %}
+                <i class="bi bi-check-circle-fill" style="color: #10b981; font-size: 12px;" title="Email Verified"></i>
+              {% endif %}
+            </div>
+            <div style="color: #64748b; display: flex; align-items: center; gap: 6px; font-size: 12px;">
+              <i class="bi bi-telephone-fill" style="color: #10b981;"></i>
+              <span>{{ u.mobile_no or '+91 9368039108' }}</span>
+              {% if u.mobile_verified %}
+                <i class="bi bi-check-circle-fill" style="color: #10b981; font-size: 11px;" title="Mobile Verified"></i>
+              {% endif %}
+            </div>
+          </td>
+
+          <!-- Column 4: Account Status (Active, Suspended, Banned) -->
+          <td style="padding: 14px 14px;">
+            <div id="status-badge-container-{{ u.id }}">
+              {% if u.status == 'Active' %}
+                <span class="badge badge-success" style="font-size: 12px; padding: 5px 10px;">
+                  <i class="bi bi-check-circle-fill"></i> Active
+                </span>
+              {% elif u.status == 'Suspended' %}
+                <span class="badge badge-warning" style="font-size: 12px; padding: 5px 10px;" title="{{ u.status_reason }}">
+                  <i class="bi bi-pause-circle-fill"></i> Suspended
+                </span>
+                {% if u.status_reason %}
+                  <div style="font-size: 11px; color: #b45309; margin-top: 4px; max-width: 160px; line-height: 1.3;">{{ u.status_reason }}</div>
+                {% endif %}
+              {% elif u.status == 'Banned' %}
+                <span class="badge badge-danger" style="font-size: 12px; padding: 5px 10px;" title="{{ u.status_reason }}">
+                  <i class="bi bi-slash-circle-fill"></i> Banned
+                </span>
+                {% if u.status_reason %}
+                  <div style="font-size: 11px; color: #dc2626; margin-top: 4px; max-width: 160px; line-height: 1.3;">{{ u.status_reason }}</div>
+                {% endif %}
+              {% endif %}
+            </div>
+          </td>
+
+          <!-- Column 5: Actions (Role, Suspend, Ban, Delete) -->
+          <td style="padding: 14px 18px; text-align: right;">
+            {% if u.id == session.user.id %}
+              <span class="badge" style="background: #f1f5f9; color: #94a3b8; font-size: 11.5px; padding: 6px 12px;">
+                <i class="bi bi-shield-check"></i> Self (Protected)
+              </span>
+            {% else %}
+              <div style="display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+                
+                <!-- Role Toggle Button -->
+                {% if u.role == 'Admin' %}
+                  <button type="button" class="btn btn-outline btn-sm" onclick="handleRoleChange({{ u.id }}, 'Member', '{{ u.username }}')" title="Demote to Member" style="font-size: 11.5px; padding: 4px 8px;">
+                    <i class="bi bi-arrow-down-circle"></i> Make Member
+                  </button>
+                {% else %}
+                  <button type="button" class="btn btn-outline btn-sm" onclick="handleRoleChange({{ u.id }}, 'Admin', '{{ u.username }}')" title="Promote to Admin" style="font-size: 11.5px; padding: 4px 8px; color: #b45309; border-color: #fde68a;">
+                    <i class="bi bi-arrow-up-circle"></i> Make Admin
+                  </button>
+                {% endif %}
+
+                <!-- Suspend / Reactivate Button -->
+                {% if u.status == 'Suspended' %}
+                  <button type="button" class="btn btn-success btn-sm" onclick="handleStatusChange({{ u.id }}, 'Active', '', '{{ u.username }}')" title="Reactivate Account" style="font-size: 11.5px; padding: 4px 8px;">
+                    <i class="bi bi-play-circle-fill"></i> Reactivate
+                  </button>
+                {% else %}
+                  <button type="button" class="btn btn-warning btn-sm" onclick="openSuspendModal({{ u.id }}, '{{ u.username }}')" title="Suspend Account" style="font-size: 11.5px; padding: 4px 8px; color: #92400e;">
+                    <i class="bi bi-pause-circle-fill"></i> Suspend
+                  </button>
+                {% endif %}
+
+                <!-- Ban / Unban Button -->
+                {% if u.status == 'Banned' %}
+                  <button type="button" class="btn btn-outline btn-sm" onclick="handleStatusChange({{ u.id }}, 'Active', '', '{{ u.username }}')" title="Lift Ban" style="font-size: 11.5px; padding: 4px 8px; color: #059669; border-color: #a7f3d0;">
+                    <i class="bi bi-shield-check"></i> Unban
+                  </button>
+                {% else %}
+                  <button type="button" class="btn btn-outline btn-sm" onclick="openBanModal({{ u.id }}, '{{ u.username }}')" title="Ban Account Permanently" style="font-size: 11.5px; padding: 4px 8px; color: #dc2626; border-color: #fca5a5;">
+                    <i class="bi bi-slash-circle-fill"></i> Ban
+                  </button>
+                {% endif %}
+
+                <!-- Delete Button -->
+                <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal({{ u.id }}, '{{ u.username }}')" title="Permanently Delete Account" style="font-size: 11.5px; padding: 4px 8px;">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+
+              </div>
+            {% endif %}
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ====================================================================
+     4. MODAL: ADD NEW MEMBER
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-add-member" style="display: none;">
+  <div class="modal-dialog" style="max-width: 520px;">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="bi bi-person-plus-fill" style="color: var(--color-primary);"></i> Register New Member</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-add-member')">&times;</button>
+    </div>
+    <form method="POST" action="{{ url_for('admin_member_create') }}" id="addMemberForm">
+      <div class="modal-body" style="padding: 20px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label" for="new_username">User ID / Username *</label>
+            <input type="text" id="new_username" name="username" class="form-control" placeholder="e.g. rahul" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new_password">Password *</label>
+            <input type="password" id="new_password" name="password" class="form-control" placeholder="Initial password" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new_full_name">Full Name *</label>
+          <input type="text" id="new_full_name" name="full_name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new_email">Email Address</label>
+          <input type="email" id="new_email" name="email" class="form-control" placeholder="e.g. rahul@amrapali.ac.in">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label" for="new_mobile_no">Mobile Number</label>
+            <input type="tel" id="new_mobile_no" name="mobile_no" class="form-control" placeholder="+91 9876543210" value="+91 9368039108">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new_age">Age</label>
+            <input type="number" id="new_age" name="age" class="form-control" value="21" min="16" max="99">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="new_role">System Role *</label>
+          <select id="new_role" name="role" class="form-control" required>
+            <option value="Member" selected>Member (Operational Quality Access)</option>
+            <option value="Admin">Admin (Full System &amp; Audit Authority)</option>
+          </select>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="background: #f8fafc;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-member')">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> Create Member Account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ====================================================================
+     5. MODAL: SUSPEND ACCOUNT
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-suspend" style="display: none;">
+  <div class="modal-dialog" style="max-width: 460px;">
+    <div class="modal-header" style="border-bottom-color: #fde68a;">
+      <h3 class="modal-title" style="color: #92400e;">
+        <i class="bi bi-pause-circle-fill"></i> Suspend User Account
+      </h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-suspend')">&times;</button>
+    </div>
+    <div class="modal-body" style="padding: 20px;">
+      <p style="font-size: 13.5px; color: #334155; margin-top: 0;">
+        You are about to temporarily suspend account <strong id="suspendUsernameText">@user</strong>. 
+        A suspended user will be immediately blocked from logging in.
+      </p>
+      <div class="form-group">
+        <label class="form-label" for="suspendReasonInput">Reason for Suspension (Optional)</label>
+        <input type="text" id="suspendReasonInput" class="form-control" placeholder="e.g. Academic audit review, unusual activity">
+      </div>
+    </div>
+    <div class="modal-footer" style="background: #f8fafc;">
+      <input type="hidden" id="suspendTargetUserId">
+      <button type="button" class="btn btn-outline" onclick="closeModal('modal-suspend')">Cancel</button>
+      <button type="button" class="btn btn-warning" onclick="confirmSuspendAction()" style="color: #92400e;">
+        <i class="bi bi-pause-circle-fill"></i> Confirm Suspension
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     6. MODAL: BAN ACCOUNT
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-ban" style="display: none;">
+  <div class="modal-dialog" style="max-width: 460px;">
+    <div class="modal-header" style="border-bottom-color: #fca5a5;">
+      <h3 class="modal-title" style="color: #dc2626;">
+        <i class="bi bi-slash-circle-fill"></i> Permanently Ban User Account
+      </h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-ban')">&times;</button>
+    </div>
+    <div class="modal-body" style="padding: 20px;">
+      <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+        <p style="margin: 0; font-size: 13px; color: #991b1b; line-height: 1.45;">
+          <i class="bi bi-shield-exclamation"></i> <strong>Critical Policy Action:</strong> Banning <strong id="banUsernameText">@user</strong> will permanently lock this account. The user cannot access any portal features.
+        </p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="banReasonInput">Reason for Ban</label>
+        <input type="text" id="banReasonInput" class="form-control" placeholder="e.g. Severe violation, unauthorized tamper attempt">
+      </div>
+    </div>
+    <div class="modal-footer" style="background: #f8fafc;">
+      <input type="hidden" id="banTargetUserId">
+      <button type="button" class="btn btn-outline" onclick="closeModal('modal-ban')">Cancel</button>
+      <button type="button" class="btn btn-danger" onclick="confirmBanAction()">
+        <i class="bi bi-slash-circle-fill"></i> Permanently Ban
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     7. MODAL: DELETE ACCOUNT CONFIRMATION
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-delete" style="display: none;">
+  <div class="modal-dialog" style="max-width: 460px;">
+    <div class="modal-header" style="border-bottom-color: #fca5a5;">
+      <h3 class="modal-title" style="color: #dc2626;">
+        <i class="bi bi-trash-fill"></i> Delete User Account
+      </h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-delete')">&times;</button>
+    </div>
+    <div class="modal-body" style="padding: 20px;">
+      <p style="font-size: 14px; color: #334155; margin-top: 0; line-height: 1.5;">
+        Are you strictly sure you want to permanently delete <strong id="deleteUsernameText">@user</strong> from the system?
+      </p>
+      <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12.5px; color: #9f1239;">
+        <i class="bi bi-exclamation-triangle-fill"></i> <strong>Warning:</strong> This account and all its user credentials will be permanently erased. This operation cannot be undone.
+      </div>
+    </div>
+    <div class="modal-footer" style="background: #f8fafc;">
+      <input type="hidden" id="deleteTargetUserId">
+      <button type="button" class="btn btn-outline" onclick="closeModal('modal-delete')">Cancel</button>
+      <button type="button" class="btn btn-danger" onclick="confirmDeleteAction()">
+        <i class="bi bi-trash-fill"></i> Delete Account Permanently
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     8. CLIENT-SIDE CONTROLLERS (0-Reload AJAX & Search Filtering)
+     ==================================================================== -->
+<script>
+  // 1. Live Search & Role/Status Filters
+  function filterMembersTable() {
+    const q = (document.getElementById('memberSearchInput').value || '').toLowerCase().trim();
+    const roleFilter = document.getElementById('roleFilterSelect').value;
+    const statusFilter = document.getElementById('statusFilterSelect').value;
+
+    const rows = document.querySelectorAll('.member-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const searchData = (row.getAttribute('data-search') || '').toLowerCase();
+      const role = row.getAttribute('data-role');
+      const status = row.getAttribute('data-status');
+
+      const matchesSearch = !q || searchData.includes(q);
+      const matchesRole = (roleFilter === 'ALL') || (role === roleFilter);
+      const matchesStatus = (statusFilter === 'ALL') || (status === statusFilter);
+
+      if (matchesSearch && matchesRole && matchesStatus) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    const badge = document.getElementById('visibleCountBadge');
+    if (badge) {
+      badge.textContent = `Showing ${visibleCount} of ${rows.length}`;
+    }
+  }
+
+  // 2. Modals Control
+  function openAddMemberModal() {
+    document.getElementById('modal-add-member').style.display = 'flex';
+  }
+
+  function openSuspendModal(userId, username) {
+    document.getElementById('suspendTargetUserId').value = userId;
+    document.getElementById('suspendUsernameText').textContent = `@${username}`;
+    document.getElementById('suspendReasonInput').value = '';
+    document.getElementById('modal-suspend').style.display = 'flex';
+  }
+
+  function openBanModal(userId, username) {
+    document.getElementById('banTargetUserId').value = userId;
+    document.getElementById('banUsernameText').textContent = `@${username}`;
+    document.getElementById('banReasonInput').value = '';
+    document.getElementById('modal-ban').style.display = 'flex';
+  }
+
+  function openDeleteModal(userId, username) {
+    document.getElementById('deleteTargetUserId').value = userId;
+    document.getElementById('deleteUsernameText').textContent = `@${username}`;
+    document.getElementById('modal-delete').style.display = 'flex';
+  }
+
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.style.display = 'none';
+  }
+
+  // 3. Role Change Action (Admin <-> Member)
+  async function handleRoleChange(userId, newRole, username) {
+    if (!confirm(`Are you sure you want to change @${username}'s role to '${newRole}'?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/admin/members/role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, role: newRole })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.error || 'Failed to update user role.');
+      }
+    } catch (err) {
+      alert('Network error modifying user role.');
+    }
+  }
+
+  // 4. Status Change Action (Active / Suspended / Banned)
+  async function handleStatusChange(userId, newStatus, reason, username) {
+    try {
+      const response = await fetch('/admin/members/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, status: newStatus, reason: reason })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.error || 'Failed to update account status.');
+      }
+    } catch (err) {
+      alert('Network error updating account status.');
+    }
+  }
+
+  function confirmSuspendAction() {
+    const userId = document.getElementById('suspendTargetUserId').value;
+    const reason = document.getElementById('suspendReasonInput').value;
+    closeModal('modal-suspend');
+    handleStatusChange(userId, 'Suspended', reason, 'user');
+  }
+
+  function confirmBanAction() {
+    const userId = document.getElementById('banTargetUserId').value;
+    const reason = document.getElementById('banReasonInput').value;
+    closeModal('modal-ban');
+    handleStatusChange(userId, 'Banned', reason, 'user');
+  }
+
+  // 5. Delete Action
+  async function confirmDeleteAction() {
+    const userId = document.getElementById('deleteTargetUserId').value;
+    closeModal('modal-delete');
+
+    try {
+      const response = await fetch('/admin/members/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.error || 'Failed to delete user account.');
+      }
+    } catch (err) {
+      alert('Network error deleting user account.');
+    }
+  }
+</script>
+{% endblock %}
