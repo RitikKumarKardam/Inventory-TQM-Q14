@@ -130,11 +130,11 @@
       <table class="table-amrapali" id="membersTable" style="width: 100%; border-collapse: collapse; margin: 0;">
         <thead>
           <tr style="background: #f8fafc;">
-            <th style="padding: 14px 18px; width: 28%;">User Identity</th>
-            <th style="padding: 14px 14px; width: 12%;">Role</th>
-            <th style="padding: 14px 14px; width: 25%;">Email &amp; Mobile</th>
-            <th style="padding: 14px 14px; width: 13%;">Status</th>
-            <th style="padding: 14px 18px; text-align: right; width: 22%;">Admin Actions</th>
+            <th style="padding: 14px 18px; width: 25%;">User Identity</th>
+            <th style="padding: 14px 14px; width: 10%;">Role</th>
+            <th style="padding: 14px 14px; width: 24%;">Email &amp; Mobile</th>
+            <th style="padding: 14px 14px; width: 11%;">Status</th>
+            <th style="padding: 14px 18px; text-align: right; width: 30%;">Actions</th>
           </tr>
         </thead>
       <tbody>
@@ -240,49 +240,49 @@
           </td>
 
           <!-- Column 5: Actions (Role, Suspend, Ban, Delete) -->
-          <td style="padding: 14px 18px; text-align: right;">
+          <td style="padding: 14px 18px; text-align: right; white-space: nowrap;">
             {% if u.id == session.user.id %}
               <span class="badge" style="background: #f1f5f9; color: #94a3b8; font-size: 11.5px; padding: 6px 12px;">
                 <i class="bi bi-shield-check"></i> Self (Protected)
               </span>
             {% else %}
-              <div style="display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+              <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end; flex-wrap: nowrap; white-space: nowrap;">
                 
                 <!-- Role Toggle Button -->
                 {% if u.role == 'Admin' %}
-                  <button type="button" class="btn btn-outline btn-sm" onclick="handleRoleChange({{ u.id }}, 'Member', '{{ u.username }}')" title="Demote to Member" style="font-size: 11.5px; padding: 4px 8px;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="handleRoleChange({{ u.id }}, 'Member', '{{ u.username }}')" title="Demote to Member" style="font-size: 11.5px; padding: 4px 8px; white-space: nowrap;">
                     <i class="bi bi-arrow-down-circle"></i> Make Member
                   </button>
                 {% else %}
-                  <button type="button" class="btn btn-outline btn-sm" onclick="handleRoleChange({{ u.id }}, 'Admin', '{{ u.username }}')" title="Promote to Admin" style="font-size: 11.5px; padding: 4px 8px; color: #b45309; border-color: #fde68a;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="handleRoleChange({{ u.id }}, 'Admin', '{{ u.username }}')" title="Promote to Admin" style="font-size: 11.5px; padding: 4px 8px; color: #b45309; border-color: #fde68a; white-space: nowrap;">
                     <i class="bi bi-arrow-up-circle"></i> Make Admin
                   </button>
                 {% endif %}
 
                 <!-- Suspend / Reactivate Button -->
                 {% if u.status == 'Suspended' %}
-                  <button type="button" class="btn btn-success btn-sm" onclick="handleStatusChange({{ u.id }}, 'Active', '', '{{ u.username }}')" title="Reactivate Account" style="font-size: 11.5px; padding: 4px 8px;">
+                  <button type="button" class="btn btn-success btn-sm" onclick="handleStatusChange({{ u.id }}, 'Active', '', '{{ u.username }}')" title="Reactivate Account" style="font-size: 11.5px; padding: 4px 8px; white-space: nowrap;">
                     <i class="bi bi-play-circle-fill"></i> Reactivate
                   </button>
                 {% else %}
-                  <button type="button" class="btn btn-warning btn-sm" onclick="openSuspendModal({{ u.id }}, '{{ u.username }}')" title="Suspend Account" style="font-size: 11.5px; padding: 4px 8px; color: #92400e;">
+                  <button type="button" class="btn btn-warning btn-sm" onclick="openSuspendModal({{ u.id }}, '{{ u.username }}')" title="Suspend Account" style="font-size: 11.5px; padding: 4px 8px; color: #92400e; white-space: nowrap;">
                     <i class="bi bi-pause-circle-fill"></i> Suspend
                   </button>
                 {% endif %}
 
                 <!-- Ban / Unban Button -->
                 {% if u.status == 'Banned' %}
-                  <button type="button" class="btn btn-outline btn-sm" onclick="handleStatusChange({{ u.id }}, 'Active', '', '{{ u.username }}')" title="Lift Ban" style="font-size: 11.5px; padding: 4px 8px; color: #059669; border-color: #a7f3d0;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="handleStatusChange({{ u.id }}, 'Active', '', '{{ u.username }}')" title="Lift Ban" style="font-size: 11.5px; padding: 4px 8px; color: #059669; border-color: #a7f3d0; white-space: nowrap;">
                     <i class="bi bi-shield-check"></i> Unban
                   </button>
                 {% else %}
-                  <button type="button" class="btn btn-outline btn-sm" onclick="openBanModal({{ u.id }}, '{{ u.username }}')" title="Ban Account Permanently" style="font-size: 11.5px; padding: 4px 8px; color: #dc2626; border-color: #fca5a5;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="openBanModal({{ u.id }}, '{{ u.username }}')" title="Ban Account Permanently" style="font-size: 11.5px; padding: 4px 8px; color: #dc2626; border-color: #fca5a5; white-space: nowrap;">
                     <i class="bi bi-slash-circle-fill"></i> Ban
                   </button>
                 {% endif %}
 
-                <!-- Delete Button -->
-                <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal({{ u.id }}, '{{ u.username }}')" title="Permanently Delete Account" style="font-size: 11.5px; padding: 4px 8px;">
+                <!-- Delete Button (Aligned in the same line) -->
+                <button type="button" class="btn btn-danger btn-sm" onclick="openDeleteModal({{ u.id }}, '{{ u.username }}')" title="Permanently Delete Account" style="font-size: 11.5px; padding: 4px 8px; white-space: nowrap;">
                   <i class="bi bi-trash-fill"></i>
                 </button>
 
