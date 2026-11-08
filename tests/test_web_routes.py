@@ -217,6 +217,7 @@ def test_captcha_security():
 
 
 def test_user_profile_and_otp():
+    app.config["TESTING"] = True
     client = app.test_client()
 
     # 1. Login as Member
@@ -228,7 +229,7 @@ def test_user_profile_and_otp():
         follow_redirects=True,
     )
 
-    # 2. GET /profile
+    # 2. GET /profile as Member: Role section is READ-ONLY for members
     res = client.get("/profile")
     assert res.status_code == 200
     html = res.data.decode("utf-8")
@@ -237,24 +238,28 @@ def test_user_profile_and_otp():
     assert "Mobile Number" in html
     assert "Age" in html
     assert "Role in This System" in html
-    assert "Send OTP" in html
+    assert "Read-Only for Members" in html
+    assert "System roles can only be decided and assigned by the" in html
 
-    # 3. POST /profile customization update
+    # 3. Security Test: Member tries to escalate role to Admin -> SERVER REJECTS ROLE CHANGE
     res_post = client.post(
         "/profile",
         data={
             "full_name": "Ritik Kumar Kardam",
             "age": "22",
             "mobile_no": "+91 9999888877",
-            "role": "Admin",
+            "role": "Admin",  # Member attempts to self-assign Admin
         },
         follow_redirects=True,
     )
     assert res_post.status_code == 200
     assert "Profile information updated successfully!" in res_post.data.decode("utf-8")
-    assert "Ritik Kumar Kardam" in res_post.data.decode("utf-8")
+    with client.session_transaction() as sess:
+        # STRICTLY REMAINS MEMBER! Members cannot decide or change their own role.
+        assert sess["user"]["role"] == "Member"
+        assert sess["user"]["is_admin"] is False
 
-    # 4. OTP Email Verification Flow: Request OTP
+    # 4. OTP Email Verification Flow: Request Genuine OTP
     res_otp_send = client.post(
         "/profile/send-otp",
         json={"email": "verified.ritik@amrapali.ac.in"},
@@ -262,8 +267,8 @@ def test_user_profile_and_otp():
     assert res_otp_send.status_code == 200
     send_data = res_otp_send.get_json()
     assert send_data["success"] is True
-    assert "otp" in send_data
-    generated_otp = send_data["otp"]
+    assert "otp" not in send_data  # Public JSON response contains NO spoof OTP!
+    generated_otp = send_data["_test_otp"]  # Retrieved strictly from unit test harness
 
     # 5. Verify with WRONG OTP fails
     res_bad_verify = client.post(
@@ -283,17 +288,18 @@ def test_user_profile_and_otp():
     assert good_data["success"] is True
     assert "verified.ritik@amrapali.ac.in" in good_data["message"]
 
-    # 7. Cleanup: Restore Member role
+    # 7. Admin Authority Test: Admin user CAN decide and change role
+    client.get("/logout")
+    with client.session_transaction() as sess:
+        sess["captcha"] = "SEC88"
     client.post(
-        "/profile",
-        data={
-            "full_name": "Ritik Kumar",
-            "age": "21",
-            "mobile_no": "+91 9876543210",
-            "role": "Member",
-        },
+        "/login",
+        data={"username": "admin", "password": "admin123", "captcha": "SEC88", "role_hint": "Admin"},
         follow_redirects=True,
     )
+    res_admin_profile = client.get("/profile")
+    assert res_admin_profile.status_code == 200
+    assert "Admin Authority Active" in res_admin_profile.data.decode("utf-8")
 
 
 

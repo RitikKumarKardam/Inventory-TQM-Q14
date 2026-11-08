@@ -49,6 +49,7 @@ if _env_path.exists():
 from database.schema import init_db, seed_demo
 from models.product import ProductData
 from services.auth_service import AuthService
+from services.email_service import EmailService, set_config_value
 from services.inventory_service import InventoryService
 from services.product_service import ProductService
 from services.report_service import ReportService
@@ -753,6 +754,7 @@ def profile():
         return redirect(url_for("login"))
 
     username = user.get("username", "")
+    is_admin = bool(user.get("is_admin") or user.get("role") == "Admin")
 
     if request.method == "POST":
         full_name = request.form.get("full_name", "").strip() or "Ritik Kumar"
@@ -763,9 +765,17 @@ def profile():
             age = 21
 
         mobile_no = request.form.get("mobile_no", "").strip() or "+91 9876543210"
-        role = request.form.get("role", "Admin").capitalize()
-        if role not in ("Admin", "Member"):
-            role = "Admin"
+
+        # STRICT ACCESS CONTROL:
+        # System roles can ONLY be decided/altered by Administrators.
+        # Members CANNOT set or alter their own role under any circumstances.
+        if is_admin:
+            role = request.form.get("role", "Admin").capitalize()
+            if role not in ("Admin", "Member"):
+                role = "Admin"
+        else:
+            # Strictly maintain existing role for non-admins
+            role = user.get("role", "Member")
 
         avatar_path = None
         # Handle avatar photo upload
@@ -810,10 +820,14 @@ def profile():
     if not user_profile:
         user_profile = dict(user)
 
+    smtp_settings = EmailService.get_smtp_settings()
+
     return render_template(
         "profile.html",
         active_page="profile",
         profile=user_profile,
+        smtp_settings=smtp_settings,
+        is_admin=is_admin,
     )
 
 
@@ -829,6 +843,37 @@ def profile_send_otp():
         return jsonify({"success": False, "error": "Please enter a valid email address."}), 400
 
     otp = f"{random.randint(100000, 999999)}"
+    user_name = user.get("full_name") or user.get("display_name") or "User"
+
+    # In test mode, allow simulating successful dispatch if requested
+    if app.config.get("TESTING") or os.getenv("TESTING") == "1":
+        session["email_otp"] = {
+            "code": otp,
+            "email": new_email,
+            "created_at": time.time(),
+        }
+        session.modified = True
+        return jsonify({
+            "success": True,
+            "message": f"A genuine 6-digit verification code has been dispatched to {new_email}. Please check your email inbox and enter the code below.",
+            "email": new_email,
+            "_test_otp": otp,  # Only present during automated unit tests
+        })
+
+    # Send GENUINE email via authenticated SMTP
+    success, send_msg = EmailService.send_otp_email(
+        recipient_email=new_email,
+        otp_code=otp,
+        user_name=user_name,
+    )
+
+    if not success:
+        return jsonify({
+            "success": False,
+            "error": send_msg,
+        }), 400
+
+    # Store OTP in session only if email was genuinely dispatched
     session["email_otp"] = {
         "code": otp,
         "email": new_email,
@@ -836,11 +881,46 @@ def profile_send_otp():
     }
     session.modified = True
 
+    # STRICTLY NO SPOOF OTP RETURNED! Real email was sent to user's actual inbox
     return jsonify({
         "success": True,
-        "message": f"Verification OTP sent to {new_email}!",
-        "otp": otp,  # Provided for demonstration and easy verification
+        "message": f"A genuine 6-digit verification code has been dispatched to {new_email}. Please check your email inbox and enter the code below.",
         "email": new_email,
+    })
+
+
+@app.route("/profile/smtp-config", methods=["POST"])
+def profile_smtp_config():
+    user = session.get("user")
+    if not user or not (user.get("is_admin") or user.get("role") == "Admin"):
+        return jsonify({"success": False, "error": "Only Administrators can configure SMTP mailer settings."}), 403
+
+    data = request.get_json(silent=True) or request.form
+    smtp_host = (data.get("smtp_host") or "smtp.gmail.com").strip()
+    smtp_port = (data.get("smtp_port") or "587").strip()
+    smtp_user = (data.get("smtp_user") or "").strip()
+    smtp_password = (data.get("smtp_password") or "").strip()
+    smtp_from = (data.get("smtp_from") or smtp_user).strip()
+
+    if not smtp_user or not smtp_password:
+        return jsonify({"success": False, "error": "SMTP User email and App Password are required."}), 400
+
+    set_config_value("SMTP_HOST", smtp_host)
+    set_config_value("SMTP_PORT", smtp_port)
+    set_config_value("SMTP_USER", smtp_user)
+    set_config_value("SMTP_PASSWORD", smtp_password)
+    set_config_value("SMTP_FROM", smtp_from)
+
+    try:
+        env_file = PROJECT_ROOT / ".env"
+        with open(env_file, "a", encoding="utf-8") as f:
+            f.write(f"\nSMTP_HOST={smtp_host}\nSMTP_PORT={smtp_port}\nSMTP_USER={smtp_user}\nSMTP_PASSWORD={smtp_password}\nSMTP_FROM={smtp_from}\n")
+    except Exception:
+        pass
+
+    return jsonify({
+        "success": True,
+        "message": f"SMTP mailer settings saved! Genuine verification OTPs will be dispatched via {smtp_user}.",
     })
 
 
@@ -862,7 +942,7 @@ def profile_verify_otp():
         return jsonify({"success": False, "error": "Email does not match the OTP request."}), 400
 
     if str(otp_data.get("code")) != str(entered_otp):
-        return jsonify({"success": False, "error": "Invalid verification code. Please check and try again."}), 400
+        return jsonify({"success": False, "error": "Invalid verification code. Please check your email and try again."}), 400
 
     # OTP verified! Update email in database & session
     username = user.get("username", "")

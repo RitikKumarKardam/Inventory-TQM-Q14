@@ -11,7 +11,7 @@
 <div class="page-header">
   <div class="page-title-group">
     <h2><i class="bi bi-person-bounding-box" style="color: var(--color-primary);"></i> User Profile &amp; Account Customization</h2>
-    <p>Manage your account profile: customize Full Name, Age, Profile Picture, Email Address (via OTP verification), Mobile Number, and Role permissions.</p>
+    <p>Manage your account profile: customize Full Name, Age, Profile Picture, verified Email Address (via genuine OTP verification), Mobile Number, and view system role privileges.</p>
   </div>
   <div class="page-actions">
     <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
@@ -47,7 +47,7 @@
         <div>
           <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px;">
             <h3 style="margin: 0; font-size: 24px; font-weight: 700; color: #ffffff;">{{ profile.full_name or 'Ritik Kumar' }}</h3>
-            {% if profile.role == 'Admin' %}
+            {% if profile.role == 'Admin' or profile.is_admin %}
               <span class="badge" style="background: #fef3c7; color: #92400e; font-weight: 700; font-size: 12px; padding: 4px 10px; border-radius: 12px;">
                 <i class="bi bi-shield-lock-fill"></i> ADMIN
               </span>
@@ -80,7 +80,7 @@
        ==================================================================== -->
   <div class="card">
     <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
-      <h3 class="card-title"><i class="bi bi-sliders" style="color: var(--color-primary);"></i> Edit Personal Details &amp; Role</h3>
+      <h3 class="card-title"><i class="bi bi-sliders" style="color: var(--color-primary);"></i> Edit Personal Details</h3>
       <span class="badge badge-info">Instant Update</span>
     </div>
     <div class="card-body" style="padding: 24px;">
@@ -131,44 +131,78 @@
             <div style="flex: 1;">
               <input type="file" id="avatarInput" name="avatar" class="form-control" accept="image/png, image/jpeg, image/jpg, image/webp, image/gif" style="font-size: 13px; padding: 8px;">
               <small style="color: var(--color-text-muted); font-size: 11.5px; display: block; margin-top: 4px;">
-                Accepts JPG, PNG, WEBP, or GIF. Live preview updates immediately.
+                Upload a JPG, PNG, WEBP, or GIF photo to personalize your account.
               </small>
             </div>
           </div>
         </div>
 
-        <!-- Role in this System -->
-        <div class="form-group" style="margin-top: 20px;">
-          <label class="form-label" style="margin-bottom: 10px;">
-            <i class="bi bi-shield-shaded" style="color: var(--color-primary);"></i> Role in This System
-          </label>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-            <!-- Admin Role Option -->
-            <label style="border: 2px solid {% if profile.role == 'Admin' %}#0284c7{% else %}#e2e8f0{% endif %}; border-radius: var(--radius-md); padding: 14px; cursor: pointer; background: {% if profile.role == 'Admin' %}#f0f9ff{% else %}#ffffff{% endif %}; display: block; position: relative;" id="roleAdminCard">
-              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-                <input type="radio" name="role" value="Admin" id="roleAdmin" {% if profile.role == 'Admin' %}checked{% endif %} onchange="updateRoleCardSelection()" style="accent-color: #0284c7; width: 18px; height: 18px;">
-                <strong style="color: #0f172a; font-size: 15px;">Admin</strong>
-                <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 11px;">FULL ACCESS</span>
-              </div>
-              <p style="margin: 0; font-size: 12px; color: var(--color-text-muted); line-height: 1.4;">
-                Full control: create, edit, delete products &amp; suppliers, manual stock adjustments, view audit trails.
-              </p>
-            </label>
+        <!-- Role in this System (ADMIN ONLY CAN DECIDE, MEMBER IS STRICTLY LOCKED) -->
+        {% if is_admin or profile.role == 'Admin' %}
+          <div class="form-group" style="margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label class="form-label" style="margin: 0;">
+                <i class="bi bi-shield-shaded" style="color: var(--color-primary);"></i> Role in This System
+              </label>
+              <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 11px; padding: 3px 8px;">
+                <i class="bi bi-shield-check"></i> Admin Authority Active
+              </span>
+            </div>
+            <small style="color: var(--color-text-muted); font-size: 12px; display: block; margin-bottom: 12px;">
+              As an Administrator, you have authority to decide and assign system roles.
+            </small>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <!-- Admin Option -->
+              <label style="border: 2px solid {% if profile.role == 'Admin' %}#0284c7{% else %}#e2e8f0{% endif %}; border-radius: var(--radius-md); padding: 14px; cursor: pointer; background: {% if profile.role == 'Admin' %}#f0f9ff{% else %}#ffffff{% endif %}; display: block; position: relative;" id="roleAdminCard">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                  <input type="radio" name="role" value="Admin" id="roleAdmin" {% if profile.role == 'Admin' %}checked{% endif %} onchange="updateRoleCardSelection()" style="accent-color: #0284c7; width: 18px; height: 18px;">
+                  <strong style="color: #0f172a; font-size: 15px;">Admin</strong>
+                  <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 11px;">FULL ACCESS</span>
+                </div>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-muted); line-height: 1.4;">
+                  Full control: add, edit, delete products &amp; suppliers, stock adjustments, audit trails.
+                </p>
+              </label>
 
-            <!-- Member Role Option -->
-            <label style="border: 2px solid {% if profile.role == 'Member' %}#0284c7{% else %}#e2e8f0{% endif %}; border-radius: var(--radius-md); padding: 14px; cursor: pointer; background: {% if profile.role == 'Member' %}#f0f9ff{% else %}#ffffff{% endif %}; display: block; position: relative;" id="roleMemberCard">
-              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-                <input type="radio" name="role" value="Member" id="roleMember" {% if profile.role == 'Member' %}checked{% endif %} onchange="updateRoleCardSelection()" style="accent-color: #0284c7; width: 18px; height: 18px;">
-                <strong style="color: #0f172a; font-size: 15px;">Member</strong>
-                <span class="badge" style="background: #d1fae5; color: #065f46; font-size: 11px;">OPERATIONAL</span>
-              </div>
-              <p style="margin: 0; font-size: 12px; color: var(--color-text-muted); line-height: 1.4;">
-                Operational access: view inventory, record standard stock transactions, use TQM calculators and inspections.
-              </p>
-            </label>
+              <!-- Member Option -->
+              <label style="border: 2px solid {% if profile.role == 'Member' %}#0284c7{% else %}#e2e8f0{% endif %}; border-radius: var(--radius-md); padding: 14px; cursor: pointer; background: {% if profile.role == 'Member' %}#f0f9ff{% else %}#ffffff{% endif %}; display: block; position: relative;" id="roleMemberCard">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                  <input type="radio" name="role" value="Member" id="roleMember" {% if profile.role == 'Member' %}checked{% endif %} onchange="updateRoleCardSelection()" style="accent-color: #0284c7; width: 18px; height: 18px;">
+                  <strong style="color: #0f172a; font-size: 15px;">Member</strong>
+                  <span class="badge" style="background: #d1fae5; color: #065f46; font-size: 11px;">OPERATIONAL</span>
+                </div>
+                <p style="margin: 0; font-size: 12px; color: var(--color-text-muted); line-height: 1.4;">
+                  Operational access: view inventory, record stock movements, run TQM tools.
+                </p>
+              </label>
+            </div>
           </div>
-        </div>
+        {% else %}
+          <!-- MEMBER VIEW: STRICTLY READ-ONLY & LOCKED -->
+          <div class="form-group" style="margin-top: 20px;">
+            <label class="form-label" style="margin-bottom: 8px;">
+              <i class="bi bi-shield-lock" style="color: var(--color-primary);"></i> Role in This System
+            </label>
+            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: var(--radius-md); padding: 16px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge" style="background: #d1fae5; color: #065f46; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 12px;">
+                    <i class="bi bi-person-fill"></i> MEMBER
+                  </span>
+                  <strong style="font-size: 14px; color: #1e293b;">Operational Access Level</strong>
+                </div>
+                <span class="badge" style="background: #fee2e2; color: #991b1b; font-size: 11px; padding: 4px 8px;">
+                  <i class="bi bi-lock-fill"></i> Read-Only for Members
+                </span>
+              </div>
+              <p style="margin: 0; font-size: 12.5px; color: #64748b; line-height: 1.45;">
+                <i class="bi bi-shield-exclamation" style="color: #ef4444;"></i>
+                <strong>Access Control Policy:</strong> System roles can only be decided and assigned by the <strong>Administrator</strong>. Members cannot modify or elevate their own role in this system.
+              </p>
+            </div>
+          </div>
+        {% endif %}
 
         <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--color-border); display: flex; gap: 12px;">
           <button type="submit" class="btn btn-primary" style="flex: 1; padding: 12px 20px; font-size: 15px; font-weight: 600;">
@@ -183,14 +217,14 @@
   </div>
 
   <!-- ====================================================================
-       RIGHT COLUMN: EMAIL CUSTOMIZATION & OTP VERIFICATION WORKFLOW
+       RIGHT COLUMN: EMAIL CUSTOMIZATION & GENUINE OTP VERIFICATION
        ==================================================================== -->
   <div>
-    <!-- Email & OTP Card -->
+    <!-- Email & Genuine OTP Card -->
     <div class="card" style="margin-bottom: 24px;">
       <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
-        <h3 class="card-title"><i class="bi bi-shield-check" style="color: var(--color-success);"></i> Email Address &amp; OTP Verification</h3>
-        <span class="badge badge-success"><i class="bi bi-patch-check-fill"></i> Secure OTP Flow</span>
+        <h3 class="card-title"><i class="bi bi-shield-check" style="color: var(--color-success);"></i> Email Address &amp; Genuine OTP Verification</h3>
+        <span class="badge badge-success"><i class="bi bi-patch-check-fill"></i> Live Inbox Verification</span>
       </div>
       <div class="card-body" style="padding: 24px;">
         
@@ -211,58 +245,51 @@
         </div>
 
         <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 18px;">
-          To update your email address in this system, enter your new email below and complete <strong>6-Digit One-Time Password (OTP) Verification</strong>.
+          To change your email address, enter your new email below. A <strong>genuine 6-digit OTP code</strong> will be dispatched to your actual email inbox.
         </p>
 
-        <!-- Step 1: Request OTP -->
+        <!-- Step 1: Request Genuine OTP -->
         <div class="form-group">
           <label class="form-label" for="newEmailInput">
             <i class="bi bi-envelope-plus" style="color: var(--color-primary);"></i> New Email Address
           </label>
           <div style="display: flex; gap: 10px;">
-            <input type="email" id="newEmailInput" class="form-control" placeholder="e.g. ritikkumar2520301005@gmail.com" value="{{ profile.email }}" style="font-size: 14px; padding: 10px 14px;">
+            <input type="email" id="newEmailInput" class="form-control" placeholder="e.g. your_email@amrapali.ac.in" value="{{ profile.email }}" style="font-size: 14px; padding: 10px 14px;">
             <button type="button" id="sendOtpBtn" class="btn btn-secondary" onclick="handleSendOTP()" style="white-space: nowrap; padding: 10px 18px; font-weight: 600;">
-              <i class="bi bi-send-fill"></i> Send OTP
+              <i class="bi bi-send-fill"></i> Send Genuine OTP
             </button>
           </div>
           <small style="color: var(--color-text-muted); font-size: 12px; display: block; margin-top: 4px;">
-            A 6-digit security verification code will be generated for your email.
+            Dispatches a real email with a 6-digit verification code to the target inbox.
           </small>
         </div>
 
-        <!-- OTP Simulation Notice Box (Shown after OTP requested) -->
+        <!-- Genuine OTP Dispatched Notification (No demo or spoof codes!) -->
         <div id="otpNoticeAlert" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 16px; margin: 18px 0;">
           <div style="display: flex; gap: 12px; align-items: flex-start;">
-            <i class="bi bi-info-circle-fill" style="color: #2563eb; font-size: 20px; flex-shrink: 0; margin-top: 2px;"></i>
+            <i class="bi bi-envelope-check-fill" style="color: #2563eb; font-size: 22px; flex-shrink: 0; margin-top: 2px;"></i>
             <div>
-              <strong style="color: #1e40af; font-size: 14px;" id="otpAlertTitle">OTP Code Generated</strong>
-              <p style="margin: 4px 0 8px 0; font-size: 13px; color: #1e3a8a;" id="otpAlertMessage">
-                Verification code dispatched to your email address.
+              <strong style="color: #1e40af; font-size: 14px;" id="otpAlertTitle">Genuine OTP Code Dispatched!</strong>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #1e3a8a;" id="otpAlertMessage">
+                A genuine 6-digit OTP code has been delivered to your email inbox. Please open your email, copy the code, and enter it below to confirm.
               </p>
-              <div style="background: #ffffff; border: 1px dashed #3b82f6; border-radius: var(--radius-sm); padding: 8px 14px; display: inline-flex; align-items: center; gap: 8px;">
-                <span style="font-size: 12px; color: #64748b; font-weight: 600;">DEMO OTP CODE:</span>
-                <span id="demoOtpCodeDisplay" style="font-family: var(--font-family-mono); font-size: 18px; font-weight: 800; letter-spacing: 3px; color: #0b3d91;">------</span>
-                <button type="button" class="btn btn-sm btn-outline" onclick="copyDemoOtp()" style="padding: 2px 8px; font-size: 11px;">
-                  <i class="bi bi-clipboard"></i> Auto-Fill
-                </button>
-              </div>
             </div>
           </div>
         </div>
 
-        <!-- Step 2: Enter & Verify OTP Code -->
+        <!-- Step 2: Enter & Verify Genuine OTP Code -->
         <div id="otpInputSection" style="margin-top: 16px; padding: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md);">
           <label class="form-label" for="enteredOtpCode" style="margin-bottom: 6px;">
-            <i class="bi bi-key-fill" style="color: var(--color-primary);"></i> Enter 6-Digit OTP Code
+            <i class="bi bi-key-fill" style="color: var(--color-primary);"></i> Enter 6-Digit OTP from Your Email
           </label>
           <div style="display: flex; gap: 10px;">
             <input type="text" id="enteredOtpCode" maxlength="6" class="form-control" placeholder="123456" style="font-family: var(--font-family-mono); font-size: 18px; letter-spacing: 4px; font-weight: 700; text-align: center; max-width: 200px;">
             <button type="button" id="verifyOtpBtn" class="btn btn-success" onclick="handleVerifyOTP()" style="flex: 1; padding: 10px 18px; font-weight: 600;">
-              <i class="bi bi-patch-check-fill"></i> Verify &amp; Update Email
+              <i class="bi bi-patch-check-fill"></i> Validate &amp; Update Email
             </button>
           </div>
           <small style="color: var(--color-text-muted); font-size: 11.5px; display: block; margin-top: 6px;">
-            The code expires in 10 minutes. Enter the digits received above.
+            The code expires in 10 minutes. Enter the exact 6 digits sent to your inbox.
           </small>
         </div>
 
@@ -271,45 +298,80 @@
       </div>
     </div>
 
-    <!-- Security & Quality Goal Q14 Note Card -->
-    <div class="card" style="border-left: 4px solid var(--color-primary);">
-      <div class="card-header">
-        <h4 class="card-title" style="font-size: 14.5px;"><i class="bi bi-shield-lock" style="color: var(--color-primary);"></i> Role &amp; Access Control Architecture</h4>
+    <!-- SMTP Configuration Box (Admin only) -->
+    {% if is_admin or profile.role == 'Admin' %}
+      <div class="card" style="border-left: 4px solid var(--color-primary);">
+        <div class="card-header" style="background: #f8fafc; cursor: pointer;" onclick="toggleSmtpPanel()">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h4 class="card-title" style="font-size: 14px; margin: 0;">
+              <i class="bi bi-envelope-gear" style="color: var(--color-primary);"></i> SMTP Mailer Settings (For Live Email Dispatch)
+            </h4>
+            <span class="badge {% if smtp_settings.is_configured %}badge-success{% else %}badge-warning{% endif %}">
+              {% if smtp_settings.is_configured %}SMTP Configured{% else %}Setup Needed for Live Email{% endif %}
+            </span>
+          </div>
+        </div>
+        <div class="card-body" id="smtpSettingsPanel" style="padding: 20px; font-size: 13px; {% if not smtp_settings.is_configured %}display: block;{% else %}display: none;{% endif %}">
+          <p style="margin-top: 0; color: #475569; font-size: 12.5px;">
+            To send genuine verification emails directly to inboxes, enter your outgoing SMTP mail server credentials (e.g. Gmail with a 16-character Google App Password):
+          </p>
+
+          <form id="smtpConfigForm" onsubmit="handleSaveSmtp(event)">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+              <div>
+                <label class="form-label" style="font-size: 12px;">SMTP Host</label>
+                <input type="text" id="smtp_host" class="form-control" value="{{ smtp_settings.host or 'smtp.gmail.com' }}" placeholder="smtp.gmail.com" style="font-size: 13px; padding: 8px;">
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 12px;">Port</label>
+                <input type="number" id="smtp_port" class="form-control" value="{{ smtp_settings.port or 587 }}" placeholder="587" style="font-size: 13px; padding: 8px;">
+              </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label class="form-label" style="font-size: 12px;">Sender Email (SMTP User)</label>
+              <input type="email" id="smtp_user" class="form-control" value="{{ smtp_settings.user }}" placeholder="your_email@gmail.com" style="font-size: 13px; padding: 8px;" required>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+              <label class="form-label" style="font-size: 12px;">SMTP Password / Gmail App Password</label>
+              <input type="password" id="smtp_password" class="form-control" value="{{ smtp_settings.password }}" placeholder="16-character Google App Password" style="font-size: 13px; padding: 8px;" required>
+              <small style="color: #64748b; font-size: 11px; display: block; margin-top: 3px;">
+                Tip: In Google Account &rarr; Security &rarr; 2-Step Verification &rarr; App Passwords, generate a 16-character app password.
+              </small>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button type="submit" id="saveSmtpBtn" class="btn btn-sm btn-primary" style="padding: 8px 16px;">
+                <i class="bi bi-save"></i> Save SMTP Configuration
+              </button>
+            </div>
+            <div id="smtpFeedback" style="margin-top: 10px; display: none;"></div>
+          </form>
+        </div>
       </div>
-      <div class="card-body" style="font-size: 13px; color: #475569; line-height: 1.6;">
-        <p style="margin-top: 0;">
-          This separate user profile screen empowers both <strong>Admin</strong> and <strong>Member</strong> users to customize their personal profile and system role at any time.
-        </p>
-        <ul style="padding-left: 18px; margin-bottom: 0;">
-          <li><strong>Quality Goal Q14:</strong> Accessible in $\le 1$ click from anywhere via the top-right user pill or keyboard shortcut <kbd>Alt+U</kbd>.</li>
-          <li><strong>Role Flexibility:</strong> Admins can switch between Member/Admin testing without needing multiple logins or accounts.</li>
-          <li><strong>Verified Email:</strong> Protects against unauthorized email changes by requiring 6-digit OTP confirmation.</li>
-        </ul>
-      </div>
-    </div>
+    {% endif %}
 
   </div>
 
 </div>
 
-<!-- Interactive JS for Live Avatar Preview & OTP Verification -->
+<!-- Interactive JS for Live Avatar Preview & Genuine OTP Verification -->
 <script>
-  // 1. Role Card UI Selection Highlighting
+  // 1. Role Card UI Selection Highlighting (for Admins)
   function updateRoleCardSelection() {
-    const isAdmin = document.getElementById('roleAdmin').checked;
+    const roleAdminEl = document.getElementById('roleAdmin');
+    if (!roleAdminEl) return;
+    const isAdmin = roleAdminEl.checked;
     const adminCard = document.getElementById('roleAdminCard');
     const memberCard = document.getElementById('roleMemberCard');
 
     if (isAdmin) {
-      adminCard.style.borderColor = '#0284c7';
-      adminCard.style.background = '#f0f9ff';
-      memberCard.style.borderColor = '#e2e8f0';
-      memberCard.style.background = '#ffffff';
+      if (adminCard) { adminCard.style.borderColor = '#0284c7'; adminCard.style.background = '#f0f9ff'; }
+      if (memberCard) { memberCard.style.borderColor = '#e2e8f0'; memberCard.style.background = '#ffffff'; }
     } else {
-      memberCard.style.borderColor = '#0284c7';
-      memberCard.style.background = '#f0f9ff';
-      adminCard.style.borderColor = '#e2e8f0';
-      adminCard.style.background = '#ffffff';
+      if (memberCard) { memberCard.style.borderColor = '#0284c7'; memberCard.style.background = '#f0f9ff'; }
+      if (adminCard) { adminCard.style.borderColor = '#e2e8f0'; adminCard.style.background = '#ffffff'; }
     }
   }
 
@@ -336,9 +398,7 @@
     }
   });
 
-  // 3. Email OTP Handlers
-  let currentGeneratedOtp = null;
-
+  // 3. Genuine Email OTP Handlers (NO SPOOF CODES!)
   async function handleSendOTP() {
     const emailInput = document.getElementById('newEmailInput');
     const email = emailInput.value.trim();
@@ -351,7 +411,7 @@
     }
 
     sendBtn.disabled = true;
-    sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+    sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending Genuine Email...';
 
     try {
       const response = await fetch('/profile/send-otp', {
@@ -362,28 +422,19 @@
       const data = await response.json();
 
       if (data.success) {
-        currentGeneratedOtp = data.otp;
-        document.getElementById('demoOtpCodeDisplay').textContent = data.otp;
-        document.getElementById('otpAlertTitle').textContent = 'Verification Code Dispatched!';
-        document.getElementById('otpAlertMessage').textContent = `6-digit OTP code sent for ${data.email}. Enter it below to confirm:`;
+        document.getElementById('otpAlertTitle').textContent = 'Genuine OTP Dispatched to Inbox!';
+        document.getElementById('otpAlertMessage').textContent = data.message;
         document.getElementById('otpNoticeAlert').style.display = 'block';
-        showOtpFeedback(`OTP successfully generated! Check demo code above.`, 'success');
+        showOtpFeedback(data.message, 'success');
         document.getElementById('enteredOtpCode').focus();
       } else {
-        showOtpFeedback(data.error || 'Failed to send OTP. Please try again.', 'danger');
+        showOtpFeedback(data.error || 'Failed to dispatch email. Please check your SMTP configuration.', 'danger');
       }
     } catch (err) {
-      showOtpFeedback('Network error sending OTP. Please try again.', 'danger');
+      showOtpFeedback('Network error sending OTP email. Please verify connection.', 'danger');
     } finally {
       sendBtn.disabled = false;
-      sendBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Resend OTP';
-    }
-  }
-
-  function copyDemoOtp() {
-    if (currentGeneratedOtp) {
-      document.getElementById('enteredOtpCode').value = currentGeneratedOtp;
-      showOtpFeedback('Demo OTP code filled into verification input!', 'info');
+      sendBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Resend Genuine OTP';
     }
   }
 
@@ -393,13 +444,13 @@
     const verifyBtn = document.getElementById('verifyOtpBtn');
 
     if (!otp || otp.length < 6) {
-      showOtpFeedback('Please enter the 6-digit OTP code.', 'danger');
+      showOtpFeedback('Please enter the 6-digit OTP code received in your email inbox.', 'danger');
       document.getElementById('enteredOtpCode').focus();
       return;
     }
 
     verifyBtn.disabled = true;
-    verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verifying...';
+    verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Validating...';
 
     try {
       const response = await fetch('/profile/verify-otp', {
@@ -416,13 +467,13 @@
         document.getElementById('otpNoticeAlert').style.display = 'none';
         document.getElementById('enteredOtpCode').value = '';
       } else {
-        showOtpFeedback(data.error || 'Verification failed. Please check the code.', 'danger');
+        showOtpFeedback(data.error || 'Verification failed. Please check the code received in your inbox.', 'danger');
       }
     } catch (err) {
-      showOtpFeedback('Network error verifying OTP.', 'danger');
+      showOtpFeedback('Network error validating OTP code.', 'danger');
     } finally {
       verifyBtn.disabled = false;
-      verifyBtn.innerHTML = '<i class="bi bi-patch-check-fill"></i> Verify & Update Email';
+      verifyBtn.innerHTML = '<i class="bi bi-patch-check-fill"></i> Validate & Update Email';
     }
   }
 
@@ -436,6 +487,48 @@
     fb.style = `${colorMap[type] || colorMap['info']} padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; margin-top: 14px;`;
     fb.innerHTML = msg;
     fb.style.display = 'block';
+  }
+
+  function toggleSmtpPanel() {
+    const p = document.getElementById('smtpSettingsPanel');
+    if (p) p.style.display = (p.style.display === 'none') ? 'block' : 'none';
+  }
+
+  async function handleSaveSmtp(e) {
+    e.preventDefault();
+    const saveBtn = document.getElementById('saveSmtpBtn');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = 'Saving & Verifying...';
+
+    const payload = {
+      smtp_host: document.getElementById('smtp_host').value.trim(),
+      smtp_port: document.getElementById('smtp_port').value.trim(),
+      smtp_user: document.getElementById('smtp_user').value.trim(),
+      smtp_password: document.getElementById('smtp_password').value.trim(),
+    };
+
+    try {
+      const resp = await fetch('/profile/smtp-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json();
+      const fb = document.getElementById('smtpFeedback');
+      fb.style.display = 'block';
+      if (data.success) {
+        fb.style = 'background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 12.5px;';
+        fb.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${data.message}`;
+      } else {
+        fb.style = 'background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 12.5px;';
+        fb.innerHTML = data.error;
+      }
+    } catch(err) {
+      alert('Error saving SMTP settings.');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="bi bi-save"></i> Save SMTP Configuration';
+    }
   }
 </script>
 {% endblock %}
