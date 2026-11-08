@@ -8,7 +8,7 @@ DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 def get_conn() -> sqlite3.Connection:
     """Open a SQLite connection with row access and foreign-key checks."""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
