@@ -298,63 +298,62 @@
       </div>
     </div>
 
-    <!-- SMTP Configuration Box (Admin only) -->
+    <!-- Simple Gmail Connection Box (Admin only) -->
     {% if is_admin or profile.role == 'Admin' %}
-      <div class="card" style="border-left: 4px solid var(--color-primary);">
+      <div class="card" style="border-left: 4px solid #ea4335;">
         <div class="card-header" style="background: #f8fafc; cursor: pointer;" onclick="toggleSmtpPanel()">
           <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h4 class="card-title" style="font-size: 14px; margin: 0;">
-              <i class="bi bi-envelope-gear" style="color: var(--color-primary);"></i> SMTP Mailer Settings (For Live Email Dispatch)
+            <h4 class="card-title" style="font-size: 14px; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <i class="bi bi-google" style="color: #ea4335;"></i> Connect Gmail for Live OTP Delivery
             </h4>
             <span class="badge {% if smtp_settings.is_configured %}badge-success{% else %}badge-warning{% endif %}">
-              {% if smtp_settings.is_configured %}SMTP Configured{% else %}Setup Needed for Live Email{% endif %}
+              {% if smtp_settings.is_configured %}<i class="bi bi-check-circle-fill"></i> Gmail Connected{% else %}Setup Needed for Gmail{% endif %}
             </span>
           </div>
         </div>
         <div class="card-body" id="smtpSettingsPanel" style="padding: 20px; font-size: 13px; {% if not smtp_settings.is_configured %}display: block;{% else %}display: none;{% endif %}">
-          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 16px;">
-            <div style="font-weight: 700; color: #1e40af; margin-bottom: 4px; font-size: 13px;">
-              <i class="bi bi-google"></i> Why is this needed to receive genuine OTP in your Gmail app?
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 16px;">
+            <div style="font-weight: 700; color: #991b1b; margin-bottom: 4px; font-size: 13.5px;">
+              <i class="bi bi-envelope-heart-fill" style="color: #ea4335;"></i> Simple 2-Step Gmail Setup
             </div>
-            <p style="margin: 0 0 10px 0; font-size: 12px; color: #1e3a8a; line-height: 1.5;">
-              In order for this web server to dispatch a live email that arrives in your personal <strong>Gmail app</strong>, Google requires authenticated SMTP sender credentials using a <strong>16-character Google App Password</strong>.
+            <p style="margin: 0 0 10px 0; font-size: 12.5px; color: #7f1d1d; line-height: 1.5;">
+              To receive the genuine OTP code on your phone's <strong>Gmail App</strong>, Google requires a 16-character <strong>Google App Password</strong> to allow this server to send emails.
             </p>
-            <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="font-size: 11.5px; background: #fff; padding: 5px 12px; font-weight: 600;">
-              <i class="bi bi-box-arrow-up-right"></i> Generate Google App Password in 30 Seconds
-            </a>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="font-size: 12px; padding: 6px 14px; font-weight: 600; background: #ea4335; border-color: #ea4335;">
+                <i class="bi bi-box-arrow-up-right"></i> 1. Click Here to Get Google App Password
+              </a>
+            </div>
           </div>
 
           <form id="smtpConfigForm" onsubmit="handleSaveSmtp(event)">
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
-              <div>
-                <label class="form-label" style="font-size: 12px;">SMTP Host</label>
-                <input type="text" id="smtp_host" class="form-control" value="{{ smtp_settings.host or 'smtp.gmail.com' }}" placeholder="smtp.gmail.com" style="font-size: 13px; padding: 8px;">
-              </div>
-              <div>
-                <label class="form-label" style="font-size: 12px;">Port</label>
-                <input type="number" id="smtp_port" class="form-control" value="{{ smtp_settings.port or 587 }}" placeholder="587" style="font-size: 13px; padding: 8px;">
-              </div>
-            </div>
+            <!-- Hidden Host & Port (defaults automatically to smtp.gmail.com:587) -->
+            <input type="hidden" id="smtp_host" value="{{ smtp_settings.host or 'smtp.gmail.com' }}">
+            <input type="hidden" id="smtp_port" value="{{ smtp_settings.port or 587 }}">
 
             <div style="margin-bottom: 12px;">
-              <label class="form-label" style="font-size: 12px;">Your Outgoing Gmail Address (SMTP User)</label>
-              <input type="email" id="smtp_user" class="form-control" value="{{ smtp_settings.user }}" placeholder="your_email@gmail.com" style="font-size: 13px; padding: 8px;" required>
+              <label class="form-label" style="font-size: 12.5px; font-weight: 600;">
+                <i class="bi bi-envelope-at"></i> 1. Your Gmail Address
+              </label>
+              <input type="email" id="smtp_user" class="form-control" value="{{ smtp_settings.user }}" placeholder="yourname@gmail.com" style="font-size: 14px; padding: 10px 14px;" required>
             </div>
 
             <div style="margin-bottom: 14px;">
-              <label class="form-label" style="font-size: 12px;">16-Character Google App Password</label>
-              <input type="password" id="smtp_password" class="form-control" value="{{ smtp_settings.password }}" placeholder="e.g. abcd efgh ijkl mnop" style="font-size: 13px; padding: 8px;" required>
-              <small style="color: #64748b; font-size: 11px; display: block; margin-top: 3px;">
-                Generated at <strong>myaccount.google.com/apppasswords</strong> (with 2-Step Verification ON).
+              <label class="form-label" style="font-size: 12.5px; font-weight: 600;">
+                <i class="bi bi-key-fill"></i> 2. 16-Character Google App Password
+              </label>
+              <input type="password" id="smtp_password" class="form-control" value="{{ smtp_settings.password }}" placeholder="abcd efgh ijkl mnop" style="font-size: 14px; padding: 10px 14px; font-family: var(--font-family-mono); letter-spacing: 2px;" required>
+              <small style="color: #64748b; font-size: 11.5px; display: block; margin-top: 4px;">
+                Generate in 30 seconds at <a href="https://myaccount.google.com/apppasswords" target="_blank">myaccount.google.com/apppasswords</a>. Type <em>"Inventory"</em> &rarr; click Create &rarr; copy the 16 letters.
               </small>
             </div>
 
             <div style="display: flex; gap: 10px;">
-              <button type="submit" id="saveSmtpBtn" class="btn btn-sm btn-primary" style="padding: 9px 18px; font-weight: 600;">
-                <i class="bi bi-shield-check"></i> Verify &amp; Save SMTP Credentials
+              <button type="submit" id="saveSmtpBtn" class="btn btn-primary" style="padding: 10px 20px; font-weight: 600; background: #0b3d91;">
+                <i class="bi bi-check-circle-fill"></i> Connect Gmail &amp; Save
               </button>
             </div>
-            <div id="smtpFeedback" style="margin-top: 10px; display: none;"></div>
+            <div id="smtpFeedback" style="margin-top: 12px; display: none;"></div>
           </form>
         </div>
       </div>
