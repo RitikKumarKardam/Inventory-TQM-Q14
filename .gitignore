@@ -6,3 +6,5 @@ __pycache__/
 .DS_Store
 data/*.db
 .pytest_cache/
+static/uploads/avatars/*
+!static/uploads/avatars/.gitkeep

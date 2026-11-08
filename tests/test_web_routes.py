@@ -283,5 +283,17 @@ def test_user_profile_and_otp():
     assert good_data["success"] is True
     assert "verified.ritik@amrapali.ac.in" in good_data["message"]
 
+    # 7. Cleanup: Restore Member role
+    client.post(
+        "/profile",
+        data={
+            "full_name": "Ritik Kumar",
+            "age": "21",
+            "mobile_no": "+91 9876543210",
+            "role": "Member",
+        },
+        follow_redirects=True,
+    )
+
 
 
