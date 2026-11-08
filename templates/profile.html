@@ -244,6 +244,21 @@
           </span>
         </div>
 
+        <!-- Simplest Option: Instant 1-Click Verification via Google Account -->
+        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <div>
+            <div style="font-size: 14px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+              <i class="bi bi-google" style="color: #4285F4; font-size: 18px;"></i> 1-Click Verification via Google
+            </div>
+            <p style="margin: 3px 0 0 0; font-size: 12px; color: #64748b;">
+              Fastest way: verify and link your Gmail identity directly through Google (0 passwords, 0 OTP codes needed).
+            </p>
+          </div>
+          <a href="{{ url_for('profile_verify_google') }}" class="btn btn-outline" style="font-size: 12.5px; padding: 8px 16px; font-weight: 600; border-color: #cbd5e1; color: #1e293b; background: #f8fafc;">
+            <i class="bi bi-patch-check-fill" style="color: #4285F4;"></i> Verify Instantly
+          </a>
+        </div>
+
         <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 18px;">
           To change your email address, enter your new email below. A <strong>genuine 6-digit OTP code</strong> will be dispatched to your actual email inbox.
         </p>
@@ -314,14 +329,17 @@
         <div class="card-body" id="smtpSettingsPanel" style="padding: 20px; font-size: 13px; {% if not smtp_settings.is_configured %}display: block;{% else %}display: none;{% endif %}">
           <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 16px;">
             <div style="font-weight: 700; color: #991b1b; margin-bottom: 4px; font-size: 13.5px;">
-              <i class="bi bi-envelope-heart-fill" style="color: #ea4335;"></i> Simple 2-Step Gmail Setup
+              <i class="bi bi-envelope-heart-fill" style="color: #ea4335;"></i> How to Enable Real OTP to Your Gmail App
             </div>
             <p style="margin: 0 0 10px 0; font-size: 12.5px; color: #7f1d1d; line-height: 1.5;">
-              To receive the genuine OTP code on your phone's <strong>Gmail App</strong>, Google requires a 16-character <strong>Google App Password</strong> to allow this server to send emails.
+              If Google says <em>"The setting that you are looking for is not available"</em>, it's because Google requires <strong>2-Step Verification</strong> to be turned ON first:
             </p>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="font-size: 12px; padding: 6px 14px; font-weight: 600; background: #ea4335; border-color: #ea4335;">
-                <i class="bi bi-box-arrow-up-right"></i> 1. Click Here to Get Google App Password
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="https://myaccount.google.com/signinoptions/two-step-verification" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="font-size: 11.5px; padding: 5px 12px; font-weight: 600; background: #fff; border-color: #cbd5e1; color: #1e293b;">
+                1. Turn ON 2-Step Verification <i class="bi bi-box-arrow-up-right"></i>
+              </a>
+              <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="font-size: 11.5px; padding: 5px 12px; font-weight: 600; background: #ea4335; border-color: #ea4335;">
+                2. Then Create App Password <i class="bi bi-box-arrow-up-right"></i>
               </a>
             </div>
           </div>

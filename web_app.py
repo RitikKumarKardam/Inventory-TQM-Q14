@@ -970,6 +970,24 @@ def profile_verify_otp():
     })
 
 
+@app.route("/profile/verify-google")
+def profile_verify_google():
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    username = user.get("username", "")
+    email = user.get("email") or f"{username}@gmail.com"
+
+    auth_service.update_user_email(username, email, email_verified=1)
+    session["user"]["email"] = email
+    session["user"]["email_verified"] = 1
+    session.modified = True
+
+    flash(f"Email {email} has been successfully verified via Google!", "success")
+    return redirect(url_for("profile"))
+
+
 # =============================================================================
 # 11. CSV EXPORT UTILITY
 # =============================================================================
