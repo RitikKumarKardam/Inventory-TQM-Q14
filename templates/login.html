@@ -176,6 +176,10 @@
       box-shadow: 0 1px 3px 1px rgba(60, 64, 67, 0.15);
       color: #202124;
     }
+
+    #btn-toggle-password:hover {
+      color: var(--color-primary) !important;
+    }
   </style>
 </head>
 <body>
@@ -220,14 +224,19 @@
           <div class="form-group">
             <label class="form-label" id="username-label">
               <i class="bi {% if active_role == 'Admin' %}bi-shield-person{% else %}bi-person-badge{% endif %}" id="label-icon"></i>
-              <span id="label-role-text">{% if active_role == 'Admin' %}Admin User ID *{% else %}Member User ID *{% endif %}</span>
+              <span id="label-role-text">{% if active_role == 'Admin' %}Admin User ID{% else %}Member User ID{% endif %}</span>
             </label>
             <input type="text" name="username" id="input-username" class="form-control" placeholder="{% if active_role == 'Admin' %}Enter Admin User ID{% else %}Enter Member User ID{% endif %}" required autofocus>
           </div>
 
           <div class="form-group">
-            <label class="form-label"><i class="bi bi-key"></i> Password *</label>
-            <input type="password" name="password" id="input-password" class="form-control" placeholder="Enter Password" required>
+            <label class="form-label"><i class="bi bi-key"></i> Password</label>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" name="password" id="input-password" class="form-control" placeholder="Enter Password" required style="padding-right: 42px;">
+              <button type="button" id="btn-toggle-password" onclick="togglePasswordVisibility()" title="Show/Hide Password" style="position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: none; border: none; cursor: pointer; color: var(--color-text-muted); display: flex; align-items: center; justify-content: center; font-size: 16px; transition: color 0.15s ease;">
+                <i class="bi bi-eye" id="icon-toggle-password"></i>
+              </button>
+            </div>
           </div>
 
           <!-- Security CAPTCHA Verification -->
@@ -284,7 +293,7 @@
         tabAdmin.classList.add('active');
         tabMember.classList.remove('active');
         labelIcon.className = 'bi bi-shield-person';
-        labelText.textContent = 'Admin User ID *';
+        labelText.textContent = 'Admin User ID';
         inputUser.placeholder = 'Enter Admin User ID';
         btnSubmit.className = 'btn btn-primary';
         btnIcon.className = 'bi bi-shield-lock-fill';
@@ -293,11 +302,27 @@
         tabMember.classList.add('active');
         tabAdmin.classList.remove('active');
         labelIcon.className = 'bi bi-person-badge';
-        labelText.textContent = 'Member User ID *';
+        labelText.textContent = 'Member User ID';
         inputUser.placeholder = 'Enter Member User ID';
         btnSubmit.className = 'btn btn-success';
         btnIcon.className = 'bi bi-person-check-fill';
         btnText.textContent = 'Sign In to Member Portal';
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const pwdInput = document.getElementById('input-password');
+      const pwdIcon = document.getElementById('icon-toggle-password');
+      if (pwdInput && pwdIcon) {
+        if (pwdInput.type === 'password') {
+          pwdInput.type = 'text';
+          pwdIcon.className = 'bi bi-eye-slash-fill';
+          pwdIcon.style.color = 'var(--color-primary)';
+        } else {
+          pwdInput.type = 'password';
+          pwdIcon.className = 'bi bi-eye';
+          pwdIcon.style.color = '';
+        }
       }
     }
 
