@@ -81,6 +81,10 @@ function initKeyboardNavigation() {
           e.preventDefault();
           window.location.href = "/viva-guide";
           break;
+        case "u":
+          e.preventDefault();
+          window.location.href = "/profile";
+          break;
       }
     }
   });

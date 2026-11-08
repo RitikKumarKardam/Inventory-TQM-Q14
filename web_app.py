@@ -14,9 +14,11 @@ import json
 import os
 import random
 import sys
+import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
+from werkzeug.utils import secure_filename
 from flask import (
     Flask,
     Response,
@@ -122,6 +124,11 @@ def inject_common_context():
         user_dict["display_name"] = "Admin"
     elif user_dict.get("role") == "Member":
         user_dict["display_name"] = "Member"
+
+    if not user_dict.get("full_name"):
+        user_dict["full_name"] = "Ritik Kumar"
+    if not user_dict.get("avatar_path"):
+        user_dict["avatar_path"] = ""
 
     return {
         "student": STUDENT_INFO,
@@ -736,7 +743,145 @@ def viva_guide():
 
 
 # =============================================================================
-# 10. CSV EXPORT UTILITY
+# 10. USER PROFILE & CUSTOMIZATION SCREEN
+# =============================================================================
+
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    username = user.get("username", "")
+
+    if request.method == "POST":
+        full_name = request.form.get("full_name", "").strip() or "Ritik Kumar"
+        age_str = request.form.get("age", "").strip()
+        try:
+            age = int(age_str) if age_str else 21
+        except ValueError:
+            age = 21
+
+        mobile_no = request.form.get("mobile_no", "").strip() or "+91 9876543210"
+        role = request.form.get("role", "Admin").capitalize()
+        if role not in ("Admin", "Member"):
+            role = "Admin"
+
+        avatar_path = None
+        # Handle avatar photo upload
+        if "avatar" in request.files:
+            file = request.files["avatar"]
+            if file and file.filename != "":
+                ext = Path(file.filename).suffix.lower()
+                if ext in [".png", ".jpg", ".jpeg", ".gif", ".webp"]:
+                    upload_folder = PROJECT_ROOT / "static" / "uploads" / "avatars"
+                    upload_folder.mkdir(parents=True, exist_ok=True)
+                    safe_uname = secure_filename(username) or "user"
+                    safe_name = f"{safe_uname}_{int(time.time())}{ext}"
+                    dest = upload_folder / safe_name
+                    file.save(str(dest))
+                    avatar_path = f"/static/uploads/avatars/{safe_name}"
+
+        auth_service.update_user_profile(
+            username=username,
+            full_name=full_name,
+            age=age,
+            mobile_no=mobile_no,
+            role=role,
+            avatar_path=avatar_path,
+        )
+
+        # Update session immediately
+        session["user"]["full_name"] = full_name
+        session["user"]["age"] = age
+        session["user"]["mobile_no"] = mobile_no
+        session["user"]["role"] = role
+        session["user"]["is_admin"] = (role == "Admin")
+        session["user"]["display_name"] = "Admin" if role == "Admin" else "Member"
+        if avatar_path:
+            session["user"]["avatar_path"] = avatar_path
+        session.modified = True
+
+        flash("Profile information updated successfully!", "success")
+        return redirect(url_for("profile"))
+
+    # GET profile
+    user_profile = auth_service.get_user_profile(username)
+    if not user_profile:
+        user_profile = dict(user)
+
+    return render_template(
+        "profile.html",
+        active_page="profile",
+        profile=user_profile,
+    )
+
+
+@app.route("/profile/send-otp", methods=["POST"])
+def profile_send_otp():
+    user = session.get("user")
+    if not user:
+        return jsonify({"success": False, "error": "Not authenticated"}), 401
+
+    data = request.get_json(silent=True) or request.form
+    new_email = (data.get("email") or "").strip().lower()
+    if not new_email or "@" not in new_email or "." not in new_email:
+        return jsonify({"success": False, "error": "Please enter a valid email address."}), 400
+
+    otp = f"{random.randint(100000, 999999)}"
+    session["email_otp"] = {
+        "code": otp,
+        "email": new_email,
+        "created_at": time.time(),
+    }
+    session.modified = True
+
+    return jsonify({
+        "success": True,
+        "message": f"Verification OTP sent to {new_email}!",
+        "otp": otp,  # Provided for demonstration and easy verification
+        "email": new_email,
+    })
+
+
+@app.route("/profile/verify-otp", methods=["POST"])
+def profile_verify_otp():
+    user = session.get("user")
+    if not user:
+        return jsonify({"success": False, "error": "Not authenticated"}), 401
+
+    data = request.get_json(silent=True) or request.form
+    entered_otp = (data.get("otp") or "").strip()
+    target_email = (data.get("email") or "").strip().lower()
+
+    otp_data = session.get("email_otp")
+    if not otp_data:
+        return jsonify({"success": False, "error": "No OTP requested. Please request an OTP first."}), 400
+
+    if otp_data.get("email") != target_email:
+        return jsonify({"success": False, "error": "Email does not match the OTP request."}), 400
+
+    if str(otp_data.get("code")) != str(entered_otp):
+        return jsonify({"success": False, "error": "Invalid verification code. Please check and try again."}), 400
+
+    # OTP verified! Update email in database & session
+    username = user.get("username", "")
+    auth_service.update_user_email(username, target_email, email_verified=1)
+
+    session["user"]["email"] = target_email
+    session["user"]["email_verified"] = 1
+    session.pop("email_otp", None)
+    session.modified = True
+
+    return jsonify({
+        "success": True,
+        "message": f"Email {target_email} successfully verified and updated!",
+        "email": target_email,
+    })
+
+
+# =============================================================================
+# 11. CSV EXPORT UTILITY
 # =============================================================================
 
 @app.route("/export/<data_type>")

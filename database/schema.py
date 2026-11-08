@@ -161,6 +161,21 @@ def init_db() -> None:
     cur.execute(
         "INSERT OR IGNORE INTO users(username,password,role,email,provider) VALUES('ritikkumarhempur5','ritik123','Member','ritikkumarhempur5@gmail.com','google')"
     )
+
+    # Ensure profile columns exist
+    cur.execute("PRAGMA table_info(users)")
+    existing_cols = [col[1] for col in cur.fetchall()]
+    profile_cols = {
+        "full_name": "TEXT DEFAULT 'Ritik Kumar'",
+        "age": "INTEGER DEFAULT 21",
+        "mobile_no": "TEXT DEFAULT '+91 9876543210'",
+        "email_verified": "INTEGER DEFAULT 1",
+        "avatar_path": "TEXT DEFAULT ''",
+    }
+    for col_name, col_def in profile_cols.items():
+        if col_name not in existing_cols:
+            cur.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
+
     conn.commit()
     conn.close()
 

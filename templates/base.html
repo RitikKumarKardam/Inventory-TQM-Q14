@@ -38,11 +38,13 @@
         </div>
       </div>
 
-      <!-- Student Profile & User Session Badge -->
+      <!-- Student Profile & User Session Badge (Clickable to Profile Screen) -->
       <div style="display: flex; align-items: center; gap: 12px;">
-        <div class="student-portal-pill">
-          <div class="student-avatar" style="{% if user.provider == 'google' %}background: #ffffff; color: #4285F4; border: 2px solid #e0e2e6; font-size: 18px;{% elif user.is_admin %}background: linear-gradient(135deg, #d97706, #b45309);{% else %}background: linear-gradient(135deg, #10b981, #059669);{% endif %}">
-            {% if user.provider == 'google' %}
+        <a href="{{ url_for('profile') }}" class="student-portal-pill" title="Click to customize profile (Name, Photo, OTP, Role)" style="text-decoration: none; cursor: pointer;">
+          <div class="student-avatar" style="{% if user.avatar_path %}background: transparent; border: 2px solid #ffffff; padding: 0;{% elif user.provider == 'google' %}background: #ffffff; color: #4285F4; border: 2px solid #e0e2e6; font-size: 18px;{% elif user.is_admin %}background: linear-gradient(135deg, #d97706, #b45309);{% else %}background: linear-gradient(135deg, #10b981, #059669);{% endif %} overflow: hidden;">
+            {% if user.avatar_path %}
+              <img src="{{ user.avatar_path }}" alt="Profile Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            {% elif user.provider == 'google' %}
               <i class="bi bi-google"></i>
             {% else %}
               RK
@@ -67,14 +69,16 @@
               {% endif %}
             </div>
             <div class="student-sub">
-              {% if user.provider == 'google' and user.email %}
+              {% if user.full_name %}
+                {{ user.full_name }}
+              {% elif user.provider == 'google' and user.email %}
                 {{ user.email }}
               {% else %}
                 Ritik Kumar
               {% endif %}
             </div>
           </div>
-        </div>
+        </a>
 
         <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm" style="color: #ffffff; border-color: rgba(255,255,255,0.4); background: rgba(0,0,0,0.25);" title="Sign out of portal">
           <i class="bi bi-box-arrow-right"></i> Logout
@@ -132,6 +136,11 @@
         <li class="nav-item">
           <a href="{{ url_for('viva_guide') }}" class="nav-link {% if active_page == 'viva' %}active{% endif %}">
             <i class="bi bi-book-half"></i> Viva & Syllabus <span class="nav-hotkey">Alt+V</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('profile') }}" class="nav-link {% if active_page == 'profile' %}active{% endif %}">
+            <i class="bi bi-person-bounding-box"></i> My Profile <span class="nav-hotkey">Alt+U</span>
           </a>
         </li>
       </ul>
@@ -240,6 +249,10 @@
         <div class="shortcut-row">
           <span>Viva Questions &amp; Syllabus Guide</span>
           <span class="kbd-badge">Alt + V</span>
+        </div>
+        <div class="shortcut-row">
+          <span>My User Profile &amp; Customization</span>
+          <span class="kbd-badge">Alt + U</span>
         </div>
         <div class="shortcut-row">
           <span>Open this Shortcuts &amp; Help Modal</span>

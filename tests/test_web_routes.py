@@ -63,6 +63,7 @@ def test_authenticated_web_routes():
         "/calculators",
         "/reports",
         "/viva-guide",
+        "/profile",
         "/api/metrics",
         "/api/pareto",
         "/api/abc",
@@ -213,5 +214,74 @@ def test_captcha_security():
     )
     assert res.status_code == 200
     assert "ADMIN" in res.data.decode("utf-8")
+
+
+def test_user_profile_and_otp():
+    client = app.test_client()
+
+    # 1. Login as Member
+    with client.session_transaction() as sess:
+        sess["captcha"] = "SEC99"
+    client.post(
+        "/login",
+        data={"username": "member", "password": "member123", "captcha": "SEC99", "role_hint": "Member"},
+        follow_redirects=True,
+    )
+
+    # 2. GET /profile
+    res = client.get("/profile")
+    assert res.status_code == 200
+    html = res.data.decode("utf-8")
+    assert "User Profile &amp; Account Customization" in html
+    assert "Full Name" in html
+    assert "Mobile Number" in html
+    assert "Age" in html
+    assert "Role in This System" in html
+    assert "Send OTP" in html
+
+    # 3. POST /profile customization update
+    res_post = client.post(
+        "/profile",
+        data={
+            "full_name": "Ritik Kumar Kardam",
+            "age": "22",
+            "mobile_no": "+91 9999888877",
+            "role": "Admin",
+        },
+        follow_redirects=True,
+    )
+    assert res_post.status_code == 200
+    assert "Profile information updated successfully!" in res_post.data.decode("utf-8")
+    assert "Ritik Kumar Kardam" in res_post.data.decode("utf-8")
+
+    # 4. OTP Email Verification Flow: Request OTP
+    res_otp_send = client.post(
+        "/profile/send-otp",
+        json={"email": "verified.ritik@amrapali.ac.in"},
+    )
+    assert res_otp_send.status_code == 200
+    send_data = res_otp_send.get_json()
+    assert send_data["success"] is True
+    assert "otp" in send_data
+    generated_otp = send_data["otp"]
+
+    # 5. Verify with WRONG OTP fails
+    res_bad_verify = client.post(
+        "/profile/verify-otp",
+        json={"email": "verified.ritik@amrapali.ac.in", "otp": "000000"},
+    )
+    assert res_bad_verify.status_code == 400
+    assert res_bad_verify.get_json()["success"] is False
+
+    # 6. Verify with CORRECT OTP succeeds
+    res_good_verify = client.post(
+        "/profile/verify-otp",
+        json={"email": "verified.ritik@amrapali.ac.in", "otp": generated_otp},
+    )
+    assert res_good_verify.status_code == 200
+    good_data = res_good_verify.get_json()
+    assert good_data["success"] is True
+    assert "verified.ritik@amrapali.ac.in" in good_data["message"]
+
 
 
