@@ -250,11 +250,11 @@
                 
                 <!-- Role Toggle Button -->
                 {% if u.role == 'Admin' %}
-                  <button type="button" class="btn btn-outline btn-sm" onclick="handleRoleChange({{ u.id }}, 'Member', '{{ u.username }}')" title="Demote to Member" style="font-size: 11.5px; padding: 4px 8px; white-space: nowrap;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="openRoleModal({{ u.id }}, 'Member', '{{ u.username }}')" title="Demote to Member" style="font-size: 11.5px; padding: 4px 8px; white-space: nowrap;">
                     <i class="bi bi-arrow-down-circle"></i> Make Member
                   </button>
                 {% else %}
-                  <button type="button" class="btn btn-outline btn-sm" onclick="handleRoleChange({{ u.id }}, 'Admin', '{{ u.username }}')" title="Promote to Admin" style="font-size: 11.5px; padding: 4px 8px; color: #b45309; border-color: #fde68a; white-space: nowrap;">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="openRoleModal({{ u.id }}, 'Admin', '{{ u.username }}')" title="Promote to Admin" style="font-size: 11.5px; padding: 4px 8px; color: #b45309; border-color: #fde68a; white-space: nowrap;">
                     <i class="bi bi-arrow-up-circle"></i> Make Admin
                   </button>
                 {% endif %}
@@ -452,6 +452,37 @@
 </div>
 
 <!-- ====================================================================
+     7.5. MODAL: ROLE CHANGE CONFIRMATION (ADMIN <-> MEMBER)
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-role-change" style="display: none;">
+  <div class="modal-dialog" style="max-width: 460px;">
+    <div class="modal-header" id="roleModalHeader" style="border-bottom-color: #fde68a;">
+      <h3 class="modal-title" id="roleModalTitle" style="color: #92400e; display: flex; align-items: center; gap: 8px;">
+        <i class="bi bi-shield-lock-fill" style="color: #d97706;"></i> Promote to Administrator
+      </h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-role-change')">&times;</button>
+    </div>
+    <div class="modal-body" style="padding: 20px;">
+      <p style="font-size: 14px; color: #334155; margin-top: 0; line-height: 1.5;" id="roleModalQuestion">
+        Are you strictly sure you want to change <strong id="roleUsernameText">@user</strong>'s role to <strong id="roleTargetText">Admin</strong>?
+      </p>
+      <div id="roleModalWarningBox" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12.5px; color: #92400e; line-height: 1.45;">
+        <i class="bi bi-shield-check"></i> <strong id="roleModalNoticeTitle">Full Administrative Privileges:</strong>
+        <span id="roleModalNoticeText">Administrators have full authority over inventory data, suppliers, audit trails, and member account management.</span>
+      </div>
+    </div>
+    <div class="modal-footer" style="background: #f8fafc;">
+      <input type="hidden" id="roleTargetUserId">
+      <input type="hidden" id="roleTargetNewRole">
+      <button type="button" class="btn btn-outline" onclick="closeModal('modal-role-change')">Cancel</button>
+      <button type="button" class="btn btn-primary" id="roleModalConfirmBtn" onclick="confirmRoleChangeAction()" style="background: #0284c7; border-color: #0284c7; font-weight: 600;">
+        <i class="bi bi-check2-circle"></i> Confirm Role Promotion
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
      8. CLIENT-SIDE CONTROLLERS (0-Reload AJAX & Search Filtering)
      ==================================================================== -->
 <script>
@@ -517,11 +548,61 @@
     if (modal) modal.style.display = 'none';
   }
 
-  // 3. Role Change Action (Admin <-> Member)
-  async function handleRoleChange(userId, newRole, username) {
-    if (!confirm(`Are you sure you want to change @${username}'s role to '${newRole}'?`)) {
-      return;
+  function openRoleModal(userId, newRole, username) {
+    document.getElementById('roleTargetUserId').value = userId;
+    document.getElementById('roleTargetNewRole').value = newRole;
+    document.getElementById('roleUsernameText').textContent = `@${username}`;
+    document.getElementById('roleTargetText').textContent = newRole;
+
+    const modalHeader = document.getElementById('roleModalHeader');
+    const modalTitle = document.getElementById('roleModalTitle');
+    const warningBox = document.getElementById('roleModalWarningBox');
+    const noticeTitle = document.getElementById('roleModalNoticeTitle');
+    const noticeText = document.getElementById('roleModalNoticeText');
+    const confirmBtn = document.getElementById('roleModalConfirmBtn');
+
+    if (newRole === 'Admin') {
+      modalHeader.style.borderBottomColor = '#fde68a';
+      modalTitle.style.color = '#92400e';
+      modalTitle.innerHTML = '<i class="bi bi-shield-lock-fill" style="color: #d97706;"></i> Promote to Administrator';
+      
+      warningBox.style.background = '#fffbeb';
+      warningBox.style.borderColor = '#fde68a';
+      warningBox.style.color = '#92400e';
+      noticeTitle.textContent = 'Full Administrative Authority:';
+      noticeText.textContent = 'Administrators have complete authority over inventory data, suppliers, audit trails, and member account management.';
+      
+      confirmBtn.className = 'btn btn-primary';
+      confirmBtn.style.background = '#0284c7';
+      confirmBtn.style.borderColor = '#0284c7';
+      confirmBtn.innerHTML = '<i class="bi bi-shield-check"></i> Confirm Role Promotion';
+    } else {
+      modalHeader.style.borderBottomColor = '#a7f3d0';
+      modalTitle.style.color = '#065f46';
+      modalTitle.innerHTML = '<i class="bi bi-person-fill" style="color: #059669;"></i> Change Role to Member';
+      
+      warningBox.style.background = '#ecfdf5';
+      warningBox.style.borderColor = '#a7f3d0';
+      warningBox.style.color = '#065f46';
+      noticeTitle.textContent = 'Operational Quality Level:';
+      noticeText.textContent = 'Members have standard privileges to view inventory, record stock in/out transactions, and run TQM calculators.';
+      
+      confirmBtn.className = 'btn btn-outline';
+      confirmBtn.style.background = '';
+      confirmBtn.style.borderColor = '#cbd5e1';
+      confirmBtn.innerHTML = '<i class="bi bi-check2"></i> Confirm Role Change';
     }
+
+    document.getElementById('modal-role-change').style.display = 'flex';
+  }
+
+  async function confirmRoleChangeAction() {
+    const userId = document.getElementById('roleTargetUserId').value;
+    const newRole = document.getElementById('roleTargetNewRole').value;
+    const confirmBtn = document.getElementById('roleModalConfirmBtn');
+
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Updating Role...';
 
     try {
       const response = await fetch('/admin/members/role', {
@@ -538,6 +619,9 @@
       }
     } catch (err) {
       alert('Network error modifying user role.');
+    } finally {
+      confirmBtn.disabled = false;
+      closeModal('modal-role-change');
     }
   }
 
