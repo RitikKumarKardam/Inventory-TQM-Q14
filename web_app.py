@@ -905,8 +905,18 @@ def profile_smtp_config():
     if not smtp_user or not smtp_password:
         return jsonify({"success": False, "error": "SMTP User email and App Password are required."}), 400
 
+    try:
+        port_int = int(smtp_port)
+    except ValueError:
+        port_int = 587
+
+    # Test the credentials directly against the SMTP server
+    is_valid, test_msg = EmailService.test_smtp_connection(smtp_host, port_int, smtp_user, smtp_password)
+    if not is_valid:
+        return jsonify({"success": False, "error": test_msg}), 400
+
     set_config_value("SMTP_HOST", smtp_host)
-    set_config_value("SMTP_PORT", smtp_port)
+    set_config_value("SMTP_PORT", str(port_int))
     set_config_value("SMTP_USER", smtp_user)
     set_config_value("SMTP_PASSWORD", smtp_password)
     set_config_value("SMTP_FROM", smtp_from)
@@ -914,13 +924,13 @@ def profile_smtp_config():
     try:
         env_file = PROJECT_ROOT / ".env"
         with open(env_file, "a", encoding="utf-8") as f:
-            f.write(f"\nSMTP_HOST={smtp_host}\nSMTP_PORT={smtp_port}\nSMTP_USER={smtp_user}\nSMTP_PASSWORD={smtp_password}\nSMTP_FROM={smtp_from}\n")
+            f.write(f"\nSMTP_HOST={smtp_host}\nSMTP_PORT={port_int}\nSMTP_USER={smtp_user}\nSMTP_PASSWORD={smtp_password}\nSMTP_FROM={smtp_from}\n")
     except Exception:
         pass
 
     return jsonify({
         "success": True,
-        "message": f"SMTP mailer settings saved! Genuine verification OTPs will be dispatched via {smtp_user}.",
+        "message": f"SMTP mailer verified and saved! Genuine verification OTPs will now be delivered to inboxes via {smtp_user}.",
     })
 
 

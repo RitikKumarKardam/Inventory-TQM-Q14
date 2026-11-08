@@ -63,6 +63,26 @@ class EmailService:
         }
 
     @staticmethod
+    def test_smtp_connection(host: str, port: int, user: str, password: str) -> Tuple[bool, str]:
+        """Test SMTP credentials by establishing connection and authenticating."""
+        try:
+            if port == 465:
+                server = smtplib.SMTP_SSL(host, port, timeout=10)
+            else:
+                server = smtplib.SMTP(host, port, timeout=10)
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+
+            server.login(user, password)
+            server.quit()
+            return True, "SMTP connection and credentials verified successfully!"
+        except smtplib.SMTPAuthenticationError as e:
+            return False, f"SMTP Authentication failed: Invalid username or App Password ({e})."
+        except Exception as e:
+            return False, f"Connection failed: {e}"
+
+    @staticmethod
     def send_otp_email(recipient_email: str, otp_code: str, user_name: str = "User") -> Tuple[bool, str]:
         """Send a genuine 6-digit OTP verification code via authenticated SMTP."""
         settings = EmailService.get_smtp_settings()
