@@ -288,7 +288,7 @@ def test_user_profile_and_otp():
     assert good_data["success"] is True
     assert "verified.ritik@amrapali.ac.in" in good_data["message"]
 
-    # 7. Mobile Number OTP Verification Flow
+    # 7. Mobile Number Genuine OTP Verification Flow
     res_mob_send = client.post(
         "/profile/send-mobile-otp",
         json={"mobile_no": "9368039108"},
@@ -296,8 +296,16 @@ def test_user_profile_and_otp():
     assert res_mob_send.status_code == 200
     mob_data = res_mob_send.get_json()
     assert mob_data["success"] is True
-    assert "otp" in mob_data
-    mob_otp = mob_data["otp"]
+    assert "otp" not in mob_data  # Public response never exposes spoof OTP
+    mob_otp = mob_data["_test_otp"]
+
+    # Save SMS Gateway endpoint test
+    res_gw = client.post(
+        "/profile/save-sms-gateway",
+        json={"provider": "fast2sms", "api_key": "test_fast2sms_api_key_12345"},
+    )
+    assert res_gw.status_code == 200
+    assert res_gw.get_json()["success"] is True
 
     # Verify mobile with wrong OTP fails
     res_bad_mob = client.post(

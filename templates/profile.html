@@ -225,9 +225,13 @@
     <div class="card" style="margin-bottom: 24px; border-top: 4px solid #0284c7;">
       <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
         <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
-          <i class="bi bi-phone-vibrate" style="color: #0284c7;"></i> Mobile Number &amp; OTP Verification
+          <i class="bi bi-phone-vibrate" style="color: #0284c7;"></i> Mobile Number &amp; Genuine OTP Verification
         </h3>
-        <span class="badge badge-info"><i class="bi bi-shield-check"></i> Instant Mobile OTP</span>
+        {% if sms_gateway_status.is_configured %}
+          <span class="badge badge-success"><i class="bi bi-broadcast"></i> SMS Gateway Active</span>
+        {% else %}
+          <span class="badge badge-info"><i class="bi bi-shield-check"></i> Cellular SMS</span>
+        {% endif %}
       </div>
       <div class="card-body" style="padding: 24px;">
         
@@ -248,7 +252,7 @@
         </div>
 
         <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px;">
-          To verify or update your mobile number, enter your 10-digit number below and click <strong>Send Mobile OTP</strong>.
+          To verify or update your mobile number, enter your 10-digit number below and click <strong>Send Mobile OTP</strong>. A genuine cellular SMS will be dispatched directly to your physical phone's Messages app.
         </p>
 
         <!-- Step 1: Input Mobile & Request OTP -->
@@ -263,33 +267,16 @@
             </button>
           </div>
           <small style="color: var(--color-text-muted); font-size: 11.5px; display: block; margin-top: 4px;">
-            Generates a 6-digit SMS verification code to verify your mobile identity.
+            Dispatches a real 6-digit SMS verification code to your phone. Check your phone's Messages inbox.
           </small>
         </div>
 
-        <!-- Realistic Incoming SMS Notification Banner (Slides in instantly) -->
-        <div id="smsNotificationBanner" style="display: none; background: #0f172a; color: #ffffff; border-radius: var(--radius-md); padding: 14px 18px; margin: 18px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.25); border-left: 4px solid #10b981; animation: slideDown 0.3s ease;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="font-size: 11.5px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
-              <i class="bi bi-chat-dots-fill" style="color: #4ade80;"></i> Incoming SMS Notification &bull; Just Now
-            </span>
-            <span class="badge" style="background: rgba(255,255,255,0.15); color: #fff; font-size: 11px;">AUTH-SMS</span>
-          </div>
-          <div style="font-size: 13.5px; font-weight: 600; color: #ffffff;">Messages &bull; My Inventory System</div>
-          <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">
-            Your mobile security verification code is: <strong style="font-family: var(--font-family-mono); font-size: 20px; color: #4ade80; letter-spacing: 4px;" id="smsOtpCodeDisplay">------</strong>
-          </div>
-          <div style="margin-top: 10px;">
-            <button type="button" class="btn btn-sm" onclick="autoFillMobileOtp()" style="background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; color: #4ade80; font-size: 12px; padding: 4px 12px; font-weight: 600;">
-              <i class="bi bi-box-arrow-down"></i> Auto-Fill 6-Digit OTP
-            </button>
-          </div>
-        </div>
+        <div id="mobileOtpStatusFeedback" style="margin-top: 14px; display: none;"></div>
 
-        <!-- Step 2: Enter & Validate Mobile OTP -->
-        <div id="mobileOtpInputSection" style="margin-top: 16px; padding: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md);">
+        <!-- Step 2: Enter & Validate Mobile OTP from Physical Phone -->
+        <div id="mobileOtpInputSection" style="margin-top: 18px; padding: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md);">
           <label class="form-label" for="enteredMobileOtp" style="margin-bottom: 6px;">
-            <i class="bi bi-key-fill" style="color: var(--color-primary);"></i> Enter 6-Digit Mobile OTP
+            <i class="bi bi-key-fill" style="color: var(--color-primary);"></i> Enter 6-Digit OTP from Your Phone
           </label>
           <div style="display: flex; gap: 10px;">
             <input type="text" id="enteredMobileOtp" maxlength="6" class="form-control" placeholder="123456" style="font-family: var(--font-family-mono); font-size: 20px; letter-spacing: 4px; font-weight: 700; text-align: center; max-width: 200px;">
@@ -298,11 +285,61 @@
             </button>
           </div>
           <small style="color: var(--color-text-muted); font-size: 11.5px; display: block; margin-top: 6px;">
-            Enter the 6-digit code received above to link and verify your phone number.
+            Enter the genuine 6-digit code received in your phone's Messages app.
           </small>
         </div>
 
-        <div id="mobileOtpStatusFeedback" style="margin-top: 14px; display: none;"></div>
+        <!-- SMS Gateway Connection Drawer / Settings -->
+        <div style="margin-top: 20px; border-top: 1px dashed #cbd5e1; padding-top: 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="toggleSmsGatewayCard()">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i class="bi bi-broadcast-pin" style="color: #0284c7; font-size: 16px;"></i>
+              <strong style="font-size: 13px; color: #1e293b;">Cellular SMS Gateway Settings</strong>
+              {% if sms_gateway_status.is_configured %}
+                <span class="badge badge-success" style="font-size: 11px;"><i class="bi bi-check-circle-fill"></i> Connected ({{ sms_gateway_status.provider }})</span>
+              {% else %}
+                <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 11px;"><i class="bi bi-gear"></i> Setup Free Fast2SMS</span>
+              {% endif %}
+            </div>
+            <i class="bi bi-chevron-down" id="smsGatewayChevron" style="color: #64748b; font-size: 12px; transition: transform 0.2s;"></i>
+          </div>
+
+          <div id="smsGatewayCardBody" style="display: {% if sms_gateway_status.is_configured %}none{% else %}block{% endif %}; margin-top: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 16px;">
+            <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px;">
+              <i class="bi bi-info-circle-fill" style="color: #0284c7; font-size: 18px; margin-top: 2px;"></i>
+              <div style="font-size: 12.5px; color: #334155; line-height: 1.45;">
+                To dispatch physical SMS messages to Indian cellular networks (+91), the system connects through <strong>Fast2SMS</strong> (India's premier developer SMS gateway). Fast2SMS provides <strong>₹50 free wallet balance</strong> upon signup with <strong>no credit card required</strong>.
+              </div>
+            </div>
+
+            <!-- 3 Simple Steps -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 14px; font-size: 12px; color: #475569;">
+              <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">How to get your free Fast2SMS API Key in 60 seconds:</div>
+              <ol style="margin: 0; padding-left: 18px; line-height: 1.6;">
+                <li>Open <a href="https://www.fast2sms.com" target="_blank" rel="noopener noreferrer" style="color: #0284c7; font-weight: 600;">fast2sms.com <i class="bi bi-box-arrow-up-right" style="font-size: 10px;"></i></a> and sign in with your phone number (₹50 free testing balance is added automatically).</li>
+                <li>In your dashboard, click on <strong>Dev API</strong> in the left sidebar.</li>
+                <li>Copy the <strong>Authorization Key</strong> and paste it into the box below:</li>
+              </ol>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" for="fast2smsApiKeyInput" style="font-size: 12.5px; font-weight: 600;">
+                Fast2SMS Authorization API Key
+              </label>
+              <div style="display: flex; gap: 10px;">
+                <input type="password" id="fast2smsApiKeyInput" class="form-control" placeholder="Paste your Fast2SMS Authorization Key here" value="" style="font-size: 13.5px; padding: 8px 12px;">
+                <button type="button" id="saveSmsGatewayBtn" class="btn btn-primary" onclick="handleSaveSmsGateway()" style="white-space: nowrap; font-size: 13px; font-weight: 600; padding: 8px 16px;">
+                  <i class="bi bi-check-lg"></i> Save &amp; Connect Gateway
+                </button>
+              </div>
+              <small style="color: var(--color-text-muted); font-size: 11px; display: block; margin-top: 4px;">
+                Key is stored securely in your database and environment variables.
+              </small>
+            </div>
+            
+            <div id="smsGatewayStatusFeedback" style="display: none; margin-top: 10px;"></div>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -374,8 +411,21 @@
     }
   });
 
-  // 3. Mobile Number OTP Handlers (FAST, DIRECT, RELIABLE!)
-  let currentMobileOtp = null;
+  // 3. Genuine Mobile SMS & Gateway Handlers
+  function toggleSmsGatewayCard() {
+    const card = document.getElementById('smsGatewayCardBody');
+    const chevron = document.getElementById('smsGatewayChevron');
+    if (!card) return;
+    if (card.style.display === 'none' || card.style.display === '') {
+      card.style.display = 'block';
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+      const input = document.getElementById('fast2smsApiKeyInput');
+      if (input) input.focus();
+    } else {
+      card.style.display = 'none';
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+    }
+  }
 
   async function handleSendMobileOTP() {
     const mobileInput = document.getElementById('mobileOtpInput');
@@ -390,7 +440,7 @@
     }
 
     sendBtn.disabled = true;
-    sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending OTP...';
+    sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Dispatching Cellular SMS...';
 
     try {
       const response = await fetch('/profile/send-mobile-otp', {
@@ -401,13 +451,18 @@
       const data = await response.json();
 
       if (data.success) {
-        currentMobileOtp = data.otp;
-        document.getElementById('smsOtpCodeDisplay').textContent = data.otp;
-        document.getElementById('smsNotificationBanner').style.display = 'block';
-        showMobileOtpFeedback(data.message, 'success');
+        showMobileOtpFeedback(`<i class="bi bi-phone-vibrate-fill"></i> ${data.message}`, 'success');
         document.getElementById('enteredMobileOtp').focus();
       } else {
-        showMobileOtpFeedback(data.error || 'Failed to dispatch Mobile OTP.', 'danger');
+        showMobileOtpFeedback(`<i class="bi bi-exclamation-triangle-fill"></i> ${data.error || 'Failed to dispatch Mobile OTP.'}`, 'danger');
+        if (data.needs_gateway) {
+          const card = document.getElementById('smsGatewayCardBody');
+          const chevron = document.getElementById('smsGatewayChevron');
+          if (card) card.style.display = 'block';
+          if (chevron) chevron.style.transform = 'rotate(180deg)';
+          const apiKeyInput = document.getElementById('fast2smsApiKeyInput');
+          if (apiKeyInput) apiKeyInput.focus();
+        }
       }
     } catch (err) {
       showMobileOtpFeedback('Network error sending Mobile OTP.', 'danger');
@@ -417,12 +472,57 @@
     }
   }
 
-  function autoFillMobileOtp() {
-    if (currentMobileOtp) {
-      document.getElementById('enteredMobileOtp').value = currentMobileOtp;
-      showMobileOtpFeedback('OTP code auto-filled! Click Validate & Verify.', 'info');
-      document.getElementById('enteredMobileOtp').focus();
+  async function handleSaveSmsGateway() {
+    const apiKeyInput = document.getElementById('fast2smsApiKeyInput');
+    const apiKey = (apiKeyInput.value || '').trim();
+    const saveBtn = document.getElementById('saveSmsGatewayBtn');
+    const statusFb = document.getElementById('smsGatewayStatusFeedback');
+
+    if (!apiKey) {
+      showSmsGatewayFeedback('Please paste your Fast2SMS Authorization API Key.', 'danger');
+      apiKeyInput.focus();
+      return;
     }
+
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verifying Key...';
+
+    try {
+      const response = await fetch('/profile/save-sms-gateway', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: 'fast2sms', api_key: apiKey })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showSmsGatewayFeedback(`<i class="bi bi-check-circle-fill"></i> ${data.message}`, 'success');
+        // Automatically trigger send mobile OTP now that gateway is saved!
+        setTimeout(() => {
+          handleSendMobileOTP();
+        }, 800);
+      } else {
+        showSmsGatewayFeedback(`<i class="bi bi-x-circle-fill"></i> ${data.error || 'Failed to save gateway key.'}`, 'danger');
+      }
+    } catch (err) {
+      showSmsGatewayFeedback('Network error connecting to SMS Gateway.', 'danger');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="bi bi-check-lg"></i> Save &amp; Connect Gateway';
+    }
+  }
+
+  function showSmsGatewayFeedback(msg, type) {
+    const fb = document.getElementById('smsGatewayStatusFeedback');
+    if (!fb) return;
+    const colorMap = {
+      'danger': 'background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;',
+      'success': 'background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;',
+      'info': 'background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af;'
+    };
+    fb.style = `${colorMap[type] || colorMap['info']} padding: 10px 14px; border-radius: var(--radius-sm); font-size: 12.5px; margin-top: 10px;`;
+    fb.innerHTML = msg;
+    fb.style.display = 'block';
   }
 
   async function handleVerifyMobileOTP() {
@@ -431,13 +531,13 @@
     const verifyBtn = document.getElementById('verifyMobileOtpBtn');
 
     if (!otp || otp.length < 6) {
-      showMobileOtpFeedback('Please enter the 6-digit OTP code received on your mobile.', 'danger');
+      showMobileOtpFeedback('Please enter the genuine 6-digit OTP code received on your mobile phone.', 'danger');
       document.getElementById('enteredMobileOtp').focus();
       return;
     }
 
     verifyBtn.disabled = true;
-    verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verifying...';
+    verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Validating OTP...';
 
     try {
       const response = await fetch('/profile/verify-mobile-otp', {
@@ -455,10 +555,9 @@
         const formMobileEl = document.getElementById('mobile_no');
         if (formMobileEl) formMobileEl.value = data.mobile_no;
         document.getElementById('mobileVerifiedBadge').style.display = 'inline-flex';
-        document.getElementById('smsNotificationBanner').style.display = 'none';
         document.getElementById('enteredMobileOtp').value = '';
       } else {
-        showMobileOtpFeedback(data.error || 'Invalid OTP code. Please check and try again.', 'danger');
+        showMobileOtpFeedback(`<i class="bi bi-x-circle-fill"></i> ${data.error || 'Invalid OTP code. Please check and try again.'}`, 'danger');
       }
     } catch (err) {
       showMobileOtpFeedback('Network error verifying OTP.', 'danger');
