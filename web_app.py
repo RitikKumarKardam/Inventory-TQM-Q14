@@ -128,7 +128,12 @@ def inject_common_context():
         user_dict["display_name"] = "Member"
 
     if not user_dict.get("full_name"):
-        user_dict["full_name"] = "Ritik Kumar"
+        if user_dict.get("username") == "admin":
+            user_dict["full_name"] = "Ritik Kardam"
+        elif user_dict.get("username") == "member":
+            user_dict["full_name"] = "Ritik Kumar Kardam"
+        else:
+            user_dict["full_name"] = "Ritik Kumar"
     if not user_dict.get("avatar_path"):
         user_dict["avatar_path"] = ""
 
@@ -775,7 +780,7 @@ def profile():
     is_admin = bool(user.get("is_admin") or user.get("role") == "Admin")
 
     if request.method == "POST":
-        full_name = request.form.get("full_name", "").strip() or "Ritik Kumar"
+        full_name = request.form.get("full_name", "").strip() or ("Ritik Kardam" if username == "admin" else "Ritik Kumar")
         age_str = request.form.get("age", "").strip()
         try:
             age = int(age_str) if age_str else 21

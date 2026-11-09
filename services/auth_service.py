@@ -93,7 +93,8 @@ class AuthService:
                     "Please switch to the 'Admin Login' tab.",
                 )
 
-        full_name = row["full_name"] if "full_name" in row.keys() and row["full_name"] else ("Ritik Kumar" if "ritik" in row["username"].lower() or row["username"] in ("admin", "member") else row["username"].title())
+        fallback_name = "Ritik Kardam" if row["username"] == "admin" else ("Ritik Kumar Kardam" if row["username"] == "member" else "Ritik Kumar")
+        full_name = row["full_name"] if "full_name" in row.keys() and row["full_name"] else fallback_name
         display_name = full_name
         age = row["age"] if "age" in row.keys() and row["age"] else 21
         mobile_no = row["mobile_no"] if "mobile_no" in row.keys() and row["mobile_no"] else "+91 9876543210"
@@ -218,7 +219,7 @@ class AuthService:
         row = cur.execute(
             """
             SELECT id, username, role, email, provider, 
-                   COALESCE(full_name, 'Ritik Kumar') as full_name,
+                   COALESCE(full_name, CASE WHEN LOWER(username) = 'admin' THEN 'Ritik Kardam' WHEN LOWER(username) = 'member' THEN 'Ritik Kumar Kardam' ELSE 'Ritik Kumar' END) as full_name,
                    COALESCE(age, 21) as age,
                    COALESCE(mobile_no, '+91 9876543210') as mobile_no,
                    COALESCE(email_verified, 1) as email_verified,
@@ -228,7 +229,8 @@ class AuthService:
             WHERE LOWER(username) = LOWER(?)
             """,
             (username.strip(),),
-        ).fetchone()
+        )
+        row = row.fetchone()
         conn.close()
         return dict(row) if row else None
 
@@ -264,6 +266,33 @@ class AuthService:
         conn.commit()
         conn.close()
         log_audit(username, "PROFILE_UPDATED", "Auth", f"Full Name: {full_name}, Role: {role}")
+
+        # Persist to data/user_profiles.json for resilient multi-restart & deployment survival
+        try:
+            import json
+            from database.compat import DB_PATH
+            profile_file = DB_PATH.parent / "user_profiles.json"
+            profiles = {}
+            if profile_file.exists():
+                try:
+                    with open(profile_file, "r", encoding="utf-8") as pf:
+                        profiles = json.load(pf)
+                except Exception:
+                    profiles = {}
+            user_entry = profiles.get(username.lower(), {})
+            user_entry["full_name"] = full_name.strip()
+            if age is not None:
+                user_entry["age"] = age
+            if mobile_no:
+                user_entry["mobile_no"] = mobile_no.strip()
+            if avatar_path:
+                user_entry["avatar_path"] = avatar_path
+            profiles[username.lower()] = user_entry
+            with open(profile_file, "w", encoding="utf-8") as pf:
+                json.dump(profiles, pf, indent=2)
+        except Exception:
+            pass
+
         return True
 
     def update_user_email(self, username: str, email: str, email_verified: int = 1) -> bool:
@@ -300,7 +329,7 @@ class AuthService:
         cur = conn.cursor()
         rows = cur.execute("""
             SELECT id, username, role, email, provider,
-                   COALESCE(full_name, 'Ritik Kumar') as full_name,
+                   COALESCE(full_name, CASE WHEN username = 'admin' THEN 'Ritik Kardam' WHEN username = 'member' THEN 'Ritik Kumar Kardam' ELSE 'Ritik Kumar' END) as full_name,
                    COALESCE(age, 21) as age,
                    COALESCE(mobile_no, '+91 9368039108') as mobile_no,
                    COALESCE(email_verified, 1) as email_verified,
@@ -371,7 +400,7 @@ class AuthService:
 
         recent_logs = cur.execute("""
             SELECT a.id, a.username, a.action, a.details, a.created_at,
-                   COALESCE(u.full_name, 'Ritik Kumar') as full_name,
+                   COALESCE(u.full_name, CASE WHEN LOWER(a.username) = 'admin' THEN 'Ritik Kardam' WHEN LOWER(a.username) = 'member' THEN 'Ritik Kumar Kardam' ELSE 'Ritik Kumar' END) as full_name,
                    COALESCE(u.avatar_path, '') as avatar_path,
                    COALESCE(u.role, 'Member') as role
             FROM audit_log a

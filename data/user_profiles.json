@@ -1,0 +1,20 @@
+{
+  "admin": {
+    "full_name": "Ritik Kardam",
+    "age": 21,
+    "mobile_no": "+91 9876543210",
+    "avatar_path": "/static/uploads/avatars/admin_profile.png"
+  },
+  "member": {
+    "full_name": "Ritik Kumar Kardam",
+    "age": 22,
+    "mobile_no": "+91 9999888877",
+    "avatar_path": ""
+  },
+  "ritik": {
+    "full_name": "Ritik Kumar",
+    "age": 21,
+    "mobile_no": "+91 9876543210",
+    "avatar_path": ""
+  }
+}

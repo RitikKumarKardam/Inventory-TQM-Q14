@@ -1,4 +1,4 @@
-from database.db import get_conn
+from database.db import get_conn, DB_PATH
 
 
 def init_db() -> None:
@@ -173,7 +173,7 @@ def init_db() -> None:
     if user_count == 0:
         cur.execute(
             "INSERT INTO users(username,password,role,email,provider,full_name,avatar_path) "
-            "VALUES('admin','admin123','Admin','admin@amrapali.ac.in','local','Ritik Kumar','/static/uploads/avatars/admin_profile.png')"
+            "VALUES('admin','admin123','Admin','admin@amrapali.ac.in','local','Ritik Kardam','/static/uploads/avatars/admin_profile.png')"
         )
         cur.execute(
             "INSERT INTO users(username,password,role,email,provider,full_name) "
@@ -190,12 +190,40 @@ def init_db() -> None:
     if not ist_migrated:
         cur.execute("UPDATE audit_log SET created_at = datetime(created_at, '+5 hours', '30 minutes') WHERE created_at LIKE '2026-%'")
         cur.execute("INSERT OR REPLACE INTO system_settings(key, value) VALUES('audit_ist_migrated', '1')")
-    else:
-        # Preserve admin avatar path if it was somehow unset
-        cur.execute(
-            "UPDATE users SET avatar_path = '/static/uploads/avatars/admin_profile.png' "
-            "WHERE username = 'admin' AND (avatar_path IS NULL OR avatar_path = '')"
-        )
+
+    # Ensure admin full_name is preserved as 'Ritik Kardam' unless user explicitly customizes it
+    cur.execute(
+        "UPDATE users SET full_name = 'Ritik Kardam' "
+        "WHERE username = 'admin' AND (full_name = 'Ritik Kumar' OR full_name IS NULL OR full_name = '')"
+    )
+
+    # Preserve admin avatar path if it was somehow unset
+    cur.execute(
+        "UPDATE users SET avatar_path = '/static/uploads/avatars/admin_profile.png' "
+        "WHERE username = 'admin' AND (avatar_path IS NULL OR avatar_path = '')"
+    )
+
+    # Sync custom profile settings from data/user_profiles.json if present
+    profile_json = DB_PATH.parent / "user_profiles.json"
+    if profile_json.exists():
+        try:
+            import json
+            with open(profile_json, "r", encoding="utf-8") as pf:
+                saved_profiles = json.load(pf)
+            for uname, pdata in saved_profiles.items():
+                cur.execute(
+                    """
+                    UPDATE users
+                    SET full_name = COALESCE(?, full_name),
+                        age = COALESCE(?, age),
+                        mobile_no = COALESCE(?, mobile_no),
+                        avatar_path = CASE WHEN ? != '' THEN ? ELSE avatar_path END
+                    WHERE LOWER(username) = LOWER(?)
+                    """,
+                    (pdata.get("full_name"), pdata.get("age"), pdata.get("mobile_no"), pdata.get("avatar_path", ""), pdata.get("avatar_path", ""), uname),
+                )
+        except Exception:
+            pass
 
     conn.commit()
     conn.close()

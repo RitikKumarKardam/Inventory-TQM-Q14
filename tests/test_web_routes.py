@@ -515,6 +515,7 @@ def test_admin_member_management():
     assert "members" in api_data["data"]
     assert "logs" in api_data["data"]
     assert any(m["full_name"] == "Ritik Kumar" for m in api_data["data"]["members"])
+    assert any(m["username"] == "admin" and m["full_name"] == "Ritik Kardam" for m in api_data["data"]["members"])
     if api_data["data"]["logs"]:
         first_log = api_data["data"]["logs"][0]
         assert "created_at" in first_log
