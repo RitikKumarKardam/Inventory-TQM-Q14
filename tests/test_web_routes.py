@@ -498,12 +498,14 @@ def test_admin_member_management():
     assert "ISO 9001 Quality Audit Trail" not in res_dash.data.decode("utf-8")
     assert "Recent Stock Movements" in res_dash.data.decode("utf-8")
 
-    # Verify admin members page contains Live Member Session & Activity Tracking
+    # Verify admin members page contains Live Session & Activity Tracking
     res_members = client.get("/admin/members")
     assert res_members.status_code == 200
-    assert "Member Live Session" in res_members.data.decode("utf-8")
-    assert "Activity Tracking" in res_members.data.decode("utf-8")
-    assert "Active Now" in res_members.data.decode("utf-8")
+    members_html = res_members.data.decode("utf-8")
+    assert "Live Session" in members_html
+    assert "Activity Tracking" in members_html
+    assert "Active Now" in members_html
+    assert "Member Live Session" not in members_html
 
     # Verify JSON endpoint /admin/members/live-sessions
     res_api = client.get("/admin/members/live-sessions")
