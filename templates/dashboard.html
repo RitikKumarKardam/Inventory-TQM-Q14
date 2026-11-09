@@ -8,8 +8,12 @@
 
 {% block content %}
 <div class="page-header">
-  <div class="page-title-group">
-    <h2><i class="bi bi-speedometer2" style="color: var(--color-primary);"></i> TQM Inventory Dashboard &amp; Quality Control</h2>
+  <div class="page-title-group" style="display: flex; align-items: center; gap: 14px;">
+    <img src="{{ url_for('static', filename='img/business_logo.jpg') }}" alt="Business Logo" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(11, 61, 145, 0.25); box-shadow: 0 4px 12px rgba(11, 61, 145, 0.15); background: #071739; flex-shrink: 0;">
+    <div>
+      <h2 style="margin: 0; line-height: 1.2;"><i class="bi bi-speedometer2" style="color: var(--color-primary);"></i> TQM Inventory Dashboard &amp; Quality Control</h2>
+      <div style="font-size: 13px; color: var(--color-text-muted); margin-top: 3px;">Real-Time Inventory Operations, Quality Control &amp; Continuous Improvement</div>
+    </div>
   </div>
   <div class="page-actions">
     <a href="{{ url_for('products') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add Product</a>

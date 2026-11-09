@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - My Inventory System</title>
   
-  <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='img/amrapali_circle.jpg') }}">
+  <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='img/business_logo.jpg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -72,12 +72,14 @@
     }
 
     .login-crest {
-      width: 70px;
-      height: 70px;
+      width: 78px;
+      height: 78px;
       border-radius: 50%;
-      background: #ffffff;
-      padding: 3px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+      object-fit: cover;
+      background: #071739;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      padding: 1px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     }
 
     .login-body {
@@ -189,7 +191,7 @@
     <div class="login-card">
       <div class="login-header">
         <div class="login-header-logos">
-          <img src="{{ url_for('static', filename='img/amrapali_circle.jpg') }}" alt="Amrapali University Crest" class="login-crest">
+          <img src="{{ url_for('static', filename='img/business_logo.jpg') }}" alt="Inventory Management System" class="login-crest">
         </div>
         <h2 style="margin: 0; font-size: 19px; font-weight: 700; color: #ffffff;">Inventory Management Portal</h2>
       </div>
