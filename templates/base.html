@@ -68,13 +68,6 @@
                 </span>
               {% endif %}
             </div>
-            <div class="student-sub">
-              {% if user.provider == 'google' and user.email %}
-                {{ user.email }}
-              {% else %}
-                @{{ user.username }}
-              {% endif %}
-            </div>
           </div>
         </a>
 
