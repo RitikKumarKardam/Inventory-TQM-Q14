@@ -224,8 +224,9 @@ def login():
         )
         if user_data:
             session["user"] = user_data
+            welcome_name = user_data.get("full_name") or user_data.get("display_name") or user_data.get("username", "").title()
             flash(
-                f"Welcome, {user_data['display_name']}! Signed in under {user_data['role']} role.",
+                f"Welcome, {welcome_name}!",
                 "success",
             )
             return redirect(url_for("dashboard"))
@@ -281,8 +282,9 @@ def login_google():
         try:
             user_data = auth_service.authenticate_google(email, full_name)
             session["user"] = user_data
+            welcome_name = user_data.get("full_name") or user_data.get("display_name") or (full_name if full_name else email)
             flash(
-                f"Signed in via Google as {user_data['email']} ({user_data['role']} Mode Active)",
+                f"Welcome, {welcome_name}!",
                 "success",
             )
             return redirect(url_for("dashboard"))
@@ -350,8 +352,9 @@ def login_google_callback():
         # 3. STRICT VALIDATION: Check if this Google account already exists on this inventory management system
         user_data = auth_service.authenticate_google(google_email, full_name=full_name)
         session["user"] = user_data
+        welcome_name = user_data.get("full_name") or user_data.get("display_name") or (full_name if full_name else google_email)
         flash(
-            f"Signed in via Google as {user_data['email']} ({user_data['role']} role active)",
+            f"Welcome, {welcome_name}!",
             "success",
         )
         return redirect(url_for("dashboard"))
@@ -808,7 +811,7 @@ def profile():
         session["user"]["mobile_no"] = mobile_no
         session["user"]["role"] = role
         session["user"]["is_admin"] = (role == "Admin")
-        session["user"]["display_name"] = "Admin" if role == "Admin" else "Member"
+        session["user"]["display_name"] = full_name
         if avatar_path:
             session["user"]["avatar_path"] = avatar_path
         session.modified = True

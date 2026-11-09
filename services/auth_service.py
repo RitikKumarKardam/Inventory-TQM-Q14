@@ -93,9 +93,8 @@ class AuthService:
                     "Please switch to the 'Admin Login' tab.",
                 )
 
-        display_name = "Admin" if role == "Admin" else "Member"
-
-        full_name = row["full_name"] if "full_name" in row.keys() and row["full_name"] else "Ritik Kumar"
+        full_name = row["full_name"] if "full_name" in row.keys() and row["full_name"] else ("Ritik Kumar" if "ritik" in row["username"].lower() or row["username"] in ("admin", "member") else row["username"].title())
+        display_name = full_name
         age = row["age"] if "age" in row.keys() and row["age"] else 21
         mobile_no = row["mobile_no"] if "mobile_no" in row.keys() and row["mobile_no"] else "+91 9876543210"
         email_verified = row["email_verified"] if "email_verified" in row.keys() else 1
@@ -178,12 +177,13 @@ class AuthService:
         role = row["role"]
         conn.close()
 
-        if full_name:
+        db_full_name = row["full_name"] if "full_name" in row.keys() and row["full_name"] else ""
+        if db_full_name:
+            display_name = db_full_name
+        elif full_name:
             display_name = full_name
         elif "ritik" in email or "2520301005" in email or username.lower() == "ritik":
             display_name = "Ritik Kumar"
-        elif role == "Admin":
-            display_name = "System Admin"
         else:
             display_name = username.title()
 

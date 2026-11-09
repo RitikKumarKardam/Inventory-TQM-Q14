@@ -47,12 +47,12 @@
             {% elif user.provider == 'google' %}
               <i class="bi bi-google"></i>
             {% else %}
-              RK
+              {{ (user.full_name or user.display_name or user.username or 'RK')[:2]|upper }}
             {% endif %}
           </div>
           <div class="student-meta">
             <div class="student-name">
-              {% if user.is_admin %}Admin{% elif user.role == 'Member' %}Member{% else %}{{ user.display_name }}{% endif %}
+              {{ user.full_name or user.display_name or 'Ritik Kumar' }}
               {% if user.provider == 'google' %}
                 <span class="badge" style="font-size: 10px; padding: 2px 6px; background: #ea4335; color: #ffffff; margin-left: 4px;">
                   <i class="bi bi-google"></i> GMAIL
@@ -69,12 +69,10 @@
               {% endif %}
             </div>
             <div class="student-sub">
-              {% if user.full_name %}
-                {{ user.full_name }}
-              {% elif user.provider == 'google' and user.email %}
+              {% if user.provider == 'google' and user.email %}
                 {{ user.email }}
               {% else %}
-                Ritik Kumar
+                @{{ user.username }}
               {% endif %}
             </div>
           </div>
