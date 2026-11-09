@@ -144,9 +144,23 @@ def inject_common_context():
 # =============================================================================
 
 def generate_captcha_text(length: int = 5) -> str:
-    """Generate unambiguous alphanumeric security CAPTCHA code."""
-    chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-    return "".join(random.choices(chars, k=length))
+    """Generate unambiguous alphanumeric security CAPTCHA code.
+    
+    Mixture of maximum 2 numerical digits (1 or 2 numbers) and 3 alphabet letters only,
+    shuffled so they appear at any position.
+    """
+    digits_pool = "23456789"
+    letters_pool = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+
+    num_digits = random.choice([1, 2])
+    num_letters = 3
+
+    digits = random.choices(digits_pool, k=num_digits)
+    letters = random.choices(letters_pool, k=num_letters)
+
+    chars = digits + letters
+    random.shuffle(chars)
+    return "".join(chars)
 
 
 def generate_captcha_svg(code: str) -> str:

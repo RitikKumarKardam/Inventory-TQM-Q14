@@ -243,7 +243,7 @@
 
           <!-- Security CAPTCHA Verification -->
           <div class="form-group">
-            <label class="form-label"><i class="bi bi-shield-check"></i> Security Code (CAPTCHA) *</label>
+            <label class="form-label">Security Code (CAPTCHA) *</label>
             <div style="display: flex; gap: 10px; align-items: center;">
               <div class="captcha-badge-wrapper" style="display: flex; align-items: center; background: #e0f2fe; border: 1px solid #7dd3fc; border-radius: var(--radius-sm); padding: 3px 6px; flex-shrink: 0; user-select: none;">
                 <img id="captcha-img" src="{{ url_for('get_captcha') }}" alt="CAPTCHA Code" style="height: 36px; width: 110px; cursor: pointer; border-radius: 4px; display: block;" onclick="refreshCaptcha()" title="Click image to refresh security code">
