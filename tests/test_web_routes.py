@@ -492,5 +492,28 @@ def test_admin_member_management():
     assert res_del_self.status_code == 400
     assert "cannot delete your own" in res_del_self.get_json()["error"]
 
+    # 10. Live Session Tracking & Audit Separation
+    # Verify dashboard no longer contains ISO 9001 Quality Audit Trail
+    res_dash = client.get("/")
+    assert "ISO 9001 Quality Audit Trail" not in res_dash.data.decode("utf-8")
+    assert "Recent Stock Movements" in res_dash.data.decode("utf-8")
+
+    # Verify admin members page contains Live Member Session & Activity Tracking
+    res_members = client.get("/admin/members")
+    assert res_members.status_code == 200
+    assert "Member Live Session" in res_members.data.decode("utf-8")
+    assert "Activity Tracking" in res_members.data.decode("utf-8")
+    assert "Active Now" in res_members.data.decode("utf-8")
+
+    # Verify JSON endpoint /admin/members/live-sessions
+    res_api = client.get("/admin/members/live-sessions")
+    assert res_api.status_code == 200
+    api_data = res_api.get_json()
+    assert api_data["success"] is True
+    assert "members" in api_data["data"]
+    assert "logs" in api_data["data"]
+    assert any(m["full_name"] == "Ritik Kumar" for m in api_data["data"]["members"])
+
+
 
 

@@ -1157,6 +1157,7 @@ def admin_members():
         return redirect(url_for("dashboard"))
 
     all_users = auth_service.get_all_users()
+    session_tracking = auth_service.get_member_session_tracking()
     stats = {
         "total": len(all_users),
         "active": sum(1 for u in all_users if u.get("status") == "Active"),
@@ -1171,8 +1172,19 @@ def admin_members():
         active_page="members",
         users=all_users,
         stats=stats,
+        session_tracking=session_tracking,
         is_admin=True,
     )
+
+
+@app.route("/admin/members/live-sessions")
+def admin_members_live_sessions():
+    """Live JSON API returning active member presence, login, and logout timestamps."""
+    user = session.get("user")
+    if not user or not user.get("is_admin"):
+        return jsonify({"success": False, "error": "Unauthorized"}), 403
+    tracking = auth_service.get_member_session_tracking()
+    return jsonify({"success": True, "data": tracking})
 
 
 @app.route("/admin/members/status", methods=["POST"])

@@ -158,89 +158,48 @@
 </div>
 
 <!-- ====================================================================
-     RECENT ACTIVITIES & AUDIT LOG ROW
+     RECENT STOCK MOVEMENTS
      ==================================================================== -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px;">
-  <!-- Recent Stock Movements -->
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title"><i class="bi bi-arrow-left-right" style="color: var(--color-primary);"></i> Recent Stock Movements</h3>
-      <a href="{{ url_for('stock') }}" class="btn btn-outline btn-sm">View All Movements</a>
-    </div>
-    <div class="card-body" style="padding: 0;">
-      <div class="table-responsive">
-        <table class="table-amrapali">
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>SKU / Product</th>
-              <th>Quantity</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for m in recent_movements %}
-            <tr>
-              <td>
-                <span class="badge {% if m.movement_type == 'IN' %}badge-in{% else %}badge-out{% endif %}">
-                  {{ m.movement_type }}
-                </span>
-              </td>
-              <td>
-                <strong>{{ m.sku }}</strong><br>
-                <span style="font-size: 11.5px; color: var(--color-text-muted);">{{ m.product_name }}</span>
-              </td>
-              <td><strong>{{ m.quantity }} units</strong></td>
-              <td style="font-size: 11.5px; color: var(--color-text-muted);">{{ m.created_at }}</td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">
-                No stock movement recorded yet.
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="bi bi-arrow-left-right" style="color: var(--color-primary);"></i> Recent Stock Movements</h3>
+    <a href="{{ url_for('stock') }}" class="btn btn-outline btn-sm">View All Movements <i class="bi bi-arrow-right"></i></a>
   </div>
-
-  <!-- ISO 9001 Audit Trail -->
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title"><i class="bi bi-shield-check" style="color: var(--color-success);"></i> ISO 9001 Quality Audit Trail</h3>
-      <a href="{{ url_for('reports') }}" class="btn btn-outline btn-sm">Full Audit Trail</a>
-    </div>
-    <div class="card-body" style="padding: 0;">
-      <div class="table-responsive">
-        <table class="table-amrapali">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Action</th>
-              <th>Entity / Details</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for a in recent_audits %}
-            <tr>
-              <td><strong>{{ a.username }}</strong></td>
-              <td><span class="badge badge-info">{{ a.action }}</span></td>
-              <td style="font-size: 12px;">{{ a.entity }}: {{ a.details }}</td>
-              <td style="font-size: 11.5px; color: var(--color-text-muted);">{{ a.created_at }}</td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">
-                No audit events recorded yet.
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+  <div class="card-body" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="table-amrapali">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>SKU / Product</th>
+            <th>Quantity</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in recent_movements %}
+          <tr>
+            <td>
+              <span class="badge {% if m.movement_type == 'IN' %}badge-in{% else %}badge-out{% endif %}">
+                {{ m.movement_type }}
+              </span>
+            </td>
+            <td>
+              <strong>{{ m.sku }}</strong><br>
+              <span style="font-size: 11.5px; color: var(--color-text-muted);">{{ m.product_name }}</span>
+            </td>
+            <td><strong>{{ m.quantity }} units</strong></td>
+            <td style="font-size: 11.5px; color: var(--color-text-muted);">{{ m.created_at }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">
+              No stock movement recorded yet.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

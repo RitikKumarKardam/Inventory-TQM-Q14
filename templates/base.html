@@ -40,7 +40,7 @@
 
       <!-- Student Profile & User Session Badge (Clickable to Profile Screen) -->
       <div style="display: flex; align-items: center; gap: 12px;">
-        <a href="{{ url_for('profile') }}" class="student-portal-pill" title="Click to customize profile (Name, Photo, OTP, Role)" style="text-decoration: none; cursor: pointer;">
+        <a href="{{ url_for('profile') }}" class="student-portal-pill" data-user-email="{{ user.email or '' }}" title="Click to customize profile ({{ user.email or user.full_name or 'Profile' }})" style="text-decoration: none; cursor: pointer;">
           <div class="student-avatar" style="{% if user.avatar_path %}background: transparent; border: 2px solid #ffffff; padding: 0;{% elif user.provider == 'google' %}background: #ffffff; color: #4285F4; border: 2px solid #e0e2e6; font-size: 18px;{% elif user.is_admin %}background: linear-gradient(135deg, #d97706, #b45309);{% else %}background: linear-gradient(135deg, #10b981, #059669);{% endif %} overflow: hidden;">
             {% if user.avatar_path %}
               <img src="{{ user.avatar_path }}" alt="Profile Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">

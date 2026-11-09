@@ -317,6 +317,91 @@ class AuthService:
         conn.close()
         return [dict(r) for r in rows]
 
+    def get_member_session_tracking(self) -> Dict[str, Any]:
+        """Retrieve live member login/logout tracking data and recent session activity."""
+        conn = get_conn()
+        cur = conn.cursor()
+
+        users = self.get_all_users()
+        member_sessions = []
+        for u in users:
+            uname = u["username"]
+            uemail = u.get("email", "")
+
+            login_row = cur.execute("""
+                SELECT created_at, action
+                FROM audit_log
+                WHERE (LOWER(username) = LOWER(?) OR (LOWER(username) = LOWER(?) AND ? != ''))
+                  AND action IN ('LOGIN_SUCCESS', 'LOGIN_GOOGLE_SUCCESS')
+                ORDER BY id DESC LIMIT 1
+            """, (uname, uemail, uemail)).fetchone()
+
+            logout_row = cur.execute("""
+                SELECT created_at, action
+                FROM audit_log
+                WHERE (LOWER(username) = LOWER(?) OR (LOWER(username) = LOWER(?) AND ? != ''))
+                  AND action = 'LOGOUT'
+                ORDER BY id DESC LIMIT 1
+            """, (uname, uemail, uemail)).fetchone()
+
+            last_login = login_row["created_at"] if login_row else None
+            last_logout = logout_row["created_at"] if logout_row else None
+
+            is_online = False
+            if last_login:
+                if not last_logout or last_login > last_logout:
+                    is_online = True
+
+            if u.get("status") in ("Suspended", "Banned"):
+                is_online = False
+
+            member_sessions.append({
+                "id": u["id"],
+                "username": u["username"],
+                "full_name": u["full_name"],
+                "role": u["role"],
+                "avatar_path": u.get("avatar_path", ""),
+                "status": u.get("status", "Active"),
+                "provider": u.get("provider", "local"),
+                "email": u.get("email", ""),
+                "is_online": is_online,
+                "last_login": last_login or "No login recorded",
+                "last_logout": last_logout or ("Currently In Session" if is_online else "No logout recorded"),
+            })
+
+        recent_logs = cur.execute("""
+            SELECT a.id, a.username, a.action, a.details, a.created_at,
+                   COALESCE(u.full_name, 'Ritik Kumar') as full_name,
+                   COALESCE(u.avatar_path, '') as avatar_path,
+                   COALESCE(u.role, 'Member') as role
+            FROM audit_log a
+            LEFT JOIN users u ON LOWER(a.username) = LOWER(u.username) OR LOWER(a.username) = LOWER(u.email)
+            WHERE a.action IN ('LOGIN_SUCCESS', 'LOGIN_GOOGLE_SUCCESS', 'LOGOUT')
+            ORDER BY a.id DESC
+            LIMIT 15
+        """).fetchall()
+
+        session_logs = []
+        for r in recent_logs:
+            session_logs.append({
+                "id": r["id"],
+                "username": r["username"],
+                "full_name": r["full_name"] or r["username"].title(),
+                "role": r["role"],
+                "avatar_path": r["avatar_path"],
+                "action_name": "Logged In" if "LOGIN" in r["action"] else "Logged Out",
+                "action_type": "LOGIN" if "LOGIN" in r["action"] else "LOGOUT",
+                "details": r["details"],
+                "created_at": r["created_at"],
+            })
+
+        conn.close()
+        return {
+            "members": member_sessions,
+            "logs": session_logs,
+            "online_count": sum(1 for m in member_sessions if m["is_online"]),
+        }
+
     def update_user_status(
         self, user_id: int, new_status: str, reason: str = "", current_admin_id: Optional[int] = None
     ) -> Tuple[bool, str]:
