@@ -183,6 +183,13 @@ def init_db() -> None:
             "INSERT INTO users(username,password,role,email,provider,full_name) "
             "VALUES('ritik','ritik123','Member','ritikkumar2520301005@gmail.com','google','Ritik Kumar')"
         )
+
+    # Ensure audit_log timestamps are stored in Indian Standard Time (IST, UTC+05:30)
+    cur.execute("CREATE TABLE IF NOT EXISTS system_settings (key TEXT PRIMARY KEY, value TEXT)")
+    ist_migrated = cur.execute("SELECT value FROM system_settings WHERE key = 'audit_ist_migrated'").fetchone()
+    if not ist_migrated:
+        cur.execute("UPDATE audit_log SET created_at = datetime(created_at, '+5 hours', '30 minutes') WHERE created_at LIKE '2026-%'")
+        cur.execute("INSERT OR REPLACE INTO system_settings(key, value) VALUES('audit_ist_migrated', '1')")
     else:
         # Preserve admin avatar path if it was somehow unset
         cur.execute(

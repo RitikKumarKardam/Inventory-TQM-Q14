@@ -513,6 +513,11 @@ def test_admin_member_management():
     assert "members" in api_data["data"]
     assert "logs" in api_data["data"]
     assert any(m["full_name"] == "Ritik Kumar" for m in api_data["data"]["members"])
+    if api_data["data"]["logs"]:
+        first_log = api_data["data"]["logs"][0]
+        assert "created_at" in first_log
+        assert len(first_log["created_at"]) == 19  # 'YYYY-MM-DD HH:MM:SS'
+
 
 
 

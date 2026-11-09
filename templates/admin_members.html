@@ -330,8 +330,8 @@
             <th style="padding: 14px 18px; width: 28%;">Member Name</th>
             <th style="padding: 14px 14px; width: 14%;">Role</th>
             <th style="padding: 14px 14px; width: 16%;">Live Status</th>
-            <th style="padding: 14px 16px; width: 21%;">Login Time</th>
-            <th style="padding: 14px 18px; width: 21%;">Logout Time</th>
+            <th style="padding: 14px 16px; width: 21%;">Login Time (IST)</th>
+            <th style="padding: 14px 18px; width: 21%;">Logout Time (IST)</th>
           </tr>
         </thead>
         <tbody id="memberSessionsTableBody">
@@ -397,16 +397,21 @@
 
             <!-- Logout Time -->
             <td style="padding: 14px 18px;">
-              {% if m.is_online %}
-                <span class="badge badge-info" style="font-size: 11.5px; padding: 4px 8px; font-weight: 600;">
-                  <i class="bi bi-activity"></i> In Session
-                </span>
-              {% elif m.last_logout != 'No logout recorded' %}
+              {% if m.last_logout != 'No logout recorded' %}
                 <div style="font-weight: 600; color: #475569; font-size: 13px; font-family: 'JetBrains Mono', monospace;">
                   <i class="bi bi-box-arrow-left" style="color: #64748b; margin-right: 4px;"></i> {{ m.last_logout }}
                 </div>
+                {% if m.is_online %}
+                  <span class="badge badge-info" style="font-size: 10px; padding: 2px 6px; margin-top: 4px; display: inline-block;">
+                    <i class="bi bi-activity"></i> Currently In Session
+                  </span>
+                {% endif %}
+              {% elif m.is_online %}
+                <span class="badge badge-info" style="font-size: 11.5px; padding: 4px 8px; font-weight: 600;">
+                  <i class="bi bi-activity"></i> In Session (First session)
+                </span>
               {% else %}
-                <span style="font-size: 12.5px; color: var(--color-text-muted);">—</span>
+                <span style="font-size: 12.5px; color: var(--color-text-muted);">No logout recorded</span>
               {% endif %}
             </td>
           </tr>
@@ -419,7 +424,7 @@
     <div style="border-top: 1px solid var(--color-border); background: #fafafa; padding: 14px 20px;">
       <div style="font-weight: 700; font-size: 13.5px; color: #1e293b; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
         <span><i class="bi bi-list-check" style="color: var(--color-primary);"></i> Chronological Login &amp; Logout Access History</span>
-        <span style="font-size: 11.5px; font-weight: 500; color: var(--color-text-muted);">Recent authenticated events mapped by member name</span>
+        <span style="font-size: 11.5px; font-weight: 500; color: var(--color-text-muted);">Recent authenticated events synchronized in Indian Standard Time (IST)</span>
       </div>
       <div class="table-responsive" style="max-height: 240px; overflow-y: auto;">
         <table class="table-amrapali" style="width: 100%; border-collapse: collapse; margin: 0; background: #ffffff;">
@@ -428,7 +433,7 @@
               <th style="padding: 10px 14px;">Member Name</th>
               <th style="padding: 10px 14px;">Event Action</th>
               <th style="padding: 10px 14px;">Details</th>
-              <th style="padding: 10px 14px;">Timestamp</th>
+              <th style="padding: 10px 14px;">Timestamp (IST)</th>
             </tr>
           </thead>
           <tbody id="sessionLogsTableBody">
@@ -889,7 +894,10 @@
                 ${m.last_login !== 'No login recorded' ? `<div style="font-weight: 600; color: #0f172a; font-size: 13px; font-family: 'JetBrains Mono', monospace;"><i class="bi bi-box-arrow-in-right" style="color: #10b981; margin-right: 4px;"></i> ${m.last_login}</div>` : '<span style="font-size: 12.5px; color: var(--color-text-muted);">No login recorded</span>'}
               </td>
               <td style="padding: 14px 18px;">
-                ${m.is_online ? '<span class="badge badge-info" style="font-size: 11.5px; padding: 4px 8px; font-weight: 600;"><i class="bi bi-activity"></i> In Session</span>' : (m.last_logout !== 'No logout recorded' ? `<div style="font-weight: 600; color: #475569; font-size: 13px; font-family: 'JetBrains Mono', monospace;"><i class="bi bi-box-arrow-left" style="color: #64748b; margin-right: 4px;"></i> ${m.last_logout}</div>` : '<span style="font-size: 12.5px; color: var(--color-text-muted);">—</span>')}
+                ${m.last_logout !== 'No logout recorded' ? `
+                  <div style="font-weight: 600; color: #475569; font-size: 13px; font-family: 'JetBrains Mono', monospace;"><i class="bi bi-box-arrow-left" style="color: #64748b; margin-right: 4px;"></i> ${m.last_logout}</div>
+                  ${m.is_online ? '<span class="badge badge-info" style="font-size: 10px; padding: 2px 6px; margin-top: 4px; display: inline-block;"><i class="bi bi-activity"></i> Currently In Session</span>' : ''}
+                ` : (m.is_online ? '<span class="badge badge-info" style="font-size: 11.5px; padding: 4px 8px; font-weight: 600;"><i class="bi bi-activity"></i> In Session (First session)</span>' : '<span style="font-size: 12.5px; color: var(--color-text-muted);">No logout recorded</span>')}
               </td>
             </tr>
           `).join('');

@@ -329,7 +329,7 @@ class AuthService:
             uemail = u.get("email", "")
 
             login_row = cur.execute("""
-                SELECT created_at, action
+                SELECT id, created_at, action
                 FROM audit_log
                 WHERE (LOWER(username) = LOWER(?) OR (LOWER(username) = LOWER(?) AND ? != ''))
                   AND action IN ('LOGIN_SUCCESS', 'LOGIN_GOOGLE_SUCCESS')
@@ -337,7 +337,7 @@ class AuthService:
             """, (uname, uemail, uemail)).fetchone()
 
             logout_row = cur.execute("""
-                SELECT created_at, action
+                SELECT id, created_at, action
                 FROM audit_log
                 WHERE (LOWER(username) = LOWER(?) OR (LOWER(username) = LOWER(?) AND ? != ''))
                   AND action = 'LOGOUT'
@@ -348,8 +348,8 @@ class AuthService:
             last_logout = logout_row["created_at"] if logout_row else None
 
             is_online = False
-            if last_login:
-                if not last_logout or last_login > last_logout:
+            if login_row:
+                if not logout_row or login_row["id"] > logout_row["id"]:
                     is_online = True
 
             if u.get("status") in ("Suspended", "Banned"):
@@ -366,7 +366,7 @@ class AuthService:
                 "email": u.get("email", ""),
                 "is_online": is_online,
                 "last_login": last_login or "No login recorded",
-                "last_logout": last_logout or ("Currently In Session" if is_online else "No logout recorded"),
+                "last_logout": last_logout or "No logout recorded",
             })
 
         recent_logs = cur.execute("""
