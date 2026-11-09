@@ -373,8 +373,8 @@ def test_admin_member_management():
     res_admin = client.get("/admin/members")
     assert res_admin.status_code == 200
     html = res_admin.data.decode("utf-8")
-    assert "Member &amp; User Account Management" in html
-    assert "Registered System Users &amp; Members" in html
+    assert "Account Management" in html
+    assert "Registered Accounts" in html
     assert "Total Accounts" in html
 
     # 3. Create a test member account
