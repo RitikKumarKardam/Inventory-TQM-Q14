@@ -144,7 +144,7 @@ def test_google_login():
     assert "admin@amrapali.ac.in" in body
     assert "ADMIN" in body
 
-    # 4. Login with student's personal Gmail (ritikkumarhempur5@gmail.com)
+    # 4. Strict rejection: Deleted / Unregistered user (ritikkumarhempur5@gmail.com) is NOT allowed to sign in
     client.get("/logout")
     res = client.post(
         "/login/google",
@@ -153,10 +153,9 @@ def test_google_login():
     )
     assert res.status_code == 200
     body = res.data.decode("utf-8")
-    assert "ritikkumarhempur5@gmail.com" in body
-    assert "MEMBER" in body
+    assert "No registered account found" in body
 
-    # 5. Strict rejection: Unregistered Gmail address is NOT allowed to sign in
+    # 5. Strict rejection: Stranger unregistered Gmail address is NOT allowed to sign in
     client.get("/logout")
     res = client.post(
         "/login/google",
@@ -167,11 +166,11 @@ def test_google_login():
     body = res.data.decode("utf-8")
     assert "No registered account found" in body
 
-    # 6. Direct Login: Sign in directly using Gmail as Username + Password
+    # 6. Direct Login: Sign in directly using registered Gmail as Username + Password
     client.get("/logout")
     res = client.post(
         "/login",
-        data={"username": "ritikkumarhempur5@gmail.com", "password": "ritik123", "role_hint": "Member"},
+        data={"username": "ritikkumar2520301005@gmail.com", "password": "ritik123", "role_hint": "Member"},
         follow_redirects=True,
     )
     assert res.status_code == 200

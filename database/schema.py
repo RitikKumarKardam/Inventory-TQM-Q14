@@ -149,19 +149,6 @@ def init_db() -> None:
         except Exception:
             pass
 
-    cur.execute(
-        "INSERT OR IGNORE INTO users(username,password,role,email,provider) VALUES('admin','admin123','Admin','admin@amrapali.ac.in','local')"
-    )
-    cur.execute(
-        "INSERT OR IGNORE INTO users(username,password,role,email,provider) VALUES('member','member123','Member','member@amrapali.ac.in','local')"
-    )
-    cur.execute(
-        "INSERT OR IGNORE INTO users(username,password,role,email,provider) VALUES('ritik','ritik123','Member','ritikkumar2520301005@gmail.com','google')"
-    )
-    cur.execute(
-        "INSERT OR IGNORE INTO users(username,password,role,email,provider) VALUES('ritikkumarhempur5','ritik123','Member','ritikkumarhempur5@gmail.com','google')"
-    )
-
     # Ensure profile columns exist
     cur.execute("PRAGMA table_info(users)")
     existing_cols = [col[1] for col in cur.fetchall()]
@@ -179,6 +166,29 @@ def init_db() -> None:
     for col_name, col_def in profile_cols.items():
         if col_name not in existing_cols:
             cur.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
+
+    # Seed initial accounts ONLY if users table is completely empty (first-time database setup)
+    # This prevents any deleted user (e.g. ritikkumarhempur5) from ever resurrecting on server restart
+    user_count = cur.execute("SELECT count(*) FROM users").fetchone()[0]
+    if user_count == 0:
+        cur.execute(
+            "INSERT INTO users(username,password,role,email,provider,full_name,avatar_path) "
+            "VALUES('admin','admin123','Admin','admin@amrapali.ac.in','local','Ritik Kumar','/static/uploads/avatars/admin_profile.png')"
+        )
+        cur.execute(
+            "INSERT INTO users(username,password,role,email,provider,full_name) "
+            "VALUES('member','member123','Member','member@amrapali.ac.in','local','Ritik Kumar Kardam')"
+        )
+        cur.execute(
+            "INSERT INTO users(username,password,role,email,provider,full_name) "
+            "VALUES('ritik','ritik123','Member','ritikkumar2520301005@gmail.com','google','Ritik Kumar')"
+        )
+    else:
+        # Preserve admin avatar path if it was somehow unset
+        cur.execute(
+            "UPDATE users SET avatar_path = '/static/uploads/avatars/admin_profile.png' "
+            "WHERE username = 'admin' AND (avatar_path IS NULL OR avatar_path = '')"
+        )
 
     conn.commit()
     conn.close()
