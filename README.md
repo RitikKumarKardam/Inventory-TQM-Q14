@@ -65,7 +65,7 @@ The system implements strict identity and role-based access control. Only genuin
 
 | Role | User ID / Login ID | Password | Registered Gmail Address | Access Scope |
 |:---|:---|:---|:---|:---|
-| 👑 **Administrator** | `admin` | `admin123` | `admin@amrapali.ac.in` | **Full Institutional Access:** Catalog management, Vendor ratings, Lot inspections, FMEA/PDCA, ISO 9001 audit trails. |
+| 👑 **Administrator** | `prariti` | `Rp@12345678` | `admin@amrapali.ac.in` | **Full Institutional Access:** Catalog management, Vendor ratings, Lot inspections, FMEA/PDCA, ISO 9001 audit trails. |
 | 🎓 **Student Member** | `ritik`<br>*(or `ritikkumarhempur5`)* | `ritik123` | `ritikkumarhempur5@gmail.com`<br>`ritikkumar2520301005@gmail.com` | **Quality Operations Access:** Ritik Kumar (Roll: 2520301005). Stock IN/OUT, Quality inspection dossiers, TQM 7 QC tools, EOQ & ABC calculators. |
 | 👤 **Store Member** | `member` | `member123` | `member@amrapali.ac.in` | **Standard Operator Access:** Catalog browsing, inventory movements, and inspection verification. |
 

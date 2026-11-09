@@ -173,7 +173,7 @@ def init_db() -> None:
     if user_count == 0:
         cur.execute(
             "INSERT INTO users(username,password,role,email,provider,full_name,avatar_path) "
-            "VALUES('admin','admin123','Admin','admin@amrapali.ac.in','local','Ritik Kardam','/static/uploads/avatars/admin_profile.png')"
+            "VALUES('prariti','Rp@12345678','Admin','admin@amrapali.ac.in','local','Ritik Kardam','/static/uploads/avatars/admin_profile.png')"
         )
         cur.execute(
             "INSERT INTO users(username,password,role,email,provider,full_name) "
@@ -191,17 +191,21 @@ def init_db() -> None:
         cur.execute("UPDATE audit_log SET created_at = datetime(created_at, '+5 hours', '30 minutes') WHERE created_at LIKE '2026-%'")
         cur.execute("INSERT OR REPLACE INTO system_settings(key, value) VALUES('audit_ist_migrated', '1')")
 
-    # Ensure admin full_name is preserved as 'Ritik Kardam' unless user explicitly customizes it
+    # Upgrade/rename old 'admin' account to 'prariti' with password 'Rp@12345678'
     cur.execute(
-        "UPDATE users SET full_name = 'Ritik Kardam' "
-        "WHERE username = 'admin' AND (full_name = 'Ritik Kumar' OR full_name IS NULL OR full_name = '')"
+        "UPDATE users SET username = 'prariti', password = 'Rp@12345678', full_name = 'Ritik Kardam', "
+        "avatar_path = '/static/uploads/avatars/admin_profile.png' WHERE username = 'admin'"
     )
+    # Ensure any residual 'admin' account is completely removed if 'prariti' exists
+    cur.execute("DELETE FROM users WHERE username = 'admin' AND EXISTS (SELECT 1 FROM users WHERE username = 'prariti')")
 
-    # Preserve admin avatar path if it was somehow unset
+    # Ensure prariti has correct credentials and avatar
     cur.execute(
-        "UPDATE users SET avatar_path = '/static/uploads/avatars/admin_profile.png' "
-        "WHERE username = 'admin' AND (avatar_path IS NULL OR avatar_path = '')"
+        "UPDATE users SET password = 'Rp@12345678', full_name = 'Ritik Kardam', "
+        "avatar_path = '/static/uploads/avatars/admin_profile.png' WHERE username = 'prariti'"
     )
+    # Update past audit logs mapping 'admin' to 'prariti'
+    cur.execute("UPDATE audit_log SET username = 'prariti' WHERE username = 'admin'")
 
     # Sync custom profile settings from data/user_profiles.json if present
     profile_json = DB_PATH.parent / "user_profiles.json"

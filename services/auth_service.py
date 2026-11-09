@@ -93,7 +93,7 @@ class AuthService:
                     "Please switch to the 'Admin Login' tab.",
                 )
 
-        fallback_name = "Ritik Kardam" if row["username"] == "admin" else ("Ritik Kumar Kardam" if row["username"] == "member" else "Ritik Kumar")
+        fallback_name = "Ritik Kardam" if row["username"] in ("admin", "prariti") else ("Ritik Kumar Kardam" if row["username"] == "member" else "Ritik Kumar")
         full_name = row["full_name"] if "full_name" in row.keys() and row["full_name"] else fallback_name
         display_name = full_name
         age = row["age"] if "age" in row.keys() and row["age"] else 21
@@ -219,7 +219,7 @@ class AuthService:
         row = cur.execute(
             """
             SELECT id, username, role, email, provider, 
-                   COALESCE(full_name, CASE WHEN LOWER(username) = 'admin' THEN 'Ritik Kardam' WHEN LOWER(username) = 'member' THEN 'Ritik Kumar Kardam' ELSE 'Ritik Kumar' END) as full_name,
+                   COALESCE(full_name, CASE WHEN LOWER(username) IN ('admin', 'prariti') THEN 'Ritik Kardam' WHEN LOWER(username) = 'member' THEN 'Ritik Kumar Kardam' ELSE 'Ritik Kumar' END) as full_name,
                    COALESCE(age, 21) as age,
                    COALESCE(mobile_no, '+91 9876543210') as mobile_no,
                    COALESCE(email_verified, 1) as email_verified,
@@ -329,7 +329,7 @@ class AuthService:
         cur = conn.cursor()
         rows = cur.execute("""
             SELECT id, username, role, email, provider,
-                   COALESCE(full_name, CASE WHEN username = 'admin' THEN 'Ritik Kardam' WHEN username = 'member' THEN 'Ritik Kumar Kardam' ELSE 'Ritik Kumar' END) as full_name,
+                   COALESCE(full_name, CASE WHEN username IN ('admin', 'prariti') THEN 'Ritik Kardam' WHEN username = 'member' THEN 'Ritik Kumar Kardam' ELSE 'Ritik Kumar' END) as full_name,
                    COALESCE(age, 21) as age,
                    COALESCE(mobile_no, '+91 9368039108') as mobile_no,
                    COALESCE(email_verified, 1) as email_verified,
@@ -400,7 +400,7 @@ class AuthService:
 
         recent_logs = cur.execute("""
             SELECT a.id, a.username, a.action, a.details, a.created_at,
-                   COALESCE(u.full_name, CASE WHEN LOWER(a.username) = 'admin' THEN 'Ritik Kardam' WHEN LOWER(a.username) = 'member' THEN 'Ritik Kumar Kardam' ELSE 'Ritik Kumar' END) as full_name,
+                   COALESCE(u.full_name, CASE WHEN LOWER(a.username) IN ('admin', 'prariti') THEN 'Ritik Kardam' WHEN LOWER(a.username) = 'member' THEN 'Ritik Kumar Kardam' ELSE 'Ritik Kumar' END) as full_name,
                    COALESCE(u.avatar_path, '') as avatar_path,
                    COALESCE(u.role, 'Member') as role
             FROM audit_log a

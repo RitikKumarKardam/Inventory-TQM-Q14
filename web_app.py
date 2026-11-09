@@ -70,7 +70,7 @@ app = Flask(
 )
 app.secret_key = "amrapali-tqm-q14-secret-key-2026"
 
-CURRENT_USER = "admin"
+CURRENT_USER = "prariti"
 STUDENT_INFO = {
     "name": "Ritik Kumar",
     "roll_no": "2520301005",
@@ -128,7 +128,7 @@ def inject_common_context():
         user_dict["display_name"] = "Member"
 
     if not user_dict.get("full_name"):
-        if user_dict.get("username") == "admin":
+        if user_dict.get("username") in ("admin", "prariti"):
             user_dict["full_name"] = "Ritik Kardam"
         elif user_dict.get("username") == "member":
             user_dict["full_name"] = "Ritik Kumar Kardam"
@@ -780,7 +780,7 @@ def profile():
     is_admin = bool(user.get("is_admin") or user.get("role") == "Admin")
 
     if request.method == "POST":
-        full_name = request.form.get("full_name", "").strip() or ("Ritik Kardam" if username == "admin" else "Ritik Kumar")
+        full_name = request.form.get("full_name", "").strip() or ("Ritik Kardam" if username in ("admin", "prariti") else "Ritik Kumar")
         age_str = request.form.get("age", "").strip()
         try:
             age = int(age_str) if age_str else 21

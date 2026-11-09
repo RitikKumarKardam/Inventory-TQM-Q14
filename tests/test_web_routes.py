@@ -24,8 +24,12 @@ def test_login_and_roles():
     assert res.status_code == 200
     assert "Invalid User ID" in res.data.decode("utf-8")
 
+    # Verify old 'admin' account credentials no longer exist
+    res_old = client.post("/login", data={"username": "admin", "password": "admin123", "role_hint": "Admin"}, follow_redirects=True)
+    assert "Invalid User ID" in res_old.data.decode("utf-8")
+
     # 4. Role Differentiation Test: Admin account blocked on Member login tab
-    res_block_admin = client.post("/login", data={"username": "admin", "password": "admin123", "role_hint": "Member"}, follow_redirects=True)
+    res_block_admin = client.post("/login", data={"username": "prariti", "password": "Rp@12345678", "role_hint": "Member"}, follow_redirects=True)
     assert res_block_admin.status_code == 200
     assert "Access Denied" in res_block_admin.data.decode("utf-8")
     assert "Administrator account" in res_block_admin.data.decode("utf-8")
@@ -43,9 +47,9 @@ def test_login_and_roles():
     assert "GMAIL" not in res.data.decode("utf-8")
     assert "GMAIL" not in res.data.decode("utf-8")
 
-    # 7. Admin login succeeds on Admin tab
+    # 7. Admin login succeeds on Admin tab with new credentials
     client.get("/logout")
-    res = client.post("/login", data={"username": "admin", "password": "admin123", "role_hint": "Admin"}, follow_redirects=True)
+    res = client.post("/login", data={"username": "prariti", "password": "Rp@12345678", "role_hint": "Admin"}, follow_redirects=True)
     assert res.status_code == 200
     assert "ADMIN" in res.data.decode("utf-8")
     assert "GMAIL" not in res.data.decode("utf-8")
@@ -54,7 +58,7 @@ def test_login_and_roles():
 def test_authenticated_web_routes():
     client = app.test_client()
     # Sign in as Admin
-    client.post("/login", data={"username": "admin", "password": "admin123"})
+    client.post("/login", data={"username": "prariti", "password": "Rp@12345678"})
 
     routes = [
         "/",
@@ -199,7 +203,7 @@ def test_captcha_security():
 
     res = client.post(
         "/login",
-        data={"username": "admin", "password": "admin123", "captcha": "WRONG1", "role_hint": "Admin"},
+        data={"username": "prariti", "password": "Rp@12345678", "captcha": "WRONG1", "role_hint": "Admin"},
         follow_redirects=True,
     )
     assert res.status_code == 200
@@ -211,7 +215,7 @@ def test_captcha_security():
 
     res = client.post(
         "/login",
-        data={"username": "admin", "password": "admin123", "captcha": "SEC88", "role_hint": "Admin"},
+        data={"username": "prariti", "password": "Rp@12345678", "captcha": "SEC88", "role_hint": "Admin"},
         follow_redirects=True,
     )
     assert res.status_code == 200
@@ -332,7 +336,7 @@ def test_user_profile_and_otp():
         sess["captcha"] = "SEC88"
     client.post(
         "/login",
-        data={"username": "admin", "password": "admin123", "captcha": "SEC88", "role_hint": "Admin"},
+        data={"username": "prariti", "password": "Rp@12345678", "captcha": "SEC88", "role_hint": "Admin"},
         follow_redirects=True,
     )
     res_admin_profile = client.get("/profile")
@@ -367,7 +371,7 @@ def test_admin_member_management():
         sess["captcha"] = "SEC02"
     client.post(
         "/login",
-        data={"username": "admin", "password": "admin123", "captcha": "SEC02", "role_hint": "Admin"},
+        data={"username": "prariti", "password": "Rp@12345678", "captcha": "SEC02", "role_hint": "Admin"},
         follow_redirects=True,
     )
     res_admin = client.get("/admin/members")
@@ -441,7 +445,7 @@ def test_admin_member_management():
         sess["captcha"] = "SEC04"
     client.post(
         "/login",
-        data={"username": "admin", "password": "admin123", "captcha": "SEC04", "role_hint": "Admin"},
+        data={"username": "prariti", "password": "Rp@12345678", "captcha": "SEC04", "role_hint": "Admin"},
         follow_redirects=True,
     )
     res_reactivate = client.post(
@@ -473,7 +477,7 @@ def test_admin_member_management():
         sess["captcha"] = "SEC06"
     client.post(
         "/login",
-        data={"username": "admin", "password": "admin123", "captcha": "SEC06", "role_hint": "Admin"},
+        data={"username": "prariti", "password": "Rp@12345678", "captcha": "SEC06", "role_hint": "Admin"},
         follow_redirects=True,
     )
     res_del = client.post(
@@ -487,7 +491,7 @@ def test_admin_member_management():
     assert not any(u["username"] == "testdummy" for u in auth_service.get_all_users())
 
     # 9. Security Policy: Admin cannot delete self
-    admin_id = next(u["id"] for u in auth_service.get_all_users() if u["username"] == "admin")
+    admin_id = next(u["id"] for u in auth_service.get_all_users() if u["username"] == "prariti")
     res_del_self = client.post("/admin/members/delete", json={"user_id": admin_id})
     assert res_del_self.status_code == 400
     assert "cannot delete your own" in res_del_self.get_json()["error"]
@@ -515,7 +519,7 @@ def test_admin_member_management():
     assert "members" in api_data["data"]
     assert "logs" in api_data["data"]
     assert any(m["full_name"] == "Ritik Kumar" for m in api_data["data"]["members"])
-    assert any(m["username"] == "admin" and m["full_name"] == "Ritik Kardam" for m in api_data["data"]["members"])
+    assert any(m["username"] == "prariti" and m["full_name"] == "Ritik Kardam" for m in api_data["data"]["members"])
     if api_data["data"]["logs"]:
         first_log = api_data["data"]["logs"][0]
         assert "created_at" in first_log
