@@ -162,6 +162,7 @@ def init_db() -> None:
         "status": "TEXT DEFAULT 'Active'",
         "status_reason": "TEXT DEFAULT ''",
         "created_at": "TEXT DEFAULT ''",
+        "session_version": "INTEGER DEFAULT 1",
     }
     for col_name, col_def in profile_cols.items():
         if col_name not in existing_cols:

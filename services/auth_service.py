@@ -101,6 +101,7 @@ class AuthService:
         email_verified = row["email_verified"] if "email_verified" in row.keys() else 1
         mobile_verified = row["mobile_verified"] if "mobile_verified" in row.keys() else 1
         avatar_path = row["avatar_path"] if "avatar_path" in row.keys() and row["avatar_path"] else ""
+        session_version = row["session_version"] if "session_version" in row.keys() and row["session_version"] else 1
 
         log_audit(row["username"], "LOGIN_SUCCESS", "Auth", f"Role: {role} (Portal: {required_role or 'Generic'})")
         return {
@@ -117,6 +118,7 @@ class AuthService:
             "email_verified": email_verified,
             "mobile_verified": mobile_verified,
             "avatar_path": avatar_path,
+            "session_version": session_version,
         }, None
 
     def authenticate_google(
@@ -202,7 +204,37 @@ class AuthService:
             "mobile_no": row["mobile_no"] if "mobile_no" in row.keys() and row["mobile_no"] else "+91 9876543210",
             "email_verified": 1,
             "avatar_path": row["avatar_path"] if "avatar_path" in row.keys() and row["avatar_path"] else "",
+            "session_version": row["session_version"] if "session_version" in row.keys() and row["session_version"] else 1,
         }
+
+    def get_session_version(self, username: str) -> int:
+        """Fetch current session_version for a user to enforce multi-device logout."""
+        if not username:
+            return 1
+        conn = get_conn()
+        cur = conn.cursor()
+        row = cur.execute(
+            "SELECT session_version FROM users WHERE LOWER(username) = LOWER(?) OR (email IS NOT NULL AND LOWER(email) = LOWER(?))",
+            (username.strip(), username.strip()),
+        ).fetchone()
+        conn.close()
+        if row and "session_version" in row.keys() and row["session_version"] is not None:
+            return int(row["session_version"])
+        return 1
+
+    def invalidate_all_sessions(self, username: str) -> int:
+        """Increment session_version to immediately invalidate all active sessions across all devices."""
+        if not username:
+            return 1
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE users SET session_version = COALESCE(session_version, 1) + 1 WHERE LOWER(username) = LOWER(?) OR (email IS NOT NULL AND LOWER(email) = LOWER(?))",
+            (username.strip(), username.strip()),
+        )
+        conn.commit()
+        conn.close()
+        return self.get_session_version(username)
 
     def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         conn = get_conn()

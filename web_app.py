@@ -106,6 +106,16 @@ def require_login():
     if "user" not in session:
         return redirect(url_for("login"))
 
+    # Enforce multi-device session invalidation
+    user_sess = session.get("user")
+    if user_sess and user_sess.get("username"):
+        current_version = auth_service.get_session_version(user_sess["username"])
+        sess_version = session.get("session_version", 1)
+        if sess_version < current_version:
+            session.clear()
+            flash("You have been signed out because this account was logged out from all devices.", "warning")
+            return redirect(url_for("login"))
+
 
 @app.context_processor
 def inject_common_context():
@@ -243,6 +253,7 @@ def login():
         )
         if user_data:
             session["user"] = user_data
+            session["session_version"] = user_data.get("session_version", 1)
             welcome_name = user_data.get("full_name") or user_data.get("display_name") or user_data.get("username", "").title()
             flash(
                 f"Welcome, {welcome_name}!",
@@ -301,6 +312,7 @@ def login_google():
         try:
             user_data = auth_service.authenticate_google(email, full_name)
             session["user"] = user_data
+            session["session_version"] = user_data.get("session_version", 1)
             welcome_name = user_data.get("full_name") or user_data.get("display_name") or (full_name if full_name else email)
             flash(
                 f"Welcome, {welcome_name}!",
@@ -371,6 +383,7 @@ def login_google_callback():
         # 3. STRICT VALIDATION: Check if this Google account already exists on this inventory management system
         user_data = auth_service.authenticate_google(google_email, full_name=full_name)
         session["user"] = user_data
+        session["session_version"] = user_data.get("session_version", 1)
         welcome_name = user_data.get("full_name") or user_data.get("display_name") or (full_name if full_name else google_email)
         flash(
             f"Welcome, {welcome_name}!",
@@ -387,12 +400,22 @@ def login_google_callback():
         return redirect(url_for("login"))
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
+    all_devices = (request.form.get("all_devices") == "1") or (request.args.get("all_devices") == "1")
     user = session.pop("user", None)
+    session.pop("session_version", None)
     if user:
-        log_audit(user.get("username", "user"), "LOGOUT", "Auth", "User logged out")
-    flash("You have been signed out of the portal.", "info")
+        username = user.get("username", "user")
+        if all_devices:
+            auth_service.invalidate_all_sessions(username)
+            log_audit(username, "LOGOUT", "Auth", "User logged out from all devices")
+            flash("You have been signed out from all devices successfully.", "info")
+        else:
+            log_audit(username, "LOGOUT", "Auth", "User logged out")
+            flash("You have been signed out of the portal.", "info")
+    else:
+        flash("You have been signed out of the portal.", "info")
     return redirect(url_for("login"))
 
 

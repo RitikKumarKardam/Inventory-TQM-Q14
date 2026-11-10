@@ -91,6 +91,10 @@ function initKeyboardNavigation() {
           e.preventDefault();
           window.location.href = "/admin/members";
           break;
+        case "l":
+          e.preventDefault();
+          openModal("modal-logout-confirm");
+          break;
       }
     }
   });
@@ -266,6 +270,14 @@ function initModals() {
       e.preventDefault();
       const modalId = trigger.getAttribute("data-open-modal");
       openModal(modalId);
+    });
+  });
+
+  // Intercept any direct logout links to show confirmation modal
+  document.querySelectorAll('a[href$="/logout"], a[href*="/logout"]').forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      openModal("modal-logout-confirm");
     });
   });
 

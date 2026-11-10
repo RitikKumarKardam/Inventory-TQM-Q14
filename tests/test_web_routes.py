@@ -526,6 +526,40 @@ def test_admin_member_management():
         assert len(first_log["created_at"]) == 19  # 'YYYY-MM-DD HH:MM:SS'
 
 
+def test_logout_confirmation_and_all_devices():
+    client1 = app.test_client()
+    client2 = app.test_client()
+
+    # 1. Both devices log in with prariti
+    res1 = client1.post('/login', data={'username': 'prariti', 'password': 'Rp@12345678', 'role_hint': 'Admin'}, follow_redirects=True)
+    assert res1.status_code == 200
+    res2 = client2.post('/login', data={'username': 'prariti', 'password': 'Rp@12345678', 'role_hint': 'Admin'}, follow_redirects=True)
+    assert res2.status_code == 200
+
+    # 2. Both devices can access dashboard
+    assert client1.get('/').status_code == 200
+    assert client2.get('/').status_code == 200
+
+    # 3. Check that the logout confirmation modal is present on the page
+    dash_html = client1.get('/').data.decode('utf-8')
+    assert 'modal-logout-confirm' in dash_html
+    assert 'logout_all_devices' in dash_html
+    assert 'Logout from all devices' in dash_html
+
+    # 4. Device 1 logs out with all_devices=1
+    res_logout = client1.post('/logout', data={'all_devices': '1'}, follow_redirects=True)
+    assert res_logout.status_code == 200
+    assert 'signed out from all devices' in res_logout.data.decode('utf-8')
+
+    # 5. Device 1 is now logged out
+    assert client1.get('/').status_code == 302
+
+    # 6. Device 2 tries to access dashboard: it should be kicked out because of all_devices logout
+    res2_kick = client2.get('/', follow_redirects=True)
+    assert res2_kick.status_code == 200
+    assert 'account was logged out from all devices' in res2_kick.data.decode('utf-8')
+
+
 
 
 
