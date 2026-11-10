@@ -1326,6 +1326,14 @@ body {
   min-width: 0;
 }
 
+.user-card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+
 .user-card-name {
   font-size: 14px;
   font-weight: 700;
@@ -1351,6 +1359,7 @@ body {
   padding: 1px 6px;
   border-radius: 4px;
   text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .sidebar-role-pill.admin {
@@ -1657,6 +1666,25 @@ body.sidebar-open .sidebar-backdrop {
 .btn-toggle-menu:hover {
   background: #e2e8f0;
   color: #0b3d91;
+}
+
+.topbar-logo-btn {
+  padding: 2px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.topbar-logo-btn .topbar-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  display: block;
+}
+
+.topbar-logo-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.3);
 }
 
 .topbar-title-section {
@@ -2208,6 +2236,15 @@ html.theme-transitioning *::after {
 
 [data-theme="dark"] .btn-toggle-menu:hover {
   background: #23355d;
+}
+
+[data-theme="dark"] .topbar-logo-btn {
+  background: #111c35 !important;
+  border-color: #1e2e4f !important;
+}
+[data-theme="dark"] .topbar-logo-btn:hover {
+  background: #162444 !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4) !important;
 }
 
 [data-theme="dark"] .topbar-profile-pill {

@@ -75,10 +75,10 @@
           {% endif %}
         </a>
         <div class="user-card-info">
-          <a href="{{ url_for('profile') }}" class="user-card-name" style="text-decoration: none;" title="{{ user.full_name or user.display_name or 'Ritik Kardam' }}">
-            {{ user.full_name or user.display_name or 'Ritik Kardam' }}
-          </a>
-          <div class="user-card-meta">
+          <div class="user-card-name-row">
+            <a href="{{ url_for('profile') }}" class="user-card-name" style="text-decoration: none;" title="{{ user.full_name or user.display_name or 'Ritik Kardam' }}">
+              {{ user.full_name or user.display_name or 'Ritik Kardam' }}
+            </a>
             {% if user.is_admin %}
               <span class="sidebar-role-pill admin"><i class="bi bi-shield-check"></i> ADMIN</span>
             {% else %}
@@ -240,11 +240,11 @@
     <header class="app-topbar">
       <div class="topbar-left">
         <!-- Toggle button: opens drawer on mobile, collapses sidebar on laptop -->
-        <button type="button" class="btn-toggle-menu d-mobile" id="mobile-menu-toggle" aria-label="Open Navigation Drawer" title="Open Menu">
-          <i class="bi bi-list"></i>
+        <button type="button" class="btn-toggle-menu topbar-logo-btn d-mobile" id="mobile-menu-toggle" aria-label="Open Navigation Drawer" title="My Inventory - Open Menu">
+          <img src="{{ url_for('static', filename='img/business_logo.png') }}" alt="Business Logo" class="topbar-logo-img">
         </button>
-        <button type="button" class="btn-toggle-menu d-desktop" id="topbar-collapse-toggle" aria-label="Toggle Left Sidebar" title="Collapse / Expand Sidebar">
-          <i class="bi bi-list"></i>
+        <button type="button" class="btn-toggle-menu topbar-logo-btn d-desktop" id="topbar-collapse-toggle" aria-label="Toggle Left Sidebar" title="Collapse / Expand Sidebar">
+          <img src="{{ url_for('static', filename='img/business_logo.png') }}" alt="Business Logo" class="topbar-logo-img">
         </button>
 
         <div class="topbar-title-section">
