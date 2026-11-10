@@ -525,6 +525,15 @@ def test_admin_member_management():
         assert "created_at" in first_log
         assert len(first_log["created_at"]) == 19  # 'YYYY-MM-DD HH:MM:SS'
 
+    # Verify dark-mode compatibility classes on Account Management page
+    assert "member-primary-name" in members_html
+    assert "badge-role-admin" in members_html
+    assert "badge-role-member" in members_html
+    assert "kpi-circle-blue" in members_html
+    assert "modal-danger-callout" in members_html
+    assert "modal-warning-callout" in members_html
+    assert 'class="card-header" style="background: #f8fafc;' not in members_html
+
 
 def test_logout_confirmation_and_all_devices():
     client1 = app.test_client()
