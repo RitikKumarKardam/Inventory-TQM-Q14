@@ -246,6 +246,10 @@ def test_user_profile_and_otp():
     assert "Role in This System" in html
     assert "Read-Only for Members" in html
     assert "System roles can only be decided and assigned by the" in html
+    # Verify dark mode compatibility classes
+    assert "profile-avatar-upload-box" in html
+    assert "profile-mobile-banner" in html
+    assert "profile-otp-box" in html
 
     # 3. Security Test: Member tries to escalate role to Admin -> SERVER REJECTS ROLE CHANGE
     res_post = client.post(
@@ -341,7 +345,9 @@ def test_user_profile_and_otp():
     )
     res_admin_profile = client.get("/profile")
     assert res_admin_profile.status_code == 200
-    assert "Admin Authority Active" in res_admin_profile.data.decode("utf-8")
+    admin_html = res_admin_profile.data.decode("utf-8")
+    assert "Admin Authority Active" in admin_html
+    assert "profile-role-card" in admin_html
 
 
 def test_admin_member_management():
@@ -380,6 +386,8 @@ def test_admin_member_management():
     assert "Account Management" in html
     assert "Registered Accounts" in html
     assert "Total Accounts" in html
+    # Strictly verified: "Return to Dashboard (Alt+D)" button removed from Account Management
+    assert "Return to Dashboard (Alt+D)" not in html
 
     # 3. Create a test member account
     res_create = client.post(
@@ -604,6 +612,34 @@ def test_sidebar_theme_toggle():
     assert 'background-color: #192746 !important' in css
     assert '[data-theme="dark"] .modal-close' in css
     assert '[data-theme="dark"] .modal-header-logout' in css
+    # Verify profile dark mode rules
+    assert '[data-theme="dark"] .profile-role-card' in css
+    assert '[data-theme="dark"] .profile-avatar-upload-box' in css
+    assert '[data-theme="dark"] .profile-mobile-banner' in css
+    assert '[data-theme="dark"] .profile-otp-box' in css
+
+
+if __name__ == '__main__':
+    tests = [
+        test_login_and_roles,
+        test_authenticated_web_routes,
+        test_q14_navigation_compliance,
+        test_abc_analysis_calculation,
+        test_eoq_calculation,
+        test_google_login,
+        test_captcha_security,
+        test_user_profile_and_otp,
+        test_admin_member_management,
+        test_logout_confirmation_and_all_devices,
+        test_sidebar_theme_toggle,
+    ]
+    passed = 0
+    for t in tests:
+        print(f"Running {t.__name__}...", end=" ", flush=True)
+        t()
+        print("PASSED")
+        passed += 1
+    print(f"\nALL {passed}/{len(tests)} TESTS PASSED SUCCESSFULLY!")
 
 
 

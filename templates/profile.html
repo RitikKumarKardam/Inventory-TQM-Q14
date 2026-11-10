@@ -23,7 +23,7 @@
 <!-- ====================================================================
      PROFILE HERO CARD
      ==================================================================== -->
-<div class="card" style="background: linear-gradient(135deg, #0b3d91 0%, #032b69 100%); color: #ffffff; margin-bottom: 24px; border: none; box-shadow: 0 10px 25px rgba(11, 61, 145, 0.25);">
+<div class="card card-profile-hero" style="background: linear-gradient(135deg, #0b3d91 0%, #032b69 100%); color: #ffffff; margin-bottom: 24px; border: none; box-shadow: 0 10px 25px rgba(11, 61, 145, 0.25);">
   <div class="card-body" style="padding: 28px;">
     <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px;">
       
@@ -70,13 +70,13 @@
   </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+<div class="profile-grid">
 
   <!-- ====================================================================
        LEFT COLUMN: USER PERSONAL DETAILS & ROLE ACCESS
        ==================================================================== -->
   <div class="card">
-    <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
+    <div class="card-header">
       <h3 class="card-title"><i class="bi bi-sliders" style="color: var(--color-primary);"></i> Edit Personal Details</h3>
       <span class="badge badge-info">Instant Update</span>
     </div>
@@ -89,7 +89,7 @@
             <i class="bi bi-person-circle" style="color: var(--color-primary);"></i> Full Name
           </label>
           <input type="text" id="full_name" name="full_name" class="form-control" value="{{ profile.full_name or 'Ritik Kumar' }}" placeholder="Enter your full name" required style="font-size: 14.5px; padding: 10px 14px;">
-          <small style="color: var(--color-text-muted); font-size: 12px; display: block; margin-top: 4px;">
+          <small class="profile-help-text" style="display: block; margin-top: 4px;">
             Displayed on top navigation bar, project reports, and audit certificates.
           </small>
         </div>
@@ -111,13 +111,13 @@
         </div>
 
         <!-- Profile Picture Upload -->
-        <div class="form-group" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: var(--radius-md); padding: 16px; margin-top: 8px;">
+        <div class="form-group profile-avatar-upload-box">
           <label class="form-label" for="avatarInput" style="margin-bottom: 8px;">
             <i class="bi bi-image" style="color: var(--color-primary);"></i> Profile Picture
           </label>
           
           <div style="display: flex; align-items: center; gap: 16px;">
-            <div id="previewAvatarCircle" style="width: 58px; height: 58px; border-radius: 50%; overflow: hidden; border: 2px solid var(--color-primary); display: flex; align-items: center; justify-content: center; background: #e0f2fe; flex-shrink: 0;">
+            <div id="previewAvatarCircle" class="profile-avatar-preview-circle">
               {% if profile.avatar_path %}
                 <img id="formAvatarPreview" src="{{ profile.avatar_path }}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
               {% else %}
@@ -127,7 +127,7 @@
             </div>
             <div style="flex: 1;">
               <input type="file" id="avatarInput" name="avatar" class="form-control" accept="image/png, image/jpeg, image/jpg, image/webp, image/gif" style="font-size: 13px; padding: 8px;">
-              <small style="color: var(--color-text-muted); font-size: 11.5px; display: block; margin-top: 4px;">
+              <small class="profile-help-text" style="display: block; margin-top: 4px;">
                 Upload a JPG, PNG, WEBP, or GIF photo to personalize your account.
               </small>
             </div>
@@ -141,35 +141,35 @@
               <label class="form-label" style="margin: 0;">
                 <i class="bi bi-shield-shaded" style="color: var(--color-primary);"></i> Role in This System
               </label>
-              <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 11px; padding: 3px 8px;">
+              <span class="badge badge-admin-active">
                 <i class="bi bi-shield-check"></i> Admin Authority Active
               </span>
             </div>
-            <small style="color: var(--color-text-muted); font-size: 12px; display: block; margin-bottom: 12px;">
+            <small class="profile-help-text" style="display: block; margin-bottom: 12px;">
               As an Administrator, you have authority to decide and assign system roles.
             </small>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
               <!-- Admin Option -->
-              <label style="border: 2px solid {% if profile.role == 'Admin' %}#0284c7{% else %}#e2e8f0{% endif %}; border-radius: var(--radius-md); padding: 14px; cursor: pointer; background: {% if profile.role == 'Admin' %}#f0f9ff{% else %}#ffffff{% endif %}; display: block; position: relative;" id="roleAdminCard">
+              <label class="profile-role-card {% if profile.role == 'Admin' %}selected{% endif %}" id="roleAdminCard">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
                   <input type="radio" name="role" value="Admin" id="roleAdmin" {% if profile.role == 'Admin' %}checked{% endif %} onchange="updateRoleCardSelection()" style="accent-color: #0284c7; width: 18px; height: 18px;">
-                  <strong style="color: #0f172a; font-size: 15px;">Admin</strong>
-                  <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 11px;">FULL ACCESS</span>
+                  <strong class="profile-role-title">Admin</strong>
+                  <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.35); font-size: 11px;">FULL ACCESS</span>
                 </div>
-                <p style="margin: 0; font-size: 12px; color: var(--color-text-muted); line-height: 1.4;">
+                <p class="profile-role-desc">
                   Full control: add, edit, delete products &amp; suppliers, stock adjustments, audit trails.
                 </p>
               </label>
 
               <!-- Member Option -->
-              <label style="border: 2px solid {% if profile.role == 'Member' %}#0284c7{% else %}#e2e8f0{% endif %}; border-radius: var(--radius-md); padding: 14px; cursor: pointer; background: {% if profile.role == 'Member' %}#f0f9ff{% else %}#ffffff{% endif %}; display: block; position: relative;" id="roleMemberCard">
+              <label class="profile-role-card {% if profile.role == 'Member' %}selected{% endif %}" id="roleMemberCard">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
                   <input type="radio" name="role" value="Member" id="roleMember" {% if profile.role == 'Member' %}checked{% endif %} onchange="updateRoleCardSelection()" style="accent-color: #0284c7; width: 18px; height: 18px;">
-                  <strong style="color: #0f172a; font-size: 15px;">Member</strong>
-                  <span class="badge" style="background: #d1fae5; color: #065f46; font-size: 11px;">OPERATIONAL</span>
+                  <strong class="profile-role-title">Member</strong>
+                  <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.35); font-size: 11px;">OPERATIONAL</span>
                 </div>
-                <p style="margin: 0; font-size: 12px; color: var(--color-text-muted); line-height: 1.4;">
+                <p class="profile-role-desc">
                   Operational access: view inventory, record stock movements, run TQM tools.
                 </p>
               </label>
@@ -181,19 +181,19 @@
             <label class="form-label" style="margin-bottom: 8px;">
               <i class="bi bi-shield-lock" style="color: var(--color-primary);"></i> Role in This System
             </label>
-            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: var(--radius-md); padding: 16px;">
+            <div class="profile-locked-role-box">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <span class="badge" style="background: #d1fae5; color: #065f46; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 12px;">
+                  <span class="badge badge-success" style="font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 12px;">
                     <i class="bi bi-person-fill"></i> MEMBER
                   </span>
-                  <strong style="font-size: 14px; color: #1e293b;">Operational Access Level</strong>
+                  <strong class="profile-locked-role-title">Operational Access Level</strong>
                 </div>
-                <span class="badge" style="background: #fee2e2; color: #991b1b; font-size: 11px; padding: 4px 8px;">
+                <span class="badge badge-danger" style="font-size: 11px; padding: 4px 8px;">
                   <i class="bi bi-lock-fill"></i> Read-Only for Members
                 </span>
               </div>
-              <p style="margin: 0; font-size: 12.5px; color: #64748b; line-height: 1.45;">
+              <p class="profile-locked-role-desc" style="margin: 0; font-size: 12.5px; line-height: 1.45;">
                 <i class="bi bi-shield-exclamation" style="color: #ef4444;"></i>
                 <strong>Access Control Policy:</strong> System roles can only be decided and assigned by the <strong>Administrator</strong>. Members cannot modify or elevate their own role in this system.
               </p>
@@ -220,7 +220,7 @@
     
     <!-- 1. MOBILE NUMBER & OTP VERIFICATION CARD (PRIMARY) -->
     <div class="card" style="margin-bottom: 24px; border-top: 4px solid #0284c7;">
-      <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
+      <div class="card-header">
         <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
           <i class="bi bi-phone-vibrate" style="color: #0284c7;"></i> Mobile Number &amp; Genuine OTP Verification
         </h3>
@@ -233,14 +233,14 @@
       <div class="card-body" style="padding: 24px;">
         
         <!-- Current Mobile Status Banner -->
-        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div class="profile-mobile-banner">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: #0284c7; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <div class="profile-mobile-banner-icon">
               <i class="bi bi-phone"></i>
             </div>
             <div>
-              <div style="font-size: 11px; text-transform: uppercase; color: #0369a1; font-weight: 700; letter-spacing: 0.5px;">Active Mobile Number</div>
-              <strong id="activeMobileText" style="font-size: 16px; color: #0f172a;">{{ profile.mobile_no or '+91 9368039108' }}</strong>
+              <div class="profile-mobile-banner-label">Active Mobile Number</div>
+              <strong id="activeMobileText" class="profile-mobile-banner-text">{{ profile.mobile_no or '+91 9368039108' }}</strong>
             </div>
           </div>
           <span class="badge badge-success" id="mobileVerifiedBadge" style="font-size: 12px; padding: 5px 12px;">
@@ -263,7 +263,7 @@
               <i class="bi bi-send-fill"></i> Send Mobile OTP
             </button>
           </div>
-          <small style="color: var(--color-text-muted); font-size: 11.5px; display: block; margin-top: 4px;">
+          <small class="profile-help-text" style="display: block; margin-top: 4px;">
             Dispatches a real 6-digit SMS verification code to your phone. Check your phone's Messages inbox.
           </small>
         </div>
@@ -271,47 +271,47 @@
         <div id="mobileOtpStatusFeedback" style="margin-top: 14px; display: none;"></div>
 
         <!-- Step 2: Enter & Validate Mobile OTP from Physical Phone -->
-        <div id="mobileOtpInputSection" style="margin-top: 18px; padding: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md);">
+        <div id="mobileOtpInputSection" class="profile-otp-box">
           <label class="form-label" for="enteredMobileOtp" style="margin-bottom: 6px;">
             <i class="bi bi-key-fill" style="color: var(--color-primary);"></i> Enter 6-Digit OTP from Your Phone
           </label>
           <div style="display: flex; gap: 10px;">
-            <input type="text" id="enteredMobileOtp" maxlength="6" class="form-control" placeholder="123456" style="font-family: var(--font-family-mono); font-size: 20px; letter-spacing: 4px; font-weight: 700; text-align: center; max-width: 200px;">
+            <input type="text" id="enteredMobileOtp" maxlength="6" class="form-control profile-otp-input" placeholder="123456">
             <button type="button" id="verifyMobileOtpBtn" class="btn btn-success" onclick="handleVerifyMobileOTP()" style="flex: 1; padding: 10px 18px; font-weight: 600;">
               <i class="bi bi-patch-check-fill"></i> Validate &amp; Verify Mobile
             </button>
           </div>
-          <small style="color: var(--color-text-muted); font-size: 11.5px; display: block; margin-top: 6px;">
+          <small class="profile-help-text" style="display: block; margin-top: 6px;">
             Enter the genuine 6-digit code received in your phone's Messages app.
           </small>
         </div>
 
         <!-- SMS Gateway Connection Drawer / Settings -->
-        <div style="margin-top: 20px; border-top: 1px dashed #cbd5e1; padding-top: 16px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="toggleSmsGatewayCard()">
+        <div class="profile-gateway-wrapper">
+          <div class="profile-gateway-toggle" onclick="toggleSmsGatewayCard()">
             <div style="display: flex; align-items: center; gap: 8px;">
               <i class="bi bi-broadcast-pin" style="color: #0284c7; font-size: 16px;"></i>
-              <strong style="font-size: 13px; color: #1e293b;">Cellular SMS Gateway Settings</strong>
+              <strong class="profile-gateway-title">Cellular SMS Gateway Settings</strong>
               {% if sms_gateway_status.is_configured %}
                 <span class="badge badge-success" style="font-size: 11px;"><i class="bi bi-check-circle-fill"></i> Connected ({{ sms_gateway_status.provider }})</span>
               {% else %}
-                <span class="badge" style="background: #fef3c7; color: #92400e; font-size: 11px;"><i class="bi bi-gear"></i> Setup Free Fast2SMS</span>
+                <span class="badge badge-warning" style="font-size: 11px;"><i class="bi bi-gear"></i> Setup Free Fast2SMS</span>
               {% endif %}
             </div>
-            <i class="bi bi-chevron-down" id="smsGatewayChevron" style="color: #64748b; font-size: 12px; transition: transform 0.2s;"></i>
+            <i class="bi bi-chevron-down" id="smsGatewayChevron" style="color: var(--color-text-muted); font-size: 12px; transition: transform 0.2s;"></i>
           </div>
 
-          <div id="smsGatewayCardBody" style="display: {% if sms_gateway_status.is_configured %}none{% else %}block{% endif %}; margin-top: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 16px;">
+          <div id="smsGatewayCardBody" class="profile-gateway-body" style="display: {% if sms_gateway_status.is_configured %}none{% else %}block{% endif %};">
             <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px;">
               <i class="bi bi-info-circle-fill" style="color: #0284c7; font-size: 18px; margin-top: 2px;"></i>
-              <div style="font-size: 12.5px; color: #334155; line-height: 1.45;">
+              <div class="profile-gateway-info-text">
                 To dispatch physical SMS messages to Indian cellular networks (+91), the system connects through <strong>Fast2SMS</strong> (India's premier developer SMS gateway). Fast2SMS provides <strong>₹50 free wallet balance</strong> upon signup with <strong>no credit card required</strong>.
               </div>
             </div>
 
             <!-- 3 Simple Steps -->
-            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 14px; font-size: 12px; color: #475569;">
-              <div style="font-weight: 700; color: #0f172a; margin-bottom: 6px;">How to get your free Fast2SMS API Key in 60 seconds:</div>
+            <div class="profile-gateway-guide">
+              <div class="profile-gateway-guide-title">How to get your free Fast2SMS API Key in 60 seconds:</div>
               <ol style="margin: 0; padding-left: 18px; line-height: 1.6;">
                 <li>Open <a href="https://www.fast2sms.com" target="_blank" rel="noopener noreferrer" style="color: #0284c7; font-weight: 600;">fast2sms.com <i class="bi bi-box-arrow-up-right" style="font-size: 10px;"></i></a> and sign in with your phone number (₹50 free testing balance is added automatically).</li>
                 <li>In your dashboard, click on <strong>Dev API</strong> in the left sidebar.</li>
@@ -329,7 +329,7 @@
                   <i class="bi bi-check-lg"></i> Save &amp; Connect Gateway
                 </button>
               </div>
-              <small style="color: var(--color-text-muted); font-size: 11px; display: block; margin-top: 4px;">
+              <small class="profile-help-text" style="display: block; margin-top: 4px;">
                 Key is stored securely in your database and environment variables.
               </small>
             </div>
@@ -343,7 +343,7 @@
 
     <!-- 2. EMAIL ADDRESS & GOOGLE VERIFICATION CARD -->
     <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid var(--color-border);">
+      <div class="card-header">
         <h4 class="card-title" style="font-size: 14px; margin: 0; display: flex; align-items: center; gap: 8px;">
           <i class="bi bi-envelope-check" style="color: #10b981;"></i> Email Address
         </h4>
@@ -352,10 +352,10 @@
       <div class="card-body" style="padding: 20px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
           <div>
-            <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Current Active Email</div>
-            <strong style="font-size: 15px; color: #065f46;">{{ profile.email }}</strong>
+            <div class="profile-email-label">Current Active Email</div>
+            <strong class="profile-active-email-text">{{ profile.email }}</strong>
           </div>
-          <a href="{{ url_for('profile_verify_google') }}" class="btn btn-outline btn-sm" style="font-weight: 600; padding: 6px 14px; border-color: #cbd5e1; color: #1e293b;">
+          <a href="{{ url_for('profile_verify_google') }}" class="btn btn-outline btn-sm profile-google-btn">
             <i class="bi bi-google" style="color: #4285F4;"></i> Re-Verify via Google
           </a>
         </div>
@@ -376,12 +376,11 @@
     const adminCard = document.getElementById('roleAdminCard');
     const memberCard = document.getElementById('roleMemberCard');
 
-    if (isAdmin) {
-      if (adminCard) { adminCard.style.borderColor = '#0284c7'; adminCard.style.background = '#f0f9ff'; }
-      if (memberCard) { memberCard.style.borderColor = '#e2e8f0'; memberCard.style.background = '#ffffff'; }
-    } else {
-      if (memberCard) { memberCard.style.borderColor = '#0284c7'; memberCard.style.background = '#f0f9ff'; }
-      if (adminCard) { adminCard.style.borderColor = '#e2e8f0'; adminCard.style.background = '#ffffff'; }
+    if (adminCard) {
+      adminCard.classList.toggle('selected', isAdmin);
+    }
+    if (memberCard) {
+      memberCard.classList.toggle('selected', !isAdmin);
     }
   }
 
@@ -512,12 +511,8 @@
   function showSmsGatewayFeedback(msg, type) {
     const fb = document.getElementById('smsGatewayStatusFeedback');
     if (!fb) return;
-    const colorMap = {
-      'danger': 'background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;',
-      'success': 'background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;',
-      'info': 'background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af;'
-    };
-    fb.style = `${colorMap[type] || colorMap['info']} padding: 10px 14px; border-radius: var(--radius-sm); font-size: 12.5px; margin-top: 10px;`;
+    const alertClass = type === 'danger' ? 'alert-danger' : (type === 'success' ? 'alert-success' : 'alert-info');
+    fb.className = 'alert ' + alertClass + ' profile-feedback-alert';
     fb.innerHTML = msg;
     fb.style.display = 'block';
   }
@@ -566,12 +561,9 @@
 
   function showMobileOtpFeedback(msg, type) {
     const fb = document.getElementById('mobileOtpStatusFeedback');
-    const colorMap = {
-      'danger': 'background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;',
-      'success': 'background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;',
-      'info': 'background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af;'
-    };
-    fb.style = `${colorMap[type] || colorMap['info']} padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; margin-top: 14px;`;
+    if (!fb) return;
+    const alertClass = type === 'danger' ? 'alert-danger' : (type === 'success' ? 'alert-success' : 'alert-info');
+    fb.className = 'alert ' + alertClass + ' profile-feedback-alert';
     fb.innerHTML = msg;
     fb.style.display = 'block';
   }
