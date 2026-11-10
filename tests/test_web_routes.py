@@ -560,6 +560,29 @@ def test_logout_confirmation_and_all_devices():
     assert 'account was logged out from all devices' in res2_kick.data.decode('utf-8')
 
 
+def test_sidebar_theme_toggle():
+    client = app.test_client()
+    res_login = client.post('/login', data={'username': 'prariti', 'password': 'Rp@12345678', 'role_hint': 'Admin'}, follow_redirects=True)
+    assert res_login.status_code == 200
+
+    dash = client.get('/')
+    assert dash.status_code == 200
+    html = dash.data.decode('utf-8')
+
+    # Verify zero-flicker head script
+    assert "localStorage.getItem('inventory_theme')" in html
+    assert "data-theme" in html
+
+    # Verify sidebar theme toggle elements
+    assert 'sidebar-theme-wrap' in html
+    assert 'sidebar-theme-toggle' in html
+    assert 'theme-icon-orb' in html
+    assert 'theme-switch-track' in html
+    assert 'theme-mode-text' in html
+    assert 'theme-switch-thumb' in html
+
+
+
 
 
 

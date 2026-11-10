@@ -19,6 +19,19 @@
   <!-- Amrapali Student Portal Theme Stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/amrapali-theme.css') }}">
 
+  <!-- Theme Synchronization (Zero-Flicker) -->
+  <script>
+    (function() {
+      try {
+        var savedTheme = localStorage.getItem('inventory_theme');
+        var theme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
   <!-- Chart.js for Live TQM 7 QC Visualizations (Pareto, ABC, Stock) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
@@ -87,6 +100,28 @@
         <i class="bi bi-search"></i>
         <input type="text" id="sidebar-filter-input" class="sidebar-search-input" placeholder="Search tabs / modules..." autocomplete="off">
       </div>
+    </div>
+
+    <!-- Theme Mode Toggle (Sidebar) -->
+    <div class="sidebar-theme-wrap">
+      <button type="button" class="sidebar-theme-toggle" id="sidebar-theme-toggle" aria-label="Toggle Light / Dark Mode" title="Toggle Theme (Dark / Light)">
+        <div class="theme-toggle-left">
+          <div class="theme-icon-orb">
+            <i class="bi bi-sun-fill theme-sun-icon"></i>
+            <i class="bi bi-moon-stars-fill theme-moon-icon"></i>
+          </div>
+          <div class="theme-toggle-label">
+            <span class="theme-mode-text" id="theme-mode-text">Dark Mode</span>
+            <span class="theme-mode-sub" id="theme-mode-sub">Switch appearance</span>
+          </div>
+        </div>
+        <div class="theme-switch-track" aria-hidden="true">
+          <div class="theme-switch-thumb">
+            <i class="bi bi-sun-fill thumb-sun"></i>
+            <i class="bi bi-moon-fill thumb-moon"></i>
+          </div>
+        </div>
+      </button>
     </div>
 
     <!-- 4. Navigation Menu List -->

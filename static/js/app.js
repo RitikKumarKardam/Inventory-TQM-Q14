@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initCharts();
   initSidebar();
   initLiveClock();
+  initThemeToggle();
 });
 
 // ============================================================================
@@ -567,4 +568,92 @@ function initLiveClock() {
 
   updateClock();
   setInterval(updateClock, 1000);
+}
+
+// ============================================================================
+// 10. DARK / LIGHT MODE SWITCH WITH COOL ANIMATION
+// ============================================================================
+
+function initThemeToggle() {
+  const toggleBtn = document.getElementById("sidebar-theme-toggle");
+  if (!toggleBtn) return;
+
+  const modeText = document.getElementById("theme-mode-text");
+  const modeSub = document.getElementById("theme-mode-sub");
+
+  function getTheme() {
+    return document.documentElement.getAttribute("data-theme") || "light";
+  }
+
+  function updateToggleUI(theme) {
+    if (theme === "dark") {
+      if (modeText) modeText.textContent = "Dark Mode";
+      if (modeSub) modeSub.textContent = "Switch to Light";
+      toggleBtn.setAttribute("aria-label", "Switch to Light Mode");
+      toggleBtn.setAttribute("title", "Currently Dark Mode — Click to switch to Light Mode");
+    } else {
+      if (modeText) modeText.textContent = "Light Mode";
+      if (modeSub) modeSub.textContent = "Switch to Dark";
+      toggleBtn.setAttribute("aria-label", "Switch to Dark Mode");
+      toggleBtn.setAttribute("title", "Currently Light Mode — Click to switch to Dark Mode");
+    }
+  }
+
+  // Set initial labels based on current theme attribute
+  updateToggleUI(getTheme());
+
+  function createThemeRipple(x, y, targetTheme) {
+    const ripple = document.createElement("div");
+    ripple.className = "theme-ripple-wave";
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    if (targetTheme === "dark") {
+      ripple.style.background = "radial-gradient(circle, rgba(99, 102, 241, 0.45) 0%, rgba(14, 23, 42, 0.3) 60%, transparent 100%)";
+    } else {
+      ripple.style.background = "radial-gradient(circle, rgba(245, 158, 11, 0.4) 0%, rgba(254, 243, 199, 0.25) 60%, transparent 100%)";
+    }
+    document.body.appendChild(ripple);
+    setTimeout(() => {
+      if (ripple && ripple.parentNode) {
+        ripple.parentNode.removeChild(ripple);
+      }
+    }, 700);
+  }
+
+  toggleBtn.addEventListener("click", (e) => {
+    const currentTheme = getTheme();
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+    // 1. Get click position for ripple epicenter
+    let clickX = window.innerWidth / 2;
+    let clickY = window.innerHeight / 2;
+    if (e && e.clientX && e.clientY) {
+      clickX = e.clientX;
+      clickY = e.clientY;
+    } else {
+      const rect = toggleBtn.getBoundingClientRect();
+      clickX = rect.left + rect.width / 2;
+      clickY = rect.top + rect.height / 2;
+    }
+
+    // 2. Spawn radiant expansion ripple wave
+    createThemeRipple(clickX, clickY, newTheme);
+
+    // 3. Smooth page color morphing
+    document.documentElement.classList.add("theme-transitioning");
+
+    // 4. Apply new theme to DOM and persist
+    document.documentElement.setAttribute("data-theme", newTheme);
+    try {
+      localStorage.setItem("inventory_theme", newTheme);
+    } catch (err) {}
+
+    // 5. Update toggle widget text and aria
+    updateToggleUI(newTheme);
+
+    // 6. Clean up transition class after animation completes
+    setTimeout(() => {
+      document.documentElement.classList.remove("theme-transitioning");
+    }, 500);
+  });
 }
