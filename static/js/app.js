@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initCalculators();
   initModals();
   initCharts();
+  initSidebar();
+  initLiveClock();
 });
 
 // ============================================================================
@@ -447,4 +449,110 @@ function initCharts() {
       },
     });
   }
+}
+
+// ============================================================================
+// 8. SIDEBAR CONTROLLER (Mobile Drawer & Laptop Persistent List)
+// ============================================================================
+
+function initSidebar() {
+  const mobileToggle = document.getElementById("mobile-menu-toggle");
+  const desktopToggle = document.getElementById("topbar-collapse-toggle");
+  const closeBtn = document.getElementById("sidebar-close-btn");
+  const collapseBtn = document.getElementById("sidebar-collapse-btn");
+  const backdrop = document.getElementById("sidebar-backdrop");
+  const filterInput = document.getElementById("sidebar-filter-input");
+
+  // Mobile drawer open
+  if (mobileToggle) {
+    mobileToggle.addEventListener("click", () => {
+      document.body.classList.add("sidebar-open");
+    });
+  }
+
+  // Mobile drawer close
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      document.body.classList.remove("sidebar-open");
+    });
+  }
+
+  // Backdrop click to close drawer
+  if (backdrop) {
+    backdrop.addEventListener("click", () => {
+      document.body.classList.remove("sidebar-open");
+    });
+  }
+
+  // Close mobile drawer when clicking any nav item
+  document.querySelectorAll(".sidebar-nav-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      if (window.innerWidth < 992) {
+        document.body.classList.remove("sidebar-open");
+      }
+    });
+  });
+
+  // Desktop collapse/expand state persistence
+  function toggleDesktopCollapse() {
+    document.body.classList.toggle("sidebar-collapsed");
+    const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+    try {
+      localStorage.setItem("inventory_sidebar_collapsed", isCollapsed ? "true" : "false");
+    } catch (e) {}
+  }
+
+  if (collapseBtn) {
+    collapseBtn.addEventListener("click", toggleDesktopCollapse);
+  }
+  if (desktopToggle) {
+    desktopToggle.addEventListener("click", toggleDesktopCollapse);
+  }
+
+  // Restore saved desktop state
+  try {
+    const saved = localStorage.getItem("inventory_sidebar_collapsed");
+    if (saved === "true" && window.innerWidth >= 992) {
+      document.body.classList.add("sidebar-collapsed");
+    }
+  } catch (e) {}
+
+  // Instant sidebar search/filter
+  if (filterInput) {
+    filterInput.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const items = document.querySelectorAll(".sidebar-nav-item");
+      items.forEach((item) => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(q) ? "" : "none";
+      });
+    });
+  }
+}
+
+// ============================================================================
+// 9. LIVE INDIAN STANDARD TIME (IST) CLOCK
+// ============================================================================
+
+function initLiveClock() {
+  const clockEl = document.getElementById("topbar-ist-time");
+  if (!clockEl) return;
+
+  function updateClock() {
+    const now = new Date();
+    const options = {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    };
+    clockEl.textContent = new Intl.DateTimeFormat("en-IN", options).format(now);
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
 }

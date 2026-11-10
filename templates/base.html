@@ -25,159 +25,275 @@
 <body>
 
   <!-- ====================================================================
-       INSTITUTIONAL BRAND HEADER
+       LEFT SIDEBAR (DRAWER IN MOBILE, PERSISTENT LIST IN LAPTOPS)
        ==================================================================== -->
-  <header class="amrapali-header">
-    <div class="header-container">
-      <div class="brand-section">
-        <div class="brand-logos">
-          <img src="{{ url_for('static', filename='img/business_logo.png') }}" alt="Inventory Management System Logo" class="amrapali-crest">
+  <aside class="app-sidebar" id="app-sidebar">
+    <!-- 1. Sidebar Brand Header -->
+    <div class="sidebar-header">
+      <a href="{{ url_for('dashboard') }}" class="sidebar-brand" title="Return to Dashboard (Home)">
+        <img src="{{ url_for('static', filename='img/business_logo.png') }}" alt="Inventory ERP Logo" class="sidebar-logo">
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-title">Inventory ERP</span>
+          <span class="sidebar-brand-sub">Management Portal</span>
         </div>
-        <div class="brand-titles">
-          <h1>My Inventory Management System</h1>
+      </a>
+      <!-- Desktop collapse toggle button (<<) -->
+      <button type="button" class="sidebar-header-btn sidebar-collapse-btn d-desktop" id="sidebar-collapse-btn" title="Collapse / Expand Sidebar">
+        <i class="bi bi-chevron-double-left"></i>
+      </button>
+      <!-- Mobile drawer close button (X) -->
+      <button type="button" class="sidebar-header-btn sidebar-close-btn d-mobile" id="sidebar-close-btn" title="Close Navigation Menu">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- 2. User Profile Card (Matches Cyborg ERP / Student Portal Screenshot) -->
+    <div class="sidebar-user-card">
+      <div class="user-card-top">
+        <a href="{{ url_for('profile') }}" class="user-card-avatar" title="Edit Profile">
+          {% if user.avatar_path %}
+            <img src="{{ user.avatar_path }}" alt="Profile Avatar" class="user-card-avatar-img">
+          {% elif user.provider == 'google' %}
+            <div class="user-card-avatar-text" style="color: #4285F4;"><i class="bi bi-google"></i></div>
+          {% elif user.is_admin %}
+            <div class="user-card-avatar-text" style="color: #fbbf24;"><i class="bi bi-shield-lock-fill"></i></div>
+          {% else %}
+            <div class="user-card-avatar-text">{{ (user.full_name or user.display_name or user.username or 'RK')[:2]|upper }}</div>
+          {% endif %}
+        </a>
+        <div class="user-card-info">
+          <a href="{{ url_for('profile') }}" class="user-card-name" style="text-decoration: none;" title="{{ user.full_name or user.display_name or 'Ritik Kardam' }}">
+            {{ user.full_name or user.display_name or 'Ritik Kardam' }}
+          </a>
+          <div class="user-card-meta">
+            {% if user.is_admin %}
+              <span class="sidebar-role-pill admin"><i class="bi bi-shield-check"></i> ADMIN</span>
+            {% else %}
+              <span class="sidebar-role-pill member"><i class="bi bi-person-check"></i> MEMBER</span>
+            {% endif %}
+            <span>• B.Tech-CSE</span>
+          </div>
+        </div>
+      </div>
+      <div class="user-card-id-box" title="Unique Account ID">
+        <span><i class="bi bi-person-badge"></i> User ID:</span>
+        <strong id="sidebar-user-id">{{ user.username or 'prariti' }}</strong>
+      </div>
+    </div>
+
+    <!-- 3. Sidebar Search / Module Filter Box -->
+    <div class="sidebar-search-wrap">
+      <div class="sidebar-search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" id="sidebar-filter-input" class="sidebar-search-input" placeholder="Search tabs / modules..." autocomplete="off">
+      </div>
+    </div>
+
+    <!-- 4. Navigation Menu List -->
+    <div class="sidebar-nav-wrap">
+      <div class="sidebar-menu-heading">MAIN MENU</div>
+      <ul class="sidebar-nav-list" id="sidebar-nav-list">
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('dashboard') }}" class="sidebar-nav-link {% if active_page == 'dashboard' %}active{% endif %}" title="Dashboard & Overview (Alt+H)">
+            <span class="sidebar-nav-icon"><i class="bi bi-speedometer2"></i></span>
+            <span class="sidebar-nav-label">Home / Dashboard</span>
+            <span class="sidebar-hotkey-badge">Alt+H</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('products') }}" class="sidebar-nav-link {% if active_page == 'products' %}active{% endif %}" title="Products Inventory (Alt+P)">
+            <span class="sidebar-nav-icon"><i class="bi bi-box-seam-fill"></i></span>
+            <span class="sidebar-nav-label">Products</span>
+            <span class="sidebar-hotkey-badge">Alt+P</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('stock') }}" class="sidebar-nav-link {% if active_page == 'stock' %}active{% endif %}" title="Stock IN & OUT Movements (Alt+M)">
+            <span class="sidebar-nav-icon"><i class="bi bi-arrow-left-right"></i></span>
+            <span class="sidebar-nav-label">Stock IN/OUT</span>
+            <span class="sidebar-hotkey-badge">Alt+M</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('suppliers') }}" class="sidebar-nav-link {% if active_page == 'suppliers' %}active{% endif %}" title="Suppliers & Vendors (Alt+S)">
+            <span class="sidebar-nav-icon"><i class="bi bi-building-fill"></i></span>
+            <span class="sidebar-nav-label">Suppliers</span>
+            <span class="sidebar-hotkey-badge">Alt+S</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('inspections') }}" class="sidebar-nav-link {% if active_page == 'inspections' %}active{% endif %}" title="Quality Inspection Lots (Alt+I)">
+            <span class="sidebar-nav-icon"><i class="bi bi-patch-check-fill"></i></span>
+            <span class="sidebar-nav-label">Quality Inspection</span>
+            <span class="sidebar-hotkey-badge">Alt+I</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('tqm_suite') }}" class="sidebar-nav-link {% if active_page == 'tqm' %}active{% endif %}" title="TQM 7 QC Tools & Analytics (Alt+Q)">
+            <span class="sidebar-nav-icon"><i class="bi bi-bar-chart-steps"></i></span>
+            <span class="sidebar-nav-label">TQM 7 QC Tools</span>
+            <span class="sidebar-hotkey-badge">Alt+Q</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('calculators') }}" class="sidebar-nav-link {% if active_page == 'calculators' %}active{% endif %}" title="Industry Calculators (Alt+C)">
+            <span class="sidebar-nav-icon"><i class="bi bi-calculator-fill"></i></span>
+            <span class="sidebar-nav-label">EOQ & ABC Calc</span>
+            <span class="sidebar-hotkey-badge">Alt+C</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('reports') }}" class="sidebar-nav-link {% if active_page == 'reports' %}active{% endif %}" title="Reports & ISO 9001 Audit (Alt+R)">
+            <span class="sidebar-nav-icon"><i class="bi bi-file-earmark-text-fill"></i></span>
+            <span class="sidebar-nav-label">Reports & Audit</span>
+            <span class="sidebar-hotkey-badge">Alt+R</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('viva_guide') }}" class="sidebar-nav-link {% if active_page == 'viva' %}active{% endif %}" title="Viva Questions & Syllabus (Alt+V)">
+            <span class="sidebar-nav-icon"><i class="bi bi-book-half"></i></span>
+            <span class="sidebar-nav-label">Viva & Syllabus</span>
+            <span class="sidebar-hotkey-badge">Alt+V</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        {% if is_admin or session.user.is_admin or session.user.role == 'Admin' %}
+        <li class="sidebar-nav-item">
+          <a href="{{ url_for('admin_members') }}" class="sidebar-nav-link {% if active_page == 'members' %}active{% endif %}" title="Administrator Command Center (Alt+X)">
+            <span class="sidebar-nav-icon"><i class="bi bi-people-fill"></i></span>
+            <span class="sidebar-nav-label">Account Management</span>
+            <span class="sidebar-hotkey-badge">Alt+X</span>
+            <i class="bi bi-chevron-right sidebar-chevron"></i>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+
+    <!-- 5. Sidebar Bottom Actions -->
+    <div class="sidebar-footer">
+      <a href="{{ url_for('profile') }}" class="sidebar-footer-link" title="Account & Profile Settings (Alt+U)">
+        <i class="bi bi-person-gear"></i>
+        <span>Profile</span>
+      </a>
+      <button type="button" class="sidebar-footer-link" data-open-modal="modal-shortcuts" title="Keyboard Shortcuts (F1)">
+        <i class="bi bi-keyboard"></i>
+        <span>Hotkeys</span>
+      </button>
+      <a href="{{ url_for('logout') }}" class="sidebar-footer-link logout" title="Sign out of portal">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Mobile Backdrop Overlay -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <!-- ====================================================================
+       RIGHT MAIN APPLICATION WORKSPACE
+       ==================================================================== -->
+  <div class="app-main-wrapper" id="app-main-wrapper">
+    <!-- Topbar across the Right Main Workspace -->
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <!-- Toggle button: opens drawer on mobile, collapses sidebar on laptop -->
+        <button type="button" class="btn-toggle-menu d-mobile" id="mobile-menu-toggle" aria-label="Open Navigation Drawer" title="Open Menu">
+          <i class="bi bi-list"></i>
+        </button>
+        <button type="button" class="btn-toggle-menu d-desktop" id="topbar-collapse-toggle" aria-label="Toggle Left Sidebar" title="Collapse / Expand Sidebar">
+          <i class="bi bi-layout-sidebar-inset"></i>
+        </button>
+
+        <div class="topbar-title-section">
+          <h1 class="topbar-page-title">My Inventory Management System</h1>
+          <span class="topbar-session-badge"><i class="bi bi-calendar-event"></i> Session 2026-27</span>
         </div>
       </div>
 
-      <!-- Student Profile & User Session Badge (Clickable to Profile Screen) -->
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <a href="{{ url_for('profile') }}" class="student-portal-pill" data-user-email="{{ user.email or '' }}" title="Click to customize profile ({{ user.email or user.full_name or 'Profile' }})" style="text-decoration: none; cursor: pointer;">
-          <div class="student-avatar" style="{% if user.avatar_path %}background: transparent; border: 2px solid #ffffff; padding: 0;{% elif user.provider == 'google' %}background: #ffffff; color: #4285F4; border: 2px solid #e0e2e6; font-size: 18px;{% elif user.is_admin %}background: linear-gradient(135deg, #d97706, #b45309);{% else %}background: linear-gradient(135deg, #10b981, #059669);{% endif %} overflow: hidden;">
+      <div class="topbar-right">
+        <!-- Live Clock (IST) -->
+        <div class="topbar-clock-badge d-desktop" id="topbar-live-clock">
+          <i class="bi bi-clock-history"></i>
+          <span id="topbar-ist-time">IST Clock</span>
+        </div>
+
+        <!-- Shortcuts Help Modal Button -->
+        <button type="button" class="btn-topbar-shortcut d-desktop" data-open-modal="modal-shortcuts" title="Keyboard Shortcuts & Q14 Quality Targets">
+          <i class="bi bi-keyboard"></i> Shortcuts <span class="kbd-badge">F1</span>
+        </button>
+
+        <!-- User Profile Pill -->
+        <a href="{{ url_for('profile') }}" class="topbar-profile-pill" data-user-email="{{ user.email or '' }}" title="Click to customize profile">
+          <div class="topbar-avatar" style="{% if user.avatar_path %}background: transparent; border: 2px solid #ffffff; padding: 0;{% elif user.provider == 'google' %}background: #ffffff; color: #4285F4; border: 2px solid #e0e2e6;{% elif user.is_admin %}background: linear-gradient(135deg, #d97706, #b45309);{% else %}background: linear-gradient(135deg, #10b981, #059669);{% endif %}">
             {% if user.avatar_path %}
-              <img src="{{ user.avatar_path }}" alt="Profile Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+              <img src="{{ user.avatar_path }}" alt="Avatar">
             {% elif user.provider == 'google' %}
               <i class="bi bi-google"></i>
             {% else %}
               {{ (user.full_name or user.display_name or user.username or 'RK')[:2]|upper }}
             {% endif %}
           </div>
-          <div class="student-meta">
-            <div class="student-name">
-              {{ user.full_name or user.display_name or 'Ritik Kumar' }}
-              {% if user.provider == 'google' %}
-                <span class="badge" style="font-size: 10px; padding: 2px 6px; background: #ea4335; color: #ffffff; margin-left: 4px;">
-                  <i class="bi bi-google"></i> GMAIL
-                </span>
-              {% endif %}
-              {% if user.is_admin %}
-                <span class="badge badge-warning" style="font-size: 10.5px; padding: 2px 7px; margin-left: 4px; background: #fef3c7; color: #92400e;">
-                  <i class="bi bi-shield-lock-fill"></i> ADMIN
-                </span>
-              {% else %}
-                <span class="badge badge-success" style="font-size: 10.5px; padding: 2px 7px; margin-left: 4px; background: #dcfce7; color: #166534;">
-                  <i class="bi bi-person-badge-fill"></i> MEMBER
-                </span>
-              {% endif %}
+          <div class="topbar-user-meta d-desktop">
+            <span class="topbar-username">{{ user.full_name or user.display_name or 'Ritik Kardam' }}</span>
+            {% if user.provider == 'google' %}
+              <span class="badge" style="font-size: 10px; padding: 2px 6px; background: #ea4335; color: #ffffff;">
+                <i class="bi bi-google"></i> GMAIL
+              </span>
+            {% endif %}
+            {% if user.is_admin %}
+              <span class="topbar-role-badge admin">ADMIN</span>
+            {% else %}
+              <span class="topbar-role-badge member">MEMBER</span>
+            {% endif %}
+          </div>
+        </a>
+
+        <!-- Quick Logout -->
+        <a href="{{ url_for('logout') }}" class="topbar-logout-btn" title="Sign out of portal">
+          <i class="bi bi-box-arrow-right"></i>
+          <span class="d-desktop">Logout</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Universal Breadcrumbs Bar -->
+    <div class="breadcrumb-section">
+      <div class="breadcrumb-container">
+        <ul class="breadcrumb-trail">
+          <li><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Home</a></li>
+          {% block breadcrumbs %}{% endblock %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Flash Messages / Notifications -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="max-width: 1440px; margin: 16px auto 0; padding: 0 24px; width: 100%;">
+          {% for category, message in messages %}
+            <div class="badge badge-{{ category }}" style="display: flex; justify-content: space-between; width: 100%; padding: 12px 16px; font-size: 13.5px; border-radius: var(--radius-sm); margin-bottom: 8px;">
+              <span><i class="bi bi-info-circle-fill"></i> {{ message }}</span>
+              <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; cursor: pointer; color: inherit; font-size: 16px;">&times;</button>
             </div>
-          </div>
-        </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
 
-        <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm" style="color: #ffffff; border-color: rgba(255,255,255,0.4); background: rgba(0,0,0,0.25);" title="Sign out of portal">
-          <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <!-- ====================================================================
-       3. UNIVERSAL STICKY TOP NAVIGATION BAR (Q14 Target 3)
-       ==================================================================== -->
-  <nav class="amrapali-nav">
-    <div class="nav-container">
-      <ul class="nav-links">
-        <li class="nav-item">
-          <a href="{{ url_for('dashboard') }}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
-            <i class="bi bi-house-door-fill"></i> Home <span class="nav-hotkey">Alt+H</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ url_for('products') }}" class="nav-link {% if active_page == 'products' %}active{% endif %}">
-            <i class="bi bi-box-seam-fill"></i> Products <span class="nav-hotkey">Alt+P</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ url_for('stock') }}" class="nav-link {% if active_page == 'stock' %}active{% endif %}">
-            <i class="bi bi-arrow-left-right"></i> Stock IN/OUT <span class="nav-hotkey">Alt+M</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ url_for('suppliers') }}" class="nav-link {% if active_page == 'suppliers' %}active{% endif %}">
-            <i class="bi bi-building-fill"></i> Suppliers <span class="nav-hotkey">Alt+S</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ url_for('inspections') }}" class="nav-link {% if active_page == 'inspections' %}active{% endif %}">
-            <i class="bi bi-check2-circle"></i> Quality Inspection <span class="nav-hotkey">Alt+I</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ url_for('tqm_suite') }}" class="nav-link {% if active_page == 'tqm' %}active{% endif %}">
-            <i class="bi bi-bar-chart-steps"></i> TQM 7 QC Tools <span class="nav-hotkey">Alt+Q</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ url_for('calculators') }}" class="nav-link {% if active_page == 'calculators' %}active{% endif %}">
-            <i class="bi bi-calculator-fill"></i> EOQ & ABC Calc <span class="nav-hotkey">Alt+C</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ url_for('reports') }}" class="nav-link {% if active_page == 'reports' %}active{% endif %}">
-            <i class="bi bi-file-earmark-text-fill"></i> Reports & Audit <span class="nav-hotkey">Alt+R</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ url_for('viva_guide') }}" class="nav-link {% if active_page == 'viva' %}active{% endif %}">
-            <i class="bi bi-book-half"></i> Viva & Syllabus <span class="nav-hotkey">Alt+V</span>
-          </a>
-        </li>
-        {% if is_admin or session.user.is_admin or session.user.role == 'Admin' %}
-        <li class="nav-item">
-          <a href="{{ url_for('admin_members') }}" class="nav-link {% if active_page == 'members' %}active{% endif %}">
-            <i class="bi bi-people-fill"></i> Manage Members <span class="nav-hotkey">Alt+X</span>
-          </a>
-        </li>
-        {% endif %}
-      </ul>
-
-      <div class="nav-actions">
-        <button type="button" class="btn-nav-shortcut" data-open-modal="modal-shortcuts" title="Keyboard Shortcuts & Q14 Quality Targets">
-          <i class="bi bi-keyboard"></i> Shortcuts <span class="kbd-badge">F1</span>
-        </button>
-      </div>
-    </div>
-  </nav>
-
-  <!-- ====================================================================
-       4. UNIVERSAL BREADCRUMB TRAILS (Q14 Target 2)
-       ==================================================================== -->
-  <div class="breadcrumb-section">
-    <div class="breadcrumb-container">
-      <ul class="breadcrumb-trail">
-        <li><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Home</a></li>
-        {% block breadcrumbs %}{% endblock %}
-      </ul>
-    </div>
+    <!-- Main Page Content -->
+    <main class="main-content">
+      {% block content %}{% endblock %}
+    </main>
   </div>
-
-  <!-- Flash Messages / Notifications -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div style="max-width: 1440px; margin: 16px auto 0; padding: 0 24px;">
-        {% for category, message in messages %}
-          <div class="badge badge-{{ category }}" style="display: flex; justify-content: space-between; width: 100%; padding: 12px 16px; font-size: 13.5px; border-radius: var(--radius-sm); margin-bottom: 8px;">
-            <span><i class="bi bi-info-circle-fill"></i> {{ message }}</span>
-            <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; cursor: pointer; color: inherit; font-size: 16px;">&times;</button>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
-
-  <!-- ====================================================================
-       5. MAIN PAGE CONTENT
-       ==================================================================== -->
-  <main class="main-content">
-    {% block content %}{% endblock %}
-  </main>
 
   <!-- ====================================================================
        7. KEYBOARD SHORTCUTS & Q14 AUDIT MODAL (F1)
