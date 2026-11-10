@@ -598,10 +598,12 @@ def test_sidebar_theme_toggle():
     assert 'theme-mode-text' in html
     assert 'theme-switch-thumb' in html
 
-    # Verify topbar toggle uses business logo in place of collapse/expand icon
+    # Verify topbar toggle uses business logo on desktop, and three lines (bi-list) on mobile
     assert 'id="topbar-collapse-toggle"' in html
     assert 'topbar-logo-img' in html
     assert 'business_logo.png' in html
+    assert 'id="mobile-menu-toggle"' in html
+    assert 'bi-list' in html
     assert 'bi-layout-sidebar-inset' not in html
     # Verify sidebar brand title & subtitle
     assert '<span class="sidebar-brand-title">My Inventory</span>' in html
