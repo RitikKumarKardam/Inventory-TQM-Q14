@@ -619,6 +619,94 @@ def test_sidebar_theme_toggle():
     assert '[data-theme="dark"] .profile-otp-box' in css
 
 
+def test_product_delete_modal_and_stock_actions():
+    client = app.test_client()
+    client.post("/login", data={"username": "prariti", "password": "Rp@12345678", "role_hint": "Admin"}, follow_redirects=True)
+
+    # 1. Products tab: verify custom delete modal UI & no browser confirm()
+    res_prod = client.get("/products")
+    assert res_prod.status_code == 200
+    p_html = res_prod.data.decode("utf-8")
+    assert "modal-delete-product" in p_html
+    assert "modal-header-delete" in p_html
+    assert "btn-delete-product" in p_html
+    assert "onsubmit=\"return confirm" not in p_html
+
+    # 2. Stock IN/OUT tab: verify Actions column, edit & delete movement modals
+    res_stock = client.get("/stock")
+    assert res_stock.status_code == 200
+    s_html = res_stock.data.decode("utf-8")
+    assert "<th>Actions</th>" in s_html
+    assert "btn-edit-movement" in s_html
+    assert "btn-delete-movement" in s_html
+    assert "modal-edit-movement" in s_html
+    assert "modal-delete-movement" in s_html
+
+    # 3. Create a test product & test stock movements edit/delete
+    from services.product_service import ProductService
+    from services.inventory_service import InventoryService
+    from models.product import ProductData
+    from database.db import get_conn
+    ps = ProductService(username="prariti")
+    inv = InventoryService(username="prariti")
+
+    test_sku = "ITM-9999"
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM products WHERE sku=?", (test_sku,))
+    conn.commit()
+    conn.close()
+
+    ps.save_product(ProductData(
+        sku=test_sku,
+        name="Test Action Item",
+        quantity=50,
+        reorder_level=10,
+        price=100.0,
+        status="Active"
+    ))
+
+    conn = get_conn()
+    prod = conn.execute("SELECT id, quantity FROM products WHERE sku=?", (test_sku,)).fetchone()
+    conn.close()
+    prod_id = prod["id"]
+    assert prod["quantity"] == 50
+
+    # Record an IN movement of 20 units
+    inv.record_movement(prod_id, "IN", 20, "Batch #1 IN")
+    conn = get_conn()
+    p_after = conn.execute("SELECT quantity FROM products WHERE id=?", (prod_id,)).fetchone()
+    mov = conn.execute("SELECT id, quantity FROM stock_movements WHERE product_id=? ORDER BY id DESC LIMIT 1", (prod_id,)).fetchone()
+    conn.close()
+    assert p_after["quantity"] == 70
+    mov_id = mov["id"]
+
+    # Test Edit Movement route: change from IN 20 to IN 30
+    res_edit = client.post(
+        f"/stock/movement/{mov_id}/edit",
+        data={"product_id": prod_id, "movement_type": "IN", "quantity": 30, "note": "Updated Batch #1 IN"},
+        follow_redirects=True
+    )
+    assert res_edit.status_code == 200
+    conn = get_conn()
+    p_edited = conn.execute("SELECT quantity FROM products WHERE id=?", (prod_id,)).fetchone()
+    conn.close()
+    assert p_edited["quantity"] == 80  # Base 50 + 30 = 80
+
+    # Test Delete Movement route: delete movement
+    res_del = client.post(f"/stock/movement/{mov_id}/delete", follow_redirects=True)
+    assert res_del.status_code == 200
+    conn = get_conn()
+    p_deleted = conn.execute("SELECT quantity FROM products WHERE id=?", (prod_id,)).fetchone()
+    cur_mov = conn.execute("SELECT id FROM stock_movements WHERE id=?", (mov_id,)).fetchone()
+    conn.close()
+    assert cur_mov is None
+    assert p_deleted["quantity"] == 50  # Reverted back to initial 50!
+
+    # Clean up
+    ps.delete_product(prod_id)
+
+
 if __name__ == '__main__':
     tests = [
         test_login_and_roles,
@@ -632,6 +720,7 @@ if __name__ == '__main__':
         test_admin_member_management,
         test_logout_confirmation_and_all_devices,
         test_sidebar_theme_toggle,
+        test_product_delete_modal_and_stock_actions,
     ]
     passed = 0
     for t in tests:

@@ -2426,6 +2426,8 @@ html.theme-transitioning *::after {
 [data-theme="dark"] .badge-abc-a { background: rgba(239, 68, 68, 0.2) !important; color: #fca5a5 !important; border: 1px solid rgba(239, 68, 68, 0.4) !important; }
 [data-theme="dark"] .badge-abc-b { background: rgba(245, 158, 11, 0.2) !important; color: #fde047 !important; border: 1px solid rgba(245, 158, 11, 0.4) !important; }
 [data-theme="dark"] .badge-abc-c { background: rgba(34, 197, 94, 0.2) !important; color: #86efac !important; border: 1px solid rgba(34, 197, 94, 0.4) !important; }
+[data-theme="dark"] .badge-in { background: rgba(34, 197, 94, 0.2) !important; color: #86efac !important; border: 1px solid rgba(74, 222, 128, 0.4) !important; }
+[data-theme="dark"] .badge-out { background: rgba(239, 68, 68, 0.2) !important; color: #fca5a5 !important; border: 1px solid rgba(248, 113, 113, 0.4) !important; }
 
 /* Modal Windows in Dark Mode */
 [data-theme="dark"] .modal-dialog {

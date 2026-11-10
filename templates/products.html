@@ -91,11 +91,15 @@
               </button>
               
               {% if user.is_admin %}
-              <form action="{{ url_for('delete_product', product_id=p.id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete SKU {{ p.sku }}? This action is logged in the ISO 9001 audit trail.');">
-                <button type="submit" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: #fca5a5;" title="Delete Product (Admin Only)">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </form>
+              <button type="button" 
+                      class="btn btn-outline btn-sm btn-delete-product" 
+                      style="color: var(--color-danger); border-color: #fca5a5;" 
+                      data-id="{{ p.id }}" 
+                      data-sku="{{ p.sku }}" 
+                      data-name="{{ p.name }}" 
+                      title="Delete Product (Admin Only)">
+                <i class="bi bi-trash"></i>
+              </button>
               {% else %}
               <button type="button" class="btn btn-outline btn-sm" style="color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed;" title="Product deletion restricted to Admin role" disabled>
                 <i class="bi bi-lock-fill"></i>
@@ -263,6 +267,35 @@
     </form>
   </div>
 </div>
+<!-- ====================================================================
+     MODAL: DELETE PRODUCT CONFIRMATION (MATCHES DELETE USER ACCOUNT UI)
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-delete-product" style="display: none;">
+  <div class="modal-dialog" style="max-width: 460px;">
+    <div class="modal-header modal-header-delete">
+      <h3 class="modal-title modal-title-delete">
+        <i class="bi bi-trash-fill"></i> Delete Product Item
+      </h3>
+      <button type="button" class="modal-close" onclick="closeProductDeleteModal()" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <form id="delete-product-form" action="" method="POST">
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 14px; margin-top: 0; line-height: 1.5;">
+          Are you strictly sure you want to permanently delete SKU <strong id="deleteProductSkuText"></strong> (<span id="deleteProductNameText"></span>) from the system?
+        </p>
+        <div class="modal-danger-callout" style="border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12.5px;">
+          <i class="bi bi-exclamation-triangle-fill"></i> <strong>Warning:</strong> This product and all its inventory records will be permanently erased. This operation cannot be undone.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeProductDeleteModal()">Cancel</button>
+        <button type="submit" class="btn btn-danger">
+          <i class="bi bi-trash-fill"></i> Delete Product Permanently
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -283,5 +316,37 @@
       openModal("modal-edit-product");
     });
   });
+
+  function openProductDeleteModal(id, sku, name) {
+    const form = document.getElementById("delete-product-form");
+    form.action = `/products/${id}/delete`;
+    document.getElementById("deleteProductSkuText").textContent = sku;
+    document.getElementById("deleteProductNameText").textContent = name;
+    const modal = document.getElementById("modal-delete-product");
+    if (modal) modal.style.display = "flex";
+  }
+
+  function closeProductDeleteModal() {
+    const modal = document.getElementById("modal-delete-product");
+    if (modal) modal.style.display = "none";
+  }
+
+  document.querySelectorAll(".btn-delete-product").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      const sku = btn.getAttribute("data-sku");
+      const name = btn.getAttribute("data-name");
+      openProductDeleteModal(id, sku, name);
+    });
+  });
+
+  const deleteProdBackdrop = document.getElementById("modal-delete-product");
+  if (deleteProdBackdrop) {
+    deleteProdBackdrop.addEventListener("click", (e) => {
+      if (e.target === deleteProdBackdrop) {
+        closeProductDeleteModal();
+      }
+    });
+  }
 </script>
 {% endblock %}

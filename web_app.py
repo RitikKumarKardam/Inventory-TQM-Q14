@@ -585,6 +585,42 @@ def record_stock_movement():
     return redirect(url_for("stock"))
 
 
+@app.route("/stock/movement/<int:movement_id>/edit", methods=["POST"])
+def edit_stock_movement(movement_id: int):
+    try:
+        product_id = int(request.form.get("product_id"))
+        movement_type = request.form.get("movement_type", "IN").upper()
+        quantity = int(request.form.get("quantity", 1))
+        note = request.form.get("note", "").strip()
+
+        inventory_service.edit_movement(movement_id, product_id, movement_type, quantity, note)
+        flash(f"Stock movement #TX-{movement_id} updated successfully.", "success")
+    except ValidationError as ve:
+        flash(f"Movement update failed: {str(ve)}", "danger")
+    except Exception as ex:
+        flash(f"Error updating stock movement: {str(ex)}", "danger")
+
+    return redirect(url_for("stock"))
+
+
+@app.route("/stock/movement/<int:movement_id>/delete", methods=["POST"])
+def delete_stock_movement(movement_id: int):
+    user = session.get("user", {})
+    if not user.get("is_admin"):
+        flash("Permission Denied: Only Administrator accounts can delete stock movement transactions.", "danger")
+        return redirect(url_for("stock"))
+
+    try:
+        inventory_service.delete_movement(movement_id)
+        flash(f"Stock transaction #TX-{movement_id} deleted and warehouse balance reverted successfully.", "success")
+    except ValidationError as ve:
+        flash(f"Movement deletion failed: {str(ve)}", "danger")
+    except Exception as ex:
+        flash(f"Error deleting stock movement: {str(ex)}", "danger")
+
+    return redirect(url_for("stock"))
+
+
 # =============================================================================
 # 4. SUPPLIERS & VENDOR QUALITY RATINGS (VQR)
 # =============================================================================

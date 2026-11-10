@@ -46,6 +46,7 @@
             <th>Quantity Moved</th>
             <th>Reference / Note</th>
             <th>Date &amp; Time</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -67,10 +68,42 @@
             </td>
             <td>{{ m.note or '<em style="color: #94a3b8;">Standard stock transaction</em>'|safe }}</td>
             <td style="font-size: 12px; color: var(--color-text-muted);">{{ m.created_at }}</td>
+            <td style="white-space: nowrap;">
+              <button type="button" 
+                      class="btn btn-outline btn-sm btn-edit-movement" 
+                      data-id="{{ m.id }}"
+                      data-product-id="{{ m.product_id }}"
+                      data-sku="{{ m.sku }}"
+                      data-name="{{ m.name }}"
+                      data-type="{{ m.movement_type }}"
+                      data-quantity="{{ m.quantity }}"
+                      data-note="{{ m.note }}"
+                      title="Edit Movement">
+                <i class="bi bi-pencil"></i>
+              </button>
+              
+              {% if user.is_admin %}
+              <button type="button" 
+                      class="btn btn-outline btn-sm btn-delete-movement" 
+                      style="color: var(--color-danger); border-color: #fca5a5;" 
+                      data-id="{{ m.id }}"
+                      data-sku="{{ m.sku }}"
+                      data-name="{{ m.name }}"
+                      data-type="{{ m.movement_type }}"
+                      data-quantity="{{ m.quantity }}"
+                      title="Delete Movement (Admin Only)">
+                <i class="bi bi-trash"></i>
+              </button>
+              {% else %}
+              <button type="button" class="btn btn-outline btn-sm" style="color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed;" title="Movement deletion restricted to Admin role" disabled>
+                <i class="bi bi-lock-fill"></i>
+              </button>
+              {% endif %}
+            </td>
           </tr>
           {% else %}
           <tr>
-            <td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 30px;">
+            <td colspan="8" style="text-align: center; color: var(--color-text-muted); padding: 30px;">
               No movement records yet. Click "Record Stock Movement" to log receipt or issuance.
             </td>
           </tr>
@@ -134,6 +167,84 @@
     </form>
   </div>
 </div>
+<!-- ====================================================================
+     MODAL: EDIT STOCK MOVEMENT
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-edit-movement" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="bi bi-pencil-square" style="color: var(--color-primary);"></i> Edit Stock Movement</h3>
+      <button type="button" class="modal-close" onclick="closeMovementEditModal()" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <form id="edit-movement-form" action="" method="POST">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Product Item *</label>
+          <select id="edit-movement-product" name="product_id" class="form-control" required>
+            {% for p in products_for_movement %}
+              <option value="{{ p.id }}" data-qty="{{ p.quantity }}">
+                {{ p.sku }} - {{ p.name }} (Current Warehouse Stock: {{ p.quantity }} units)
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Movement Type *</label>
+            <select id="edit-movement-type" name="movement_type" class="form-control" required>
+              <option value="IN">Stock IN (Inward Receipt / Purchase / Return)</option>
+              <option value="OUT">Stock OUT (Issue / Department Consumption / Sale)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantity to Move *</label>
+            <input type="number" id="edit-movement-qty" name="quantity" class="form-control" min="1" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Transaction Note / Reference Slip</label>
+          <input type="text" id="edit-movement-note" name="note" class="form-control" placeholder="e.g. PO-8921 / Department Lab 3 Indent">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeMovementEditModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Update Movement</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ====================================================================
+     MODAL: DELETE STOCK MOVEMENT CONFIRMATION (MATCHES DELETE USER ACCOUNT UI)
+     ==================================================================== -->
+<div class="modal-backdrop" id="modal-delete-movement" style="display: none;">
+  <div class="modal-dialog" style="max-width: 460px;">
+    <div class="modal-header modal-header-delete">
+      <h3 class="modal-title modal-title-delete">
+        <i class="bi bi-trash-fill"></i> Delete Stock Movement
+      </h3>
+      <button type="button" class="modal-close" onclick="closeMovementDeleteModal()" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <form id="delete-movement-form" action="" method="POST">
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 14px; margin-top: 0; line-height: 1.5;">
+          Are you strictly sure you want to permanently delete transaction <strong id="deleteMovementIdText">#TX-</strong> for SKU <strong id="deleteMovementSkuText"></strong> (<span id="deleteMovementNameText"></span>)?
+        </p>
+        <div class="modal-danger-callout" style="border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12.5px;">
+          <i class="bi bi-exclamation-triangle-fill"></i> <strong>Warning:</strong> Deleting this transaction will automatically reverse the stock quantity on the product item to maintain ledger balance. This operation cannot be undone.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeMovementDeleteModal()">Cancel</button>
+        <button type="submit" class="btn btn-danger">
+          <i class="bi bi-trash-fill"></i> Delete Movement Permanently
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -163,6 +274,78 @@
     prodSelect.addEventListener("change", validateQty);
     typeSelect.addEventListener("change", validateQty);
     qtyInput.addEventListener("input", validateQty);
+  }
+
+  // Edit Movement Handlers
+  function openMovementEditModal(id, productId, type, quantity, note) {
+    const form = document.getElementById("edit-movement-form");
+    form.action = `/stock/movement/${id}/edit`;
+    const prodSelect = document.getElementById("edit-movement-product");
+    if (prodSelect) prodSelect.value = productId;
+    const typeSelect = document.getElementById("edit-movement-type");
+    if (typeSelect) typeSelect.value = type;
+    const qtyInput = document.getElementById("edit-movement-qty");
+    if (qtyInput) qtyInput.value = quantity;
+    const noteInput = document.getElementById("edit-movement-note");
+    if (noteInput) noteInput.value = note;
+
+    const modal = document.getElementById("modal-edit-movement");
+    if (modal) modal.style.display = "flex";
+  }
+
+  function closeMovementEditModal() {
+    const modal = document.getElementById("modal-edit-movement");
+    if (modal) modal.style.display = "none";
+  }
+
+  document.querySelectorAll(".btn-edit-movement").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      const productId = btn.getAttribute("data-product-id");
+      const type = btn.getAttribute("data-type");
+      const qty = btn.getAttribute("data-quantity");
+      const note = btn.getAttribute("data-note");
+      openMovementEditModal(id, productId, type, qty, note);
+    });
+  });
+
+  // Delete Movement Handlers
+  function openMovementDeleteModal(id, sku, name) {
+    const form = document.getElementById("delete-movement-form");
+    form.action = `/stock/movement/${id}/delete`;
+    document.getElementById("deleteMovementIdText").textContent = `#TX-${id}`;
+    document.getElementById("deleteMovementSkuText").textContent = sku;
+    document.getElementById("deleteMovementNameText").textContent = name;
+
+    const modal = document.getElementById("modal-delete-movement");
+    if (modal) modal.style.display = "flex";
+  }
+
+  function closeMovementDeleteModal() {
+    const modal = document.getElementById("modal-delete-movement");
+    if (modal) modal.style.display = "none";
+  }
+
+  document.querySelectorAll(".btn-delete-movement").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      const sku = btn.getAttribute("data-sku");
+      const name = btn.getAttribute("data-name");
+      openMovementDeleteModal(id, sku, name);
+    });
+  });
+
+  const editMovBackdrop = document.getElementById("modal-edit-movement");
+  if (editMovBackdrop) {
+    editMovBackdrop.addEventListener("click", (e) => {
+      if (e.target === editMovBackdrop) closeMovementEditModal();
+    });
+  }
+  const deleteMovBackdrop = document.getElementById("modal-delete-movement");
+  if (deleteMovBackdrop) {
+    deleteMovBackdrop.addEventListener("click", (e) => {
+      if (e.target === deleteMovBackdrop) closeMovementDeleteModal();
+    });
   }
 </script>
 {% endblock %}
