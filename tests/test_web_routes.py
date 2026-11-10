@@ -598,6 +598,15 @@ def test_sidebar_theme_toggle():
     assert 'theme-mode-text' in html
     assert 'theme-switch-thumb' in html
 
+    # Verify topbar toggle uses bi-list instead of window icon
+    assert 'id="topbar-collapse-toggle"' in html
+    assert 'bi-layout-sidebar-inset' not in html
+    # Verify sidebar brand title & subtitle
+    assert '<span class="sidebar-brand-title">My Inventory</span>' in html
+    assert '<span class="sidebar-brand-sub">Management System</span>' in html
+    # Verify B.Tech-CSE removed from user card
+    assert '• B.Tech-CSE' not in html
+
     # Verify logout confirmation modal classes & bi-x-lg close icon
     assert 'modal-header-logout' in html
     assert 'logout-security-banner' in html

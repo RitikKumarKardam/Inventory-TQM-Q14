@@ -44,10 +44,10 @@
     <!-- 1. Sidebar Brand Header -->
     <div class="sidebar-header">
       <a href="{{ url_for('dashboard') }}" class="sidebar-brand" title="Return to Dashboard (Home)">
-        <img src="{{ url_for('static', filename='img/business_logo.png') }}" alt="Inventory ERP Logo" class="sidebar-logo">
+        <img src="{{ url_for('static', filename='img/business_logo.png') }}" alt="My Inventory Logo" class="sidebar-logo">
         <div class="sidebar-brand-text">
-          <span class="sidebar-brand-title">Inventory ERP</span>
-          <span class="sidebar-brand-sub">Management Portal</span>
+          <span class="sidebar-brand-title">My Inventory</span>
+          <span class="sidebar-brand-sub">Management System</span>
         </div>
       </a>
       <!-- Desktop collapse toggle button (<<) -->
@@ -84,7 +84,6 @@
             {% else %}
               <span class="sidebar-role-pill member"><i class="bi bi-person-check"></i> MEMBER</span>
             {% endif %}
-            <span>• B.Tech-CSE</span>
           </div>
         </div>
       </div>
@@ -245,7 +244,7 @@
           <i class="bi bi-list"></i>
         </button>
         <button type="button" class="btn-toggle-menu d-desktop" id="topbar-collapse-toggle" aria-label="Toggle Left Sidebar" title="Collapse / Expand Sidebar">
-          <i class="bi bi-layout-sidebar-inset"></i>
+          <i class="bi bi-list"></i>
         </button>
 
         <div class="topbar-title-section">
