@@ -154,11 +154,12 @@ a:hover {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  object-fit: cover;
-  background: #071739;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  padding: 1px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  object-fit: contain;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  display: block;
 }
 
 .amrapali-wordmark {
