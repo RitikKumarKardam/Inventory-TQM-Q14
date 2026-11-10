@@ -8,9 +8,41 @@ Usage:
 
 import sys
 import argparse
+import socket
+import os
+import subprocess
+import time
+
+
+def free_port(port: int):
+    """If port is occupied by a stale/previous process, free it so the server starts seamlessly."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                cmd = ["lsof", "-t", f"-i:{port}"]
+                out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL).decode().strip()
+                if out:
+                    pids = [int(p) for p in out.split() if p.isdigit() and int(p) != os.getpid()]
+                    for pid in pids:
+                        try:
+                            os.kill(pid, 15)
+                        except ProcessLookupError:
+                            pass
+                    time.sleep(0.3)
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
+                        if s2.connect_ex(("127.0.0.1", port)) == 0:
+                            for pid in pids:
+                                try:
+                                    os.kill(pid, 9)
+                                except ProcessLookupError:
+                                    pass
+                            time.sleep(0.3)
+    except Exception:
+        pass
 
 
 def start_web(port: int = 5001, host: str = "0.0.0.0"):
+    free_port(port)
     from web_app import run_web
     run_web(host=host, port=port)
 

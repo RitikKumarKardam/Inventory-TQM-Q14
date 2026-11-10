@@ -1480,7 +1480,25 @@ def run_web(host: str = "0.0.0.0", port: int = 5001, debug: bool = False):
     print(f"Local Access:    http://127.0.0.1:{port}/")
     print(f"Member Access:   http://{local_ip}:{port}/  (Any laptop on same Wi-Fi / Hotspot)")
     print("=" * 72)
-    app.run(host=host, port=port, debug=debug)
+    try:
+        app.run(host=host, port=port, debug=debug)
+    except OSError as e:
+        if "Address already in use" in str(e) or getattr(e, "errno", None) in (48, 98):
+            import subprocess, os
+            try:
+                out = subprocess.check_output(["lsof", "-t", f"-i:{port}"], stderr=subprocess.DEVNULL).decode().strip()
+                for p in out.split():
+                    if p.isdigit() and int(p) != os.getpid():
+                        os.kill(int(p), 9)
+                time.sleep(0.4)
+                app.run(host=host, port=port, debug=debug)
+            except Exception:
+                alt_port = port + 1
+                print(f"Notice: Port {port} was occupied; starting on port {alt_port} instead.")
+                print(f"Local Access: http://127.0.0.1:{alt_port}/")
+                app.run(host=host, port=alt_port, debug=debug)
+        else:
+            raise
 
 
 if __name__ == "__main__":
