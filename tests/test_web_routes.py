@@ -581,6 +581,22 @@ def test_sidebar_theme_toggle():
     assert 'theme-mode-text' in html
     assert 'theme-switch-thumb' in html
 
+    # Verify logout confirmation modal classes & bi-x-lg close icon
+    assert 'modal-header-logout' in html
+    assert 'logout-security-banner' in html
+    assert 'logout-device-box' in html
+    assert 'bi-x-lg' in html
+    assert '#fffaf0' not in html
+
+    # Verify CSS contains hover whiteout prevention rules
+    with open('static/css/amrapali-theme.css') as f:
+        css = f.read()
+    assert '[data-theme="dark"] .table-amrapali tbody tr:hover' in css
+    assert 'background-color: #192746 !important' in css
+    assert '[data-theme="dark"] .modal-close' in css
+    assert '[data-theme="dark"] .modal-header-logout' in css
+
+
 
 
 

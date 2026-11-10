@@ -418,14 +418,14 @@
     </div>
 
     <!-- Chronological Session Events Ledger -->
-    <div style="border-top: 1px solid var(--color-border); background: #fafafa; padding: 14px 20px;">
-      <div style="font-weight: 700; font-size: 13.5px; color: #1e293b; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+    <div class="session-ledger-wrap" style="border-top: 1px solid var(--color-border); padding: 14px 20px;">
+      <div class="session-ledger-title" style="font-weight: 700; font-size: 13.5px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
         <span><i class="bi bi-list-check" style="color: var(--color-primary);"></i> Chronological Login &amp; Logout Access History</span>
       </div>
       <div class="table-responsive" style="max-height: 240px; overflow-y: auto;">
-        <table class="table-amrapali" style="width: 100%; border-collapse: collapse; margin: 0; background: #ffffff;">
+        <table class="table-amrapali" style="width: 100%; border-collapse: collapse; margin: 0;">
           <thead>
-            <tr style="background: #f1f5f9; font-size: 12px;">
+            <tr class="session-ledger-tr" style="font-size: 12px;">
               <th style="padding: 10px 14px;">Name</th>
               <th style="padding: 10px 14px;">Event Action</th>
               <th style="padding: 10px 14px;">Details</th>
@@ -485,7 +485,7 @@
   <div class="modal-dialog" style="max-width: 520px;">
     <div class="modal-header">
       <h3 class="modal-title"><i class="bi bi-person-plus-fill" style="color: var(--color-primary);"></i> Register New Member</h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-add-member')">&times;</button>
+      <button type="button" class="modal-close" onclick="closeModal('modal-add-member')" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <form method="POST" action="{{ url_for('admin_member_create') }}" id="addMemberForm">
       <div class="modal-body" style="padding: 20px;">
@@ -531,7 +531,7 @@
         </div>
 
       </div>
-      <div class="modal-footer" style="background: #f8fafc;">
+      <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-member')">Cancel</button>
         <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> Create Member Account</button>
       </div>
@@ -548,10 +548,10 @@
       <h3 class="modal-title" style="color: #92400e;">
         <i class="bi bi-pause-circle-fill"></i> Suspend User Account
       </h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-suspend')">&times;</button>
+      <button type="button" class="modal-close" onclick="closeModal('modal-suspend')" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="modal-body" style="padding: 20px;">
-      <p style="font-size: 13.5px; color: #334155; margin-top: 0;">
+      <p style="font-size: 13.5px; margin-top: 0;">
         You are about to temporarily suspend account <strong id="suspendUsernameText">@user</strong>. 
         A suspended user will be immediately blocked from logging in.
       </p>
@@ -560,7 +560,7 @@
         <input type="text" id="suspendReasonInput" class="form-control" placeholder="e.g. Academic audit review, unusual activity">
       </div>
     </div>
-    <div class="modal-footer" style="background: #f8fafc;">
+    <div class="modal-footer">
       <input type="hidden" id="suspendTargetUserId">
       <button type="button" class="btn btn-outline" onclick="closeModal('modal-suspend')">Cancel</button>
       <button type="button" class="btn btn-warning" onclick="confirmSuspendAction()" style="color: #92400e;">
@@ -579,7 +579,7 @@
       <h3 class="modal-title" style="color: #dc2626;">
         <i class="bi bi-slash-circle-fill"></i> Permanently Ban User Account
       </h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-ban')">&times;</button>
+      <button type="button" class="modal-close" onclick="closeModal('modal-ban')" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="modal-body" style="padding: 20px;">
       <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
@@ -592,7 +592,7 @@
         <input type="text" id="banReasonInput" class="form-control" placeholder="e.g. Severe violation, unauthorized tamper attempt">
       </div>
     </div>
-    <div class="modal-footer" style="background: #f8fafc;">
+    <div class="modal-footer">
       <input type="hidden" id="banTargetUserId">
       <button type="button" class="btn btn-outline" onclick="closeModal('modal-ban')">Cancel</button>
       <button type="button" class="btn btn-danger" onclick="confirmBanAction()">
@@ -611,17 +611,17 @@
       <h3 class="modal-title" style="color: #dc2626;">
         <i class="bi bi-trash-fill"></i> Delete User Account
       </h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-delete')">&times;</button>
+      <button type="button" class="modal-close" onclick="closeModal('modal-delete')" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="modal-body" style="padding: 20px;">
-      <p style="font-size: 14px; color: #334155; margin-top: 0; line-height: 1.5;">
+      <p style="font-size: 14px; margin-top: 0; line-height: 1.5;">
         Are you strictly sure you want to permanently delete <strong id="deleteUsernameText">@user</strong> from the system?
       </p>
       <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12.5px; color: #9f1239;">
         <i class="bi bi-exclamation-triangle-fill"></i> <strong>Warning:</strong> This account and all its user credentials will be permanently erased. This operation cannot be undone.
       </div>
     </div>
-    <div class="modal-footer" style="background: #f8fafc;">
+    <div class="modal-footer">
       <input type="hidden" id="deleteTargetUserId">
       <button type="button" class="btn btn-outline" onclick="closeModal('modal-delete')">Cancel</button>
       <button type="button" class="btn btn-danger" onclick="confirmDeleteAction()">
@@ -640,10 +640,10 @@
       <h3 class="modal-title" id="roleModalTitle" style="color: #92400e; display: flex; align-items: center; gap: 8px;">
         <i class="bi bi-shield-lock-fill" style="color: #d97706;"></i> Promote to Administrator
       </h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-role-change')">&times;</button>
+      <button type="button" class="modal-close" onclick="closeModal('modal-role-change')" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="modal-body" style="padding: 20px;">
-      <p style="font-size: 14px; color: #334155; margin-top: 0; line-height: 1.5;" id="roleModalQuestion">
+      <p style="font-size: 14px; margin-top: 0; line-height: 1.5;" id="roleModalQuestion">
         Are you strictly sure you want to change <strong id="roleUsernameText">@user</strong>'s role to <strong id="roleTargetText">Admin</strong>?
       </p>
       <div id="roleModalWarningBox" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12.5px; color: #92400e; line-height: 1.45;">
@@ -651,7 +651,7 @@
         <span id="roleModalNoticeText">Administrators have full authority over inventory data, suppliers, audit trails, and member account management.</span>
       </div>
     </div>
-    <div class="modal-footer" style="background: #f8fafc;">
+    <div class="modal-footer">
       <input type="hidden" id="roleTargetUserId">
       <input type="hidden" id="roleTargetNewRole">
       <button type="button" class="btn btn-outline" onclick="closeModal('modal-role-change')">Cancel</button>

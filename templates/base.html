@@ -337,18 +337,18 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3 class="modal-title"><i class="bi bi-keyboard-fill" style="color: var(--color-primary);"></i> Q14 Navigation & Hotkeys</h3>
-        <button type="button" class="modal-close">&times;</button>
+        <button type="button" class="modal-close" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="modal-body">
         <p style="margin-top: 0; color: var(--color-text-muted); font-size: 13px;">
           This web application satisfies all five measurable navigation targets specified under <strong>Teacher Reference Quality Goal Q14</strong>:
         </p>
 
-        <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
-          <div style="font-weight: 600; font-size: 13px; color: var(--color-primary); margin-bottom: 6px;">
+        <div class="shortcuts-q14-box">
+          <div class="shortcuts-q14-title">
             <i class="bi bi-shield-check"></i> Q14 Measurable Verification Targets:
           </div>
-          <ul style="margin: 0; padding-left: 20px; font-size: 12px; line-height: 1.6; color: #334155;">
+          <ul class="shortcuts-q14-list">
             <li><strong>≤ 2 Clicks:</strong> Every major module accessible in 1 click from sticky top nav.</li>
             <li><strong>Breadcrumbs:</strong> Context trail visible on 100% of pages.</li>
             <li><strong>Top Navigation:</strong> Sticky Amrapali navbar present throughout all screens.</li>
@@ -422,37 +422,37 @@
        ==================================================================== -->
   <div class="modal-backdrop" id="modal-logout-confirm">
     <div class="modal-dialog" style="max-width: 480px;">
-      <div class="modal-header" style="border-bottom: 1px solid #fee2e2; background: #fffaf0;">
-        <h3 class="modal-title" style="color: #991b1b; display: flex; align-items: center; gap: 8px; font-size: 16.5px; font-weight: 700;">
-          <i class="bi bi-box-arrow-right" style="color: #dc2626;"></i> Confirm Account Logout
+      <div class="modal-header modal-header-logout">
+        <h3 class="modal-title modal-title-logout">
+          <i class="bi bi-box-arrow-right"></i> Confirm Account Logout
         </h3>
-        <button type="button" class="modal-close">&times;</button>
+        <button type="button" class="modal-close" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
       </div>
       <form action="{{ url_for('logout') }}" method="POST" style="margin: 0;">
         <div class="modal-body" style="padding: 20px;">
           <!-- Security warning banner -->
-          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px;">
-            <p style="margin: 0; font-size: 13px; color: #991b1b; line-height: 1.45;">
+          <div class="logout-security-banner">
+            <p style="margin: 0; font-size: 13px; line-height: 1.45;">
               <i class="bi bi-shield-exclamation" style="margin-right: 4px;"></i>
               <strong>Session Security:</strong> Are you sure you want to log out of <strong>My Inventory System</strong>?
             </p>
           </div>
 
           <!-- Checkbox: Logout from all devices -->
-          <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
-            <input type="checkbox" name="all_devices" id="logout_all_devices" value="1" style="width: 18px; height: 18px; margin-top: 2px; accent-color: #dc2626; cursor: pointer;">
-            <label for="logout_all_devices" style="margin: 0; cursor: pointer; flex: 1;">
-              <span style="font-weight: 600; font-size: 13.5px; color: #0f172a; display: block;">
+          <div class="logout-device-box">
+            <input type="checkbox" name="all_devices" id="logout_all_devices" value="1" class="logout-checkbox">
+            <label for="logout_all_devices" class="logout-device-label">
+              <span class="logout-device-title">
                 Logout from all devices
               </span>
-              <span style="font-size: 12px; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">
+              <span class="logout-device-sub">
                 Revokes active session tokens and logs out from phones, laptops, and all other browsers.
               </span>
             </label>
           </div>
         </div>
 
-        <div class="modal-footer" style="background: #f8fafc; display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px;">
+        <div class="modal-footer modal-footer-logout">
           <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
           <button type="submit" class="btn btn-danger" style="display: flex; align-items: center; gap: 6px;">
             <i class="bi bi-box-arrow-right"></i> Confirm Logout

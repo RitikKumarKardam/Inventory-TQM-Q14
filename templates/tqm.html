@@ -452,7 +452,7 @@
   <div class="modal-dialog">
     <div class="modal-header">
       <h3 class="modal-title"><i class="bi bi-shield-plus" style="color: var(--color-primary);"></i> Add Failure Mode Assessment (FMEA)</h3>
-      <button type="button" class="modal-close">&times;</button>
+      <button type="button" class="modal-close" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <form action="{{ url_for('add_fmea') }}" method="POST">
       <div class="modal-body">
@@ -512,7 +512,7 @@
   <div class="modal-dialog">
     <div class="modal-header">
       <h3 class="modal-title"><i class="bi bi-plus-circle" style="color: var(--color-primary);"></i> Log Defect Occurrence</h3>
-      <button type="button" class="modal-close">&times;</button>
+      <button type="button" class="modal-close" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <form action="{{ url_for('add_defect') }}" method="POST">
       <div class="modal-body">
@@ -546,7 +546,7 @@
   <div class="modal-dialog">
     <div class="modal-header">
       <h3 class="modal-title"><i class="bi bi-plus-circle" style="color: var(--color-primary);"></i> New PDCA Continuous Improvement Action</h3>
-      <button type="button" class="modal-close">&times;</button>
+      <button type="button" class="modal-close" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <form action="{{ url_for('add_pdca') }}" method="POST">
       <div class="modal-body">

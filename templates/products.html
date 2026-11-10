@@ -123,7 +123,7 @@
   <div class="modal-dialog">
     <div class="modal-header">
       <h3 class="modal-title"><i class="bi bi-plus-circle" style="color: var(--color-primary);"></i> Add New Product Item</h3>
-      <button type="button" class="modal-close">&times;</button>
+      <button type="button" class="modal-close" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <form action="{{ url_for('create_product') }}" method="POST">
       <div class="modal-body">
@@ -197,7 +197,7 @@
   <div class="modal-dialog">
     <div class="modal-header">
       <h3 class="modal-title"><i class="bi bi-pencil-square" style="color: var(--color-primary);"></i> Edit Product</h3>
-      <button type="button" class="modal-close">&times;</button>
+      <button type="button" class="modal-close" aria-label="Close dialog"><i class="bi bi-x-lg"></i></button>
     </div>
     <form id="edit-product-form" action="" method="POST">
       <div class="modal-body">
