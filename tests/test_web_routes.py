@@ -15,19 +15,17 @@ def test_login_and_roles():
     assert res.status_code == 302
     assert "/login" in res.headers["Location"]
 
-    # 2. Login page loads successfully with live background and glassmorphic card
+    # 2. Login page loads successfully (clean portal layout matching Image 2)
     res = client.get("/login")
     assert res.status_code == 200
     login_html = res.data.decode("utf-8")
-    assert "warehouse_live_bg.jpg" in login_html
-    assert "login-bg-scene" in login_html
-    assert "backdrop-filter: blur" in login_html
-    assert "liveWarehouseMotion" in login_html
-    assert "Enterprise Inventory System &bull; ISO 9001 Live Node" in login_html or "ISO 9001 Live Node" in login_html
-    assert "live-status-pill" in login_html
-    assert "live-dot-pulse" in login_html
-    # Sub-line explicitly removed per user request
-    assert "Enterprise Supply Chain &amp; Quality Control Center" not in login_html
+    assert "Inventory Management Portal" in login_html
+    assert "business_logo.png" in login_html
+    assert "tab-admin" in login_html
+    assert "tab-member" in login_html
+    assert "btn-google-signin" in login_html
+    # Sub-line explicitly absent
+    assert "Enterprise Supply Chain" not in login_html
 
     # 3. Invalid credentials fail
     res = client.post("/login", data={"username": "wrong", "password": "bad", "role_hint": "Admin"}, follow_redirects=True)
