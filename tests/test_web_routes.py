@@ -26,6 +26,9 @@ def test_login_and_roles():
     assert "btn-google-signin" in login_html
     # Sub-line explicitly absent
     assert "Enterprise Supply Chain" not in login_html
+    # No icon before user ID or password labels
+    assert "label-icon" not in login_html
+    assert "bi-key" not in login_html
 
     # 3. Invalid credentials fail
     res = client.post("/login", data={"username": "wrong", "password": "bad", "role_hint": "Admin"}, follow_redirects=True)

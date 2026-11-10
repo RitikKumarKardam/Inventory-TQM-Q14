@@ -227,14 +227,13 @@
 
           <div class="form-group">
             <label class="form-label" id="username-label">
-              <i class="bi {% if active_role == 'Admin' %}bi-shield-person{% else %}bi-person-badge{% endif %}" id="label-icon"></i>
               <span id="label-role-text">{% if active_role == 'Admin' %}Admin User ID{% else %}Member User ID{% endif %}</span>
             </label>
             <input type="text" name="username" id="input-username" class="form-control" placeholder="{% if active_role == 'Admin' %}Enter Admin User ID{% else %}Enter Member User ID{% endif %}" required autofocus>
           </div>
 
           <div class="form-group">
-            <label class="form-label"><i class="bi bi-key"></i> Password</label>
+            <label class="form-label">Password</label>
             <div style="position: relative; display: flex; align-items: center;">
               <input type="password" name="password" id="input-password" class="form-control" placeholder="Enter Password" required style="padding-right: 42px;">
               <button type="button" id="btn-toggle-password" onclick="togglePasswordVisibility()" title="Show/Hide Password" style="position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: none; border: none; cursor: pointer; color: var(--color-text-muted); display: flex; align-items: center; justify-content: center; font-size: 16px; transition: color 0.15s ease;">
@@ -288,7 +287,6 @@
       const btnIcon = document.getElementById('btn-icon');
       const btnText = document.getElementById('btn-text');
       const labelText = document.getElementById('label-role-text');
-      const labelIcon = document.getElementById('label-icon');
       const inputUser = document.getElementById('input-username');
       const tabAdmin = document.getElementById('tab-admin');
       const tabMember = document.getElementById('tab-member');
@@ -296,7 +294,6 @@
       if (role === 'Admin') {
         tabAdmin.classList.add('active');
         tabMember.classList.remove('active');
-        labelIcon.className = 'bi bi-shield-person';
         labelText.textContent = 'Admin User ID';
         inputUser.placeholder = 'Enter Admin User ID';
         btnSubmit.className = 'btn btn-primary';
@@ -305,7 +302,6 @@
       } else {
         tabMember.classList.add('active');
         tabAdmin.classList.remove('active');
-        labelIcon.className = 'bi bi-person-badge';
         labelText.textContent = 'Member User ID';
         inputUser.placeholder = 'Enter Member User ID';
         btnSubmit.className = 'btn btn-success';
