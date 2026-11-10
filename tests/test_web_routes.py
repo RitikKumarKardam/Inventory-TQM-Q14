@@ -23,6 +23,11 @@ def test_login_and_roles():
     assert "login-bg-scene" in login_html
     assert "backdrop-filter: blur" in login_html
     assert "liveWarehouseMotion" in login_html
+    assert "Enterprise Inventory System &bull; ISO 9001 Live Node" in login_html or "ISO 9001 Live Node" in login_html
+    assert "live-status-pill" in login_html
+    assert "live-dot-pulse" in login_html
+    # Sub-line explicitly removed per user request
+    assert "Enterprise Supply Chain &amp; Quality Control Center" not in login_html
 
     # 3. Invalid credentials fail
     res = client.post("/login", data={"username": "wrong", "password": "bad", "role_hint": "Admin"}, follow_redirects=True)

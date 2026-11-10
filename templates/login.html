@@ -6,6 +6,7 @@
   <title>Login - My Inventory System</title>
   
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/business_logo.png') }}">
+  <link rel="preload" as="image" href="{{ url_for('static', filename='img/warehouse_live_bg.jpg') }}" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Text:wght@400;500;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,30 +23,48 @@
       font-family: var(--font-google) !important;
     }
 
+    html {
+      height: 100%;
+      min-height: 100%;
+    }
+
+    /* Zoom-Proof & Refresh-Proof Body Base */
     body {
       font-family: var(--font-google) !important;
-      background: #06132b;
+      background-color: #071738;
+      background-image: url("{{ url_for('static', filename='img/warehouse_live_bg.jpg') }}");
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       margin: 0;
-      padding: 20px 0;
+      padding: 24px 16px 28px;
       position: relative;
+      overflow-y: auto;
       overflow-x: hidden;
+      box-sizing: border-box;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
     /* ==========================================================================
-       LIVE BACKGROUND LAYER (Animated Warehouse + Cinematic Atmosphere)
+       ZOOM-PROOF LIVE BACKGROUND LAYER (Animated Warehouse + Glass Ambient Atmosphere)
        ========================================================================== */
     .login-bg-scene {
       position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
+      top: -6%;
+      left: -6%;
+      width: 112vw;
+      height: 112vh;
+      height: 112dvh;
+      min-width: 112%;
+      min-height: 112%;
       overflow: hidden;
       z-index: 0;
       pointer-events: none;
@@ -54,12 +73,16 @@
 
     .login-bg-image {
       position: absolute;
-      inset: -45px;
+      top: -8%;
+      left: -8%;
+      width: 116%;
+      height: 116%;
       background-image: url("{{ url_for('static', filename='img/warehouse_live_bg.jpg') }}");
       background-size: cover;
-      background-position: center 45%;
-      filter: brightness(0.88) contrast(1.1) saturate(1.15);
-      animation: liveWarehouseMotion 32s ease-in-out infinite alternate;
+      background-position: center center;
+      background-repeat: no-repeat;
+      filter: brightness(0.92) contrast(1.08) saturate(1.18);
+      animation: liveWarehouseMotion 30s ease-in-out infinite alternate;
       will-change: transform;
       transform-origin: center center;
     }
@@ -69,23 +92,23 @@
         transform: scale(1.0) translate(0, 0);
       }
       35% {
-        transform: scale(1.07) translate(-1.5%, -1.0%);
+        transform: scale(1.06) translate(-1.2%, -0.8%);
       }
       70% {
-        transform: scale(1.05) translate(1.2%, -1.6%);
+        transform: scale(1.04) translate(1.0%, -1.4%);
       }
       100% {
-        transform: scale(1.08) translate(-0.8%, 0.8%);
+        transform: scale(1.07) translate(-0.6%, 0.6%);
       }
     }
 
-    /* Ambient Cinematic Contrast Overlay (Prevents background from interfering) */
+    /* Ambient Contrast Overlay (Balanced so warehouse shines through without interfering) */
     .login-bg-overlay {
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse at 50% 50%, rgba(6, 22, 54, 0.45) 0%, rgba(3, 14, 38, 0.72) 58%, rgba(2, 8, 22, 0.90) 100%),
-        linear-gradient(180deg, rgba(3, 15, 42, 0.5) 0%, rgba(2, 9, 26, 0.75) 100%);
+        radial-gradient(ellipse at 50% 50%, rgba(6, 22, 54, 0.38) 0%, rgba(3, 14, 38, 0.62) 60%, rgba(2, 8, 22, 0.82) 100%),
+        linear-gradient(180deg, rgba(3, 15, 42, 0.4) 0%, rgba(2, 9, 26, 0.65) 100%);
     }
 
     /* Ambient Pulsing Glow Orbs */
@@ -99,28 +122,28 @@
     }
 
     .glow-cyan {
-      width: 480px;
-      height: 480px;
-      background: radial-gradient(circle, rgba(0, 166, 214, 0.38) 0%, transparent 70%);
+      width: 460px;
+      height: 460px;
+      background: radial-gradient(circle, rgba(0, 166, 214, 0.4) 0%, transparent 70%);
       top: -100px;
       right: 5%;
       animation-delay: 0s;
     }
 
     .glow-navy {
-      width: 550px;
-      height: 550px;
-      background: radial-gradient(circle, rgba(11, 61, 145, 0.55) 0%, transparent 70%);
-      bottom: -120px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(11, 61, 145, 0.5) 0%, transparent 70%);
+      bottom: -100px;
       left: 5%;
       animation-delay: -5s;
     }
 
     .glow-teal {
-      width: 380px;
-      height: 380px;
+      width: 360px;
+      height: 360px;
       background: radial-gradient(circle, rgba(14, 165, 233, 0.28) 0%, transparent 70%);
-      top: 40%;
+      top: 35%;
       left: -80px;
       animation-delay: -9s;
     }
@@ -131,51 +154,56 @@
         opacity: 0.35;
       }
       50% {
-        transform: scale(1.16) translate(15px, -18px);
+        transform: scale(1.15) translate(15px, -15px);
         opacity: 0.55;
       }
       100% {
-        transform: scale(0.98) translate(-12px, 12px);
+        transform: scale(0.98) translate(-10px, 10px);
         opacity: 0.38;
       }
     }
 
     /* ==========================================================================
-       LOGIN CARD CONTAINER & GLASSMORPHIC STYLING
+       LOGIN CONTAINER & TRUE FROSTED GLASS EFFECT
        ========================================================================== */
     .login-container {
       position: relative;
       z-index: 10;
-      max-width: 480px;
+      max-width: 440px;
       width: 100%;
-      margin: 18px auto;
-      padding: 0 16px;
+      margin: auto; /* Vertically & horizontally centered, scrolls cleanly at any zoom level */
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .login-card {
-      /* Frosted Glass Surface */
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(24px) saturate(190%);
-      -webkit-backdrop-filter: blur(24px) saturate(190%);
-      border: 1px solid rgba(255, 255, 255, 0.72);
+      width: 100%;
+      /* Authentic Frosted Glass Surface */
+      background: rgba(255, 255, 255, 0.74);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
       border-radius: 20px;
       box-shadow:
-        0 28px 65px -12px rgba(0, 0, 0, 0.55),
-        0 12px 30px -6px rgba(2, 20, 50, 0.35),
-        inset 0 1px 2px rgba(255, 255, 255, 0.95),
-        inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+        0 25px 55px -10px rgba(0, 0, 0, 0.52),
+        0 10px 20px -5px rgba(2, 20, 50, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.35) inset,
+        0 2px 4px rgba(255, 255, 255, 0.8) inset;
       overflow: hidden;
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .login-header {
-      background: linear-gradient(135deg, rgba(11, 61, 145, 0.94) 0%, rgba(6, 31, 74, 0.97) 100%);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      /* Translucent Glass Header */
+      background: linear-gradient(135deg, rgba(11, 61, 145, 0.86) 0%, rgba(6, 31, 74, 0.92) 100%);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       color: #ffffff;
-      padding: 26px 24px 22px;
+      padding: 20px 22px 17px;
       text-align: center;
-      border-bottom: 2px solid rgba(0, 166, 214, 0.45);
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.2);
       position: relative;
     }
 
@@ -183,12 +211,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .login-crest {
-      width: 84px;
-      height: 84px;
+      width: 76px;
+      height: 76px;
       border-radius: 50%;
       object-fit: contain;
       background: transparent;
@@ -196,7 +224,7 @@
       padding: 0;
       display: block;
       margin: 0 auto;
-      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.4));
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
       transition: transform 0.25s ease;
     }
 
@@ -206,51 +234,44 @@
 
     .login-title {
       margin: 0;
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 700;
       color: #ffffff;
       letter-spacing: -0.2px;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-    }
-
-    .login-subtitle {
-      margin: 4px 0 0;
-      font-size: 12.5px;
-      color: rgba(224, 242, 254, 0.85);
-      font-weight: 500;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     }
 
     .login-body {
-      padding: 26px 24px 28px;
+      padding: 20px 22px 24px;
     }
 
     /* Role Switcher Tabs */
     .role-toggle-group {
       display: flex;
-      gap: 8px;
-      background: rgba(235, 242, 250, 0.85);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(190, 210, 235, 0.7);
+      gap: 6px;
+      background: rgba(240, 244, 250, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.75);
       border-radius: 12px;
-      padding: 5px;
-      margin-bottom: 22px;
+      padding: 4px;
+      margin-bottom: 16px;
     }
 
     .role-toggle-btn {
       flex: 1;
       border: none;
       background: transparent;
-      padding: 10px 8px;
-      font-size: 13.5px;
+      padding: 9px 8px;
+      font-size: 13px;
       font-weight: 600;
-      color: #64748b;
+      color: #475569;
       border-radius: 9px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 7px;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -259,7 +280,7 @@
     }
 
     .role-toggle-btn.active.role-admin {
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.95);
       color: #0b3d91;
       box-shadow: 0 3px 10px rgba(11, 61, 145, 0.16);
       font-weight: 700;
@@ -267,7 +288,7 @@
     }
 
     .role-toggle-btn.active.role-member {
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.95);
       color: #15803d;
       box-shadow: 0 3px 10px rgba(22, 163, 74, 0.16);
       font-weight: 700;
@@ -276,35 +297,35 @@
 
     /* Form Fields (Ultra-Crisp, High Contrast, Non-Interfering) */
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .form-label {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 7px;
+      color: #0f172a;
+      margin-bottom: 5px;
     }
 
     .form-label i {
       color: #0284c7;
-      font-size: 14px;
+      font-size: 13.5px;
     }
 
     .form-control {
       display: block;
       width: 100%;
-      padding: 11px 14px;
-      font-size: 14px;
+      padding: 9.5px 13px;
+      font-size: 13.5px;
       font-weight: 500;
       color: #0f172a !important;
-      background: rgba(255, 255, 255, 0.94);
-      border: 1.5px solid rgba(190, 205, 225, 0.85);
-      border-radius: 10px;
-      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1.5px solid rgba(200, 214, 229, 0.85);
+      border-radius: 9px;
+      transition: all 0.18s ease;
       box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 2px rgba(0, 0, 0, 0.03);
     }
 
@@ -316,7 +337,7 @@
     .form-control:focus {
       background: #ffffff;
       border-color: #0284c7;
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.22), 0 1px 3px rgba(15, 23, 42, 0.06);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25), 0 1px 3px rgba(15, 23, 42, 0.06);
       outline: none;
     }
 
@@ -328,18 +349,18 @@
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1.5px solid #7dd3fc;
-      border-radius: 10px;
-      padding: 3px 8px;
+      border-radius: 9px;
+      padding: 2px 7px;
       flex-shrink: 0;
       user-select: none;
       box-shadow: 0 1px 2px rgba(2, 132, 199, 0.08);
     }
 
     #captcha-img {
-      height: 38px;
-      width: 112px;
+      height: 36px;
+      width: 110px;
       cursor: pointer;
-      border-radius: 6px;
+      border-radius: 5px;
       display: block;
       transition: opacity 0.15s ease;
     }
@@ -351,18 +372,18 @@
     /* Buttons */
     .btn-submit {
       width: 100%;
-      padding: 12px 18px;
-      font-size: 14.5px;
+      padding: 10.5px 16px;
+      font-size: 14px;
       font-weight: 600;
-      border-radius: 10px;
+      border-radius: 9px;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      margin-top: 10px;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-top: 8px;
     }
 
     .btn-submit.btn-primary {
@@ -399,7 +420,7 @@
       display: flex;
       align-items: center;
       text-align: center;
-      margin: 22px 0 16px;
+      margin: 16px 0 12px;
     }
 
     .login-separator::before,
@@ -410,8 +431,8 @@
     }
 
     .login-separator span {
-      padding: 0 12px;
-      font-size: 12px;
+      padding: 0 10px;
+      font-size: 11.5px;
       color: #64748b;
       text-transform: uppercase;
       letter-spacing: 0.6px;
@@ -423,19 +444,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       width: 100%;
-      padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.94);
+      padding: 9px 14px;
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1.5px solid rgba(203, 213, 225, 0.85);
-      border-radius: 10px;
+      border-radius: 9px;
       color: #334155;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 600;
       text-decoration: none;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
       cursor: pointer;
     }
@@ -448,44 +469,65 @@
       transform: translateY(-1px);
     }
 
-    /* Footer Live Status Pill */
+    /* ==========================================================================
+       STATUS BADGE PILL (Pulsating Green Indicator Light + Glass Finish)
+       ========================================================================== */
     .login-footer-pill {
-      margin-top: 18px;
-      display: flex;
+      margin-top: 14px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: rgba(15, 23, 42, 0.55);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      gap: 9px;
+      padding: 7px 18px;
+      background: rgba(7, 24, 60, 0.68);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
       border-radius: 9999px;
-      color: #e2e8f0;
+      color: #f1f5f9;
       font-size: 12px;
-      font-weight: 500;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-      text-align: center;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      user-select: none;
     }
 
-    .live-dot {
+    .live-dot-pulse {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 10px;
+      height: 10px;
+    }
+
+    .live-dot-core {
       width: 8px;
       height: 8px;
       background: #22c55e;
       border-radius: 50%;
-      display: inline-block;
       box-shadow: 0 0 10px #22c55e;
-      animation: pulseLiveDot 2s ease-in-out infinite alternate;
+      z-index: 2;
     }
 
-    @keyframes pulseLiveDot {
+    .live-dot-ring {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, 0.45);
+      animation: radarPulse 1.8s ease-out infinite;
+      z-index: 1;
+    }
+
+    @keyframes radarPulse {
       0% {
-        opacity: 0.6;
-        transform: scale(0.9);
+        transform: scale(0.4);
+        opacity: 0.95;
       }
       100% {
-        opacity: 1;
-        transform: scale(1.25);
+        transform: scale(1.9);
+        opacity: 0;
       }
     }
 
@@ -494,22 +536,25 @@
     }
 
     @media (max-width: 480px) {
-      .login-container {
-        padding: 0 12px;
-        margin: 12px auto;
+      body {
+        padding: 16px 12px 24px;
       }
       .login-card {
         border-radius: 16px;
       }
       .login-body {
-        padding: 22px 18px;
+        padding: 18px 16px 20px;
+      }
+      .login-footer-pill {
+        font-size: 11px;
+        padding: 6px 14px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Live Animated Background Layer (Warehouse Logistics Theme) -->
+  <!-- Zoom-Proof Live Animated Background Layer (Warehouse Logistics Theme) -->
   <div class="login-bg-scene" aria-hidden="true">
     <div class="login-bg-image"></div>
     <div class="login-bg-overlay"></div>
@@ -526,7 +571,6 @@
           <img src="{{ url_for('static', filename='img/business_logo.png') }}" alt="Inventory Management System" class="login-crest">
         </div>
         <h2 class="login-title">Inventory Management Portal</h2>
-        <p class="login-subtitle">Enterprise Supply Chain &amp; Quality Control Center</p>
       </div>
 
       <div class="login-body">
@@ -534,8 +578,8 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
-              <div class="badge badge-{{ category }}" style="display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 12px 14px; font-size: 13px; border-radius: 10px; margin-bottom: 18px; text-align: left; line-height: 1.4;">
-                <i class="bi bi-exclamation-triangle-fill" style="font-size: 15px; margin-top: 1px;"></i>
+              <div class="badge badge-{{ category }}" style="display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 10px 12px; font-size: 13px; border-radius: 9px; margin-bottom: 16px; text-align: left; line-height: 1.4;">
+                <i class="bi bi-exclamation-triangle-fill" style="font-size: 14px; margin-top: 1px;"></i>
                 <span>{{ message }}</span>
               </div>
             {% endfor %}
@@ -584,7 +628,7 @@
                   <i class="bi bi-arrow-clockwise"></i>
                 </button>
               </div>
-              <input type="text" name="captcha" id="input-captcha" class="form-control" placeholder="ENTER CODE" maxlength="6" autocomplete="off" style="text-transform: uppercase; font-family: var(--font-google) !important; font-size: 15px; font-weight: 700; letter-spacing: 2px;" required>
+              <input type="text" name="captcha" id="input-captcha" class="form-control" placeholder="ENTER CODE" maxlength="6" autocomplete="off" style="text-transform: uppercase; font-family: var(--font-google) !important; font-size: 14.5px; font-weight: 700; letter-spacing: 2px;" required>
             </div>
           </div>
 
@@ -611,9 +655,12 @@
       </div>
     </div>
 
-    <!-- Live Status Pill below Login Card -->
-    <div class="login-footer-pill">
-      <span class="live-dot"></span>
+    <!-- Status Badge Pill with Pulsating Green Indicator Light -->
+    <div class="login-footer-pill" id="live-status-pill">
+      <span class="live-dot-pulse">
+        <span class="live-dot-ring"></span>
+        <span class="live-dot-core"></span>
+      </span>
       <span>Enterprise Inventory System &bull; ISO 9001 Live Node</span>
     </div>
   </div>
