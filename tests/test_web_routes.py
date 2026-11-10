@@ -15,9 +15,14 @@ def test_login_and_roles():
     assert res.status_code == 302
     assert "/login" in res.headers["Location"]
 
-    # 2. Login page loads successfully
+    # 2. Login page loads successfully with live background and glassmorphic card
     res = client.get("/login")
     assert res.status_code == 200
+    login_html = res.data.decode("utf-8")
+    assert "warehouse_live_bg.jpg" in login_html
+    assert "login-bg-scene" in login_html
+    assert "backdrop-filter: blur" in login_html
+    assert "liveWarehouseMotion" in login_html
 
     # 3. Invalid credentials fail
     res = client.post("/login", data={"username": "wrong", "password": "bad", "role_hint": "Admin"}, follow_redirects=True)
